@@ -1,0 +1,19 @@
+﻿@using Audionix.Components.Pages
+@using Audionix.Data
+@using Microsoft.AspNetCore.Identity
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager NavigationManager
+
+
+<AuthorizeView>
+    <MudNavMenu>
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavLink Href="/studio" Icon="@Icons.Material.Filled.Mic">Studio</MudNavLink>
+            <MudNavLink Href="/filemanager" Icon="@Icons.Material.Filled.AudioFile">File Manager</MudNavLink>
+            <MudNavLink Href="/traffic" Icon="@Icons.Material.Filled.Traffic">Traffic</MudNavLink>
+            <MudNavLink Href="/musicschedule" Icon="@Icons.Material.Filled.MusicNote">Schedule Music</MudNavLink>
+            <MudNavLink Href="/audioedit" Icon="@Icons.Material.Filled.Edit">Audio Editor</MudNavLink>
+            <MudNavLink Href="/setup" Icon="@Icons.Material.Filled.Settings">Setup</MudNavLink>
+    </MudNavMenu>
+</AuthorizeView>

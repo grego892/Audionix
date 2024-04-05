@@ -1,0 +1,38 @@
+﻿@page "/studio"
+@rendermode InteractiveServer
+
+
+<PageTitle>Live Studio</PageTitle>
+
+<MudPaper >
+<MudToolBar Class="ma-1" Dense="false">
+    <MudButton Variant="Variant.Outlined" OnClick="LoadTodaysLog">Load Log</MudButton>
+</MudToolBar>
+</MudPaper>
+
+<MudPaper Class="pl-4">
+    <MudDataGrid 
+        Items="ProgramLog"
+        RowStyleFunc="@RowStyleFunc"
+        SortMode="SortMode.None"
+        FixedHeader="true"
+        Virtualize="true"
+        ShowMenuIcon="false"
+        Dense="true"
+        Height="90vh">
+        <Columns>
+            <PropertyColumn Property="x => x.Id" CellStyle="width: 5%;"/>
+            <PropertyColumn Property="x => x.Cue" CellStyle="width: 5%;" />
+            <PropertyColumn Property="x => x.Description" CellStyle="width: 45%;" />
+            <PropertyColumn Property="x => x.Scheduled" CellStyle="width: 10%;" />
+            <PropertyColumn Property="x => x.Name" CellStyle="width: 15%;" />
+            <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" />
+            <TemplateColumn CellStyle="width: 10%;">
+                <CellTemplate>
+                    <MudProgressLinear Variant="Variant.Determinate" Color="Color.Success" Size="Size.Large" Value="@context.Item.Progress" />
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.Segue" CellStyle="width: 10%;" />
+        </Columns>
+    </MudDataGrid>
+</MudPaper>

@@ -1,0 +1,113 @@
+﻿@page "/Account/Login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using Audionix.Data
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject MudBlazor.ISnackbar Snackbar
+
+
+<PageTitle>Log in</PageTitle>
+
+<MudPaper>
+    <h2 Class="ptb-2 ml-2">Login</h2>
+</MudPaper>
+
+<MudGrid Justify="Justify.Center" Class="pa-8">
+    <MudCard Outlined=true Class="d-flex align-center" Elevation="25">
+        <MudStack Outlined=true Class="d-flex align-center">
+            <MudImage Class="ma-4" Height="100" Width="100" Src="images/AudionixLogo.png" />
+            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" OnInvalidSubmit="ShowValidationErrors" FormName="login">
+                <DataAnnotationsValidator />
+                <MudPaper Class="ml-6 mr-6 mb-2">
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label for="email" class="form-label">Email</label>
+                </MudPaper>
+                <MudPaper Class="ml-6 mr-6 mb-2 mt-2">
+                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label for="password" class="form-label">Password</label>
+                </MudPaper>
+                <MudPaper Class="pl-6 pr-2 pb-2 pt-2">
+                    <label class="form-label">
+                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
+                        Remember me
+                    </label>
+                </MudPaper>
+                <MudPaper Class="ml-6 mr-2 mb-2 mt-2">
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Log in</MudButton>
+                </MudPaper>
+            </EditForm>
+        </MudStack>
+    </MudCard>
+</MudGrid>
+
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    public async Task LoginUser()
+    {
+        // This doesn't count login failures towards account lockout
+        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectTo(ReturnUrl);
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            RedirectManager.RedirectTo(
+                "Account/LoginWith2fa",
+                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("User account locked out.");
+            RedirectManager.RedirectTo("Account/Lockout");
+        }
+        else
+        {
+            Snackbar.Add("Error: Invalid login attempt.", Severity.Error);
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+    public void ShowValidationErrors()
+    {
+        Snackbar.Add("Error: Invalid input. Please check your email and password.", Severity.Error);
+    }
+}

@@ -1,0 +1,32 @@
+﻿@page "/musicschedule"
+@using Audionix.Models
+@inject ILogger<Home> Logger
+@inject IHostEnvironment Environment
+@inject AudionixDbContext DbContext
+@inject NavigationManager _nav
+
+<PageTitle>Music Schedule</PageTitle>
+
+<MudPaper>
+    <h2 Class="ptb-2 ml-2">Music Schedule</h2>
+</MudPaper>
+
+<MudPaper Class="ma-1" Elevation="8">
+    <MudStack Row="true" >
+        <MudPaper Width="500px">
+                <MudStack Row="true" >
+                    <MudSelect Class="mtbl-4" Margin="Margin.Dense" T="string" Label="Station" Variant="Variant.Outlined" FullWidth="false" >
+                        @foreach (var cnt in DbContext.Stations)
+                        {
+                            <MudSelectItem Value="@(cnt.CallLetters)" />
+                        }
+                    </MudSelect>
+                    <MudDatePicker @bind-Date="musicLogDate" Label="Date to Schedule"  Margin="Margin.Dense" Variant="Variant.Outlined" />
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary">Schedule</MudButton>
+                </MudStack>
+        </MudPaper>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>_nav.NavigateTo("/patterns"))">Patterns</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>_nav.NavigateTo("/musicgrid"))">Music Grid</MudButton>
+    </MudStack>
+</MudPaper>

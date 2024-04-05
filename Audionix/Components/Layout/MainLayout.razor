@@ -1,0 +1,140 @@
+﻿@using Audionix.Data
+@using Audionix.Models
+@using Audionix.Services
+@using Serilog
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<ApplicationUser> SignInManager
+
+
+<MudThemeProvider @ref="@_mudThemeProvider" Theme="AudionixTheme" @bind-IsDarkMode="@_isDarkMode" />
+<MudSnackbarProvider />
+<MudDialogProvider />
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudImage Src="Images/NavbarLogo.svg" Width="200" Height="60" />
+        <MudSpacer />
+        <MudText>@userName</MudText>
+        <MudSpacer />
+        <MudSwitch @bind-value="@_isDarkMode" Color="Color.Primary" Class="ma-2" T="bool" Label="Light/Dark Mode" />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="ShowAboutSnackbar" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu />
+        <MudSpacer />
+        <MudNavLink Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
+            @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
+        </MudNavLink>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    // Removed unused field 'loginLogoutText'
+    bool _drawerOpen = true;
+    private MudThemeProvider? _mudThemeProvider;
+    private bool _isDarkMode = true;
+    private string userName = "";
+    private Color buttonColor = Color.Error;
+    private bool isLoginPage = false;
+    [Inject] private AppSettingsService? AppSettingsService { get; set; }
+    [Inject] private NavigationManager? NavigationManager { get; set; }
+    [Inject] private IDialogService? DialogService { get; set; }
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Log.Information("--- MainLayout -- OnInitializedAsync() - Method Starting");
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await UpdateAuthenticationState();
+    }
+
+    private async Task ToggleLoginLogout()
+    {
+        Log.Information("--- MainLayout -- ToggleLoginLogout() - Method Starting");
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var isAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
+        Log.Debug("--- MainLayout -- isAuthenticated: " + isAuthenticated);
+        if (isAuthenticated)
+        {
+            Log.Debug("--- MainLayout -- " + userName + "IS LOGGING OUT.");
+            // await SignInManager.SignOutAsync();
+            NavigationManager?.NavigateTo("/Account/LoggingOut", true);
+            Log.Debug("--- MainLayout -- " + userName + "IS LOGGED OUT.");
+            NavigationManager?.NavigateTo("/Account/LoggedOut", true);
+        }
+        else
+        {
+            NavigationManager?.NavigateTo("/Account/Login", true);
+        }
+    }
+
+    private async Task UpdateAuthenticationState()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var isAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
+        // Use null-coalescing operator to provide a default value
+        userName = isAuthenticated ? authState.User?.Identity?.Name ?? "" : "";
+        buttonColor = isAuthenticated ? Color.Primary : Color.Error;
+        isLoginPage = HttpContext?.Request.Path.StartsWithSegments("/Account") ?? false;
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        await InvokeAsync(async () =>
+        {
+            await UpdateAuthenticationState();
+            StateHasChanged(); // Notify Blazor that the state has changed and a re-render is necessary
+        });
+    }
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+        StateHasChanged();
+        Log.Information("--- MainLayout -- DrawerToggle() - _drawerOpen: {_drawerOpen}", _drawerOpen);
+    }
+
+    MudTheme AudionixTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = Colors.LightBlue.Default,
+                Secondary = Colors.Teal.Default,
+                AppbarBackground = Colors.LightBlue.Darken4
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.LightBlue.Default,
+                Secondary = Colors.Teal.Default,
+                AppbarBackground = Colors.LightBlue.Darken4
+            },
+
+            LayoutProperties = new LayoutProperties()
+            {
+                DrawerWidthLeft = "180px",
+                //DrawerWidthRight = "500px"
+            }
+        };
+    private async Task ShowAboutSnackbar()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Audionix",
+            (MarkupString) $"Version: {GetVersion()} <br /> Developed by: Greg Davis <br /> djgrego@djgrego.com");
+        string? state = result == null ? "Canceled" : "Deleted!";
+        StateHasChanged();
+    }
+    string GetVersion()
+    {
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version;
+        return version.ToString();
+    }
+}

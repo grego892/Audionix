@@ -1,0 +1,117 @@
+﻿@page "/patterns"
+@rendermode InteractiveServer
+@inject AudionixDbContext DbContext
+@using Audionix.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDialogService DialogService
+
+
+<PageTitle>Music Patterns</PageTitle>
+
+<MudPaper>
+    <h2 Class="ptb-2 ml-2">Music Patterns</h2>
+</MudPaper>
+
+<MudStack Row="true">
+<MudPaper Width="500px" Class="ma-1" Elevation="8">
+    <MudStack Row="true">
+        <MudSelect T="string" Label="Select Template" @bind-Value="selectedMusicPatternName" Margin="Margin.Dense" Variant="Variant.Outlined">
+            @foreach (var musicPatternName in MusicPatternNames)
+            {
+                <MudSelectItem Value="musicPatternName">@musicPatternName</MudSelectItem>
+            }
+        </MudSelect>
+        <MudButton OnClick="OpenDialogRemoveMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Remove Selected Pattern</MudButton>
+    </MudStack>
+</MudPaper>
+
+<MudPaper Width="500px" Class="ma-1" Elevation="8">
+    <MudStack Row="true">
+        <MudTextField @bind-Value="newMusicPatternName" Label="New Music Pattern Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+        <MudButton OnClick="AddMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Add New Pattern</MudButton>
+    </MudStack>
+</MudPaper>
+</MudStack>
+
+@if (MusicPatternDataList != null)
+{
+    <MudPaper Class="border-solid border-2 mud-border-primary ma-1">
+        <MudDataGrid Items="MusicPatternDataList"
+                     Bordered="true"
+                     SortMode="SortMode.None"
+                     FixedHeader="true"
+                     Virtualize="true"
+                     Dense="true"
+                     Height="80vh">
+            <Columns>
+ 
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
+}
+
+
+@code
+{
+    private string? selectedMusicPatternName;
+    private string newMusicPatternName = string.Empty;
+    private List<string> MusicPatternNames = new List<string>();
+    private List<MusicPatternData> MusicPatternDataList = new List<MusicPatternData>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        MusicPatternNames = await DbContext.MusicPatterns.Select(mp => mp.Name!).ToListAsync();
+        SelectDefaultItem();
+        if (selectedMusicPatternName != null)
+        {
+            var selectedMusicPattern = await DbContext.MusicPatterns.Include(mp => mp.MusicPatternData).FirstOrDefaultAsync(mp => mp.Name == selectedMusicPatternName);
+            if (selectedMusicPattern != null)
+            {
+                MusicPatternDataList = selectedMusicPattern.MusicPatternData.ToList();
+            }
+        }
+    }
+
+    private async Task AddMusicPattern()
+    {
+        var newMusicPattern = new MusicPattern { Name = newMusicPatternName };
+        DbContext.MusicPatterns.Add(newMusicPattern);
+        await DbContext.SaveChangesAsync();
+        MusicPatternNames.Add(newMusicPatternName);
+        newMusicPatternName = string.Empty;
+        SelectDefaultItem();
+        StateHasChanged();
+    }
+
+    private async Task RemoveMusicPattern()
+    {
+        var musicPatternToRemove = await DbContext.MusicPatterns.FirstOrDefaultAsync(mp => mp.Name == selectedMusicPatternName);
+        if (musicPatternToRemove != null)
+        {
+            DbContext.MusicPatterns.Remove(musicPatternToRemove);
+            await DbContext.SaveChangesAsync();
+            MusicPatternNames.Remove(selectedMusicPatternName!);
+            SelectDefaultItem();
+        }
+        StateHasChanged();
+    }
+
+
+    private void OpenDialogRemoveMusicPattern()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("OnConfirm", new Action(async () => await RemoveMusicPattern()));
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<TemplateDeleteDialog>("Are you sure you want to delete this pattern?", parameters, options);
+    }
+
+    private void SelectDefaultItem()
+    {
+        if (selectedMusicPatternName != null)
+        {
+            selectedMusicPatternName = MusicPatternNames.FirstOrDefault();
+        }
+    }
+}
