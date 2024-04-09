@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
+        public ICollection<AudioMetadata>? AudioMetadatas { get; set; }
         public Station DeepCopy()
         {
             Station copy = new()

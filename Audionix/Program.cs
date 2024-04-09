@@ -150,7 +150,7 @@ void ConfigureHost(WebApplicationBuilder builder)
 
     if (!builder.Environment.IsDevelopment())
     {
-        builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
+        builder.WebHost.UseUrls("http://*:80", "https://*:443");
         builder.Services.AddHsts(options =>
         {
             options.Preload = true;

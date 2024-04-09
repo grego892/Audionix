@@ -1,6 +1,9 @@
 ﻿using Audionix.Models;
 using Serilog;
 using ATL;
+using Microsoft.VisualStudio.TextTemplating;
+using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Audionix.Services
 {
@@ -35,12 +38,26 @@ namespace Audionix.Services
                 var additionalFields = theTrack.AdditionalFields;
                 var AudioMetadata = new AudioMetadata();
 
-                if (additionalFields.TryGetValue("info.ISRF", out var ISRFfield) && int.TryParse(ISRFfield, out var intro))
+                AudioMetadata.Filename = theTrack.Title;
+                AudioMetadata.Artist = theTrack.Artist;
+
+                //if (theTrack.AdditionalFields.TryGetValue("disp.entry[0].value", out var title))
+                //{
+                //    Console.WriteLine("================================== Title: " + title);
+                //    AudioMetadata.Title = title;
+                //}
+
+                if (additionalFields.TryGetValue("disp.entry[0].value", out string? title))
+                {
+                    AudioMetadata.Title = title;
+                }
+
+                if (additionalFields.TryGetValue("info.ISRF", out var ISRFfield) && Int16.TryParse(ISRFfield, out var intro))
                 {
                     AudioMetadata.Intro = intro;
                 }
 
-                if (additionalFields.TryGetValue("info.IMED", out var IMEDfield) && int.TryParse(IMEDfield, out var segue))
+                if (additionalFields.TryGetValue("info.IMED", out var IMEDfield) && Int16.TryParse(IMEDfield, out var segue))
                 {
                     AudioMetadata.Segue = segue;
                 }

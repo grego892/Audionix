@@ -6,5 +6,4 @@ namespace Audionix.Data
     public class ApplicationUser : IdentityUser
     {
     }
-
 }

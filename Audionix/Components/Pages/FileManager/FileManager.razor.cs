@@ -2,6 +2,7 @@
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.CodeAnalysis;
 using Serilog;
 using WavesurferBlazorWrapper;
 
@@ -16,8 +17,8 @@ namespace Audionix.Components.Pages.FileManager
         readonly IList<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioFile> filesInDirectory = new List<AudioFile>();
         [Inject]
-        public AppSettings AppSettings { get; set; }
-
+        public AppSettings? AppSettings { get; set; }
+ 
         public AudioMetadata audioMetadata { get; set; } = new AudioMetadata();
         private IEnumerable<WavesurferOption> options = new List<WavesurferOption>
             {
@@ -64,38 +65,80 @@ namespace Audionix.Components.Pages.FileManager
             {
                 try
                 {
-                    var path = Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation, "Audio", file.Name);
+                    var path = Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", file.Name);
 
-                    await using var fs = new FileStream(path, FileMode.Create);
-                    var stream = file.OpenReadStream(maxFileSize);
-
-                    var buffer = new byte[81920]; // 80 KB chunks
-                    int bytesRead;
-                    long totalRead = 0;
-
-                    while ((bytesRead = await stream.ReadAsync(buffer)) != 0)
+                    // Use a using statement to ensure the FileStream is disposed of
+                    await using (var fs = new FileStream(path, FileMode.Create))
                     {
-                        await fs.WriteAsync(buffer.AsMemory(0, bytesRead));
-                        totalRead += bytesRead;
+                        var stream = file.OpenReadStream(maxFileSize);
 
-                        // Update progress
-                        progress = (int)(totalRead * 100 / file.Size);
-                        StateHasChanged(); // Notify Blazor about the state change
+                        var buffer = new byte[81920]; // 80 KB chunks
+                        int bytesRead;
+                        long totalRead = 0;
+
+                        while ((bytesRead = await stream.ReadAsync(buffer)) != 0)
+                        {
+                            await fs.WriteAsync(buffer.AsMemory(0, bytesRead));
+                            totalRead += bytesRead;
+
+                            // Update progress
+                            progress = (int)(totalRead * 100 / file.Size);
+                            StateHasChanged(); // Notify Blazor about the state change
+                        }
+
+                        await fs.FlushAsync();
                     }
-
-                    await fs.FlushAsync();
 
                     loadedFiles.Add(file);
                     await Task.Delay(1000);
                     progress = 0;
                     Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
-                }
+
+                    // Get the metadata of the current file
+
+                    var audioMetadata = new AudioMetadataList().GetMetadata(path);
+
+                    Console.WriteLine("=================================");
+                    Console.WriteLine("Title: " + audioMetadata.Title);
+                    Console.WriteLine("Artist: " + audioMetadata.Artist);
+                    Console.WriteLine("Duration: " + audioMetadata.Duration);
+                    Console.WriteLine("Intro: " + audioMetadata.Intro);
+                    Console.WriteLine("Segue: " + audioMetadata.Segue);
+                    Console.WriteLine("=================================");
+
+                    // Create a new AudioMetadata instance and set its properties
+                    var audioMetadataForDb = new AudioMetadata
+                    {
+                        Filename = file.Name,
+                        Title = audioMetadata.Title,
+                        Artist = audioMetadata.Artist,
+                        Duration = audioMetadata.Duration,
+                        Intro = audioMetadata.Intro,
+                        Segue = audioMetadata.Segue,
+                    };
+
+                    // Find the station with the selected call letters and assign its ID to StationId
+                    var station = DbContext.Stations.FirstOrDefault(s => s.CallLetters == selectedStation);
+                    if (station != null)
+                    {
+                        audioMetadataForDb.StationId = station.Id;
+                    }
+                    else
+                    {
+                        Log.Error("Station with call letters {CallLetters} not found", selectedStation);
+                    }
+
+                    // Add the new audio metadata to the database
+                    DbContext.AudioMetadatas.Add(audioMetadataForDb);
+            }
                 catch (Exception ex)
                 {
                     Log.Error("++++++ FileManager - LoadFiles() -- File: {Filename} Error: {Error}",
                         file.Name, ex.Message);
                 }
             }
+
+            await DbContext.SaveChangesAsync();
             GetFolderFileList();
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
 
@@ -107,7 +150,7 @@ namespace Audionix.Components.Pages.FileManager
             Log.Debug("--- FileManager - LoadFiles() -- AppSettings.DataPath: {DataPath}", AppSettings?.DataPath);
             if (AppSettings != null && AppSettings.DataPath != null)
             {
-                var directoryPath = Path.Combine(AppSettings.DataPath, "Stations", selectedStation, "Audio");
+                var directoryPath = Path.Combine(AppSettings.DataPath, "Stations", selectedStation.ToString(), "Audio");
                 filePaths = Directory.GetFiles(directoryPath);
                 filesInDirectory.Clear();
 
@@ -127,7 +170,7 @@ namespace Audionix.Components.Pages.FileManager
         private void DeleteAudio(AudioFile audioFile)
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioFile.Name);
-            File.Delete(Path.Combine(AppSettings?.DataPath ?? string.Empty, selectedStation, "Audio", audioFile.FullName));
+            File.Delete(Path.Combine(AppSettings?.DataPath ?? string.Empty, selectedStation.ToString(), "Audio", audioFile.FullName));
             GetFolderFileList();
             StateHasChanged();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioFile.Name);
@@ -246,5 +289,29 @@ namespace Audionix.Components.Pages.FileManager
                 Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
             }
         }
+
+        public string SelectedStation
+        {
+            get => selectedStation;
+            set
+            {
+                if (selectedStation != value)
+                {
+                    selectedStation = value;
+                    OnSelectedValueChanged(value);
+                }
+            }
+        }
+
+        private void OnSelectedValueChanged(string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                Log.Information("--- FileManager - OnSelectedValuesChanged() -- SelectedStation: {Station}", value);
+                SelectedStation = value;
+                GetFolderFileList();
+            }
+        }
+
     }
 }

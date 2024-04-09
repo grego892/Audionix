@@ -9,12 +9,6 @@ namespace Audionix.Components.Pages.FileManager
         private double WavePlayerVolume = 50.0;
         public TimeSpan? WavePlayerCurrentPosition { get; private set; } = TimeSpan.Zero;
 
-        public void SetWavePlayerVolume(double volume)
-        {
-            WavePlayerVolume = volume;
-            wavePlayer?.SetVolume((float)(volume / 100));
-        }
-
         public void WaveLoading(int percent)
         {
             progress = percent;
@@ -157,10 +151,18 @@ namespace Audionix.Components.Pages.FileManager
         private double WavePlayerZoom = 0;
         //public TimeSpan? WavePlayerCurrentPosition { get; private set; } = TimeSpan.Zero;
 
-        public void SetWavePlayerZoom(double value)
+        public async Task SetWavePlayerZoom(double value)
         {
             WavePlayerZoom = value;
             wavePlayer?.Zoom((int)value);
+            await Task.CompletedTask;
+        }
+
+        public async Task SetWavePlayerVolume(double volume)
+        {
+            WavePlayerVolume = volume;
+            wavePlayer?.SetVolume((float)(volume / 100));
+            await Task.CompletedTask;
         }
     }
 }

@@ -81,6 +81,61 @@ namespace Audionix.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Artist")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Duration")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("EndDate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<short>("Intro")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("IntroSeconds")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool>("NoFade")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ProtectNextIntro")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Segue")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("SegueSeconds")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("StartDate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("StationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StationId");
+
+                    b.ToTable("AudioMetadatas");
+                });
+
             modelBuilder.Entity("Audionix.Models.MusicPattern", b =>
                 {
                     b.Property<int>("Id")
@@ -259,6 +314,13 @@ namespace Audionix.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
+                {
+                    b.HasOne("Audionix.Models.Station", null)
+                        .WithMany("AudioMetadatas")
+                        .HasForeignKey("StationId");
+                });
+
             modelBuilder.Entity("Audionix.Models.MusicPatternData", b =>
                 {
                     b.HasOne("Audionix.Models.MusicPattern", null)
@@ -320,6 +382,11 @@ namespace Audionix.Data.Migrations
             modelBuilder.Entity("Audionix.Models.MusicPattern", b =>
                 {
                     b.Navigation("MusicPatternData");
+                });
+
+            modelBuilder.Entity("Audionix.Models.Station", b =>
+                {
+                    b.Navigation("AudioMetadatas");
                 });
 #pragma warning restore 612, 618
         }
