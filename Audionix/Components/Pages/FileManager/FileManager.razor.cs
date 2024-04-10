@@ -3,7 +3,9 @@ using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Configuration;
 using WavesurferBlazorWrapper;
 
 
@@ -16,9 +18,18 @@ namespace Audionix.Components.Pages.FileManager
         private WavesurferPlayer? wavePlayer;
         readonly IList<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioFile> filesInDirectory = new List<AudioFile>();
+        private List<Station>? stations;
         [Inject]
         public AppSettings? AppSettings { get; set; }
- 
+        [Inject]
+        public IConfiguration? Configuration { get; set; }
+
+
+        protected override async Task OnInitializedAsync()
+        {
+            stations = await DbContext.Stations.ToListAsync();
+        }
+
         public AudioMetadata audioMetadata { get; set; } = new AudioMetadata();
         private IEnumerable<WavesurferOption> options = new List<WavesurferOption>
             {

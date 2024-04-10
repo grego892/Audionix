@@ -24,7 +24,7 @@
             <MudPaper Width="200px" Class="mp-1 pl-1">
                 <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Value="SelectedStation"
                            Variant="Variant.Outlined" Placeholder="Select a station">
-                    @foreach (var cnt in DbContext.Stations)
+                    @foreach (var cnt in stations)
                     {
                         <MudSelectItem Value="@cnt.CallLetters" />
                     }

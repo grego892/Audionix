@@ -15,6 +15,7 @@ namespace Audionix.Services
 
             for (int i = 0; i < 3; i++) // Try 3 times
             {
+                Log.Debug("++++++ AudioMetadataList -- GetMetadata() - Attempting to read file: " + filepath + " ** Try #: " + i.ToString());
                 try
                 {
                     theTrack = new Track(filepath);
@@ -24,7 +25,7 @@ namespace Audionix.Services
                 {
                     if (i == 2) // If this was the last attempt, rethrow the exception
                     {
-                        Log.Error("++++++ AudioMetadata -- GetMetadata() - Error reading file: " + filepath);
+                        Log.Error("++++++ AudioMetadataList -- GetMetadata() - Error reading file: " + filepath);
                         throw;
                     }
 
