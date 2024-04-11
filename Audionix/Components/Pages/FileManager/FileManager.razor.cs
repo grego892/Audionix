@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Configuration;
+using System.Linq;
 using WavesurferBlazorWrapper;
 
 
@@ -17,17 +18,19 @@ namespace Audionix.Components.Pages.FileManager
         private int progress = 0;
         private WavesurferPlayer? wavePlayer;
         readonly IList<IBrowserFile> filesToUpload = new List<IBrowserFile>();
-        IList<AudioFile> filesInDirectory = new List<AudioFile>();
+        IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
         [Inject]
         public AppSettings? AppSettings { get; set; }
         [Inject]
         public IConfiguration? Configuration { get; set; }
 
-
         protected override async Task OnInitializedAsync()
         {
             stations = await DbContext.Stations.ToListAsync();
+
+            // Fetch data from the database
+            filesInDirectory = await DbContext.AudioMetadatas.ToListAsync();
         }
 
         public AudioMetadata audioMetadata { get; set; } = new AudioMetadata();
@@ -36,20 +39,6 @@ namespace Audionix.Components.Pages.FileManager
                 new WavesurferOption(WavesurferOptionKey.hideScrollbar, true),
                 new WavesurferOption(WavesurferOptionKey.mediaControls, true)
             };
-
-        public class AudioFile
-        {
-            public string Name { get; set; }
-            public long Size { get; set; }
-            public string FullName { get; set; }
-
-            public AudioFile(string name, long size, string fullName)
-            {
-                Name = name;
-                Size = size;
-                FullName = fullName;
-            }
-        }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
@@ -154,42 +143,38 @@ namespace Audionix.Components.Pages.FileManager
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
 
         }
-        private string[]? filePaths;
+
         private void GetFolderFileList()
         {
             Log.Information("--- FileManager - LoadFiles() -- Start - GetFolderFileList: {Station}", selectedStation);
-            Log.Debug("--- FileManager - LoadFiles() -- AppSettings.DataPath: {DataPath}", AppSettings?.DataPath);
-            if (AppSettings != null && AppSettings.DataPath != null)
+            if (!string.IsNullOrEmpty(selectedStation) && stations != null)
             {
-                var directoryPath = Path.Combine(AppSettings.DataPath, "Stations", selectedStation.ToString(), "Audio");
-                filePaths = Directory.GetFiles(directoryPath);
-                filesInDirectory.Clear();
-
-                foreach (var filePath in filePaths)
+                var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
+                if (station != null)
                 {
-                    var fileInfo = new FileInfo(filePath);
-                    filesInDirectory.Add(new AudioFile(fileInfo.Name, fileInfo.Length, filePath));
+                    filesInDirectory = DbContext.AudioMetadatas
+                        .Where(am => am.StationId == station.Id)
+                        .ToList();
                 }
-            }
-            else
-            {
-                Log.Error("--- FileManager - GetFolderFileList() -- AppSettings is null");
             }
             Log.Information("--- FileManager - GetFolderFileList() -- End - GetFolderFileList: {Station}", selectedStation);
         }
 
-        private void DeleteAudio(AudioFile audioFile)
+
+        private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
-            Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioFile.Name);
-            File.Delete(Path.Combine(AppSettings?.DataPath ?? string.Empty, selectedStation.ToString(), "Audio", audioFile.FullName));
+            Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
+            File.Delete(Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", audioMetadata.Filename));
+            DbContext.AudioMetadatas.Remove(audioMetadata);
+            await DbContext.SaveChangesAsync();
             GetFolderFileList();
             StateHasChanged();
-            Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioFile.Name);
+            Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
 
-        private async Task EditAudio(AudioFile audioFile)
+        private async Task EditAudio(AudioMetadata audioMetadata)
         {
-            Log.Information("--- FileManager - EditAudio() -- EditAudio() START** -aidofile: " + audioFile.Name);
+            Log.Information("--- FileManager - EditAudio() -- EditAudio() START** -aidofile: " + audioMetadata.Filename);
 
             if (wavePlayer != null)
             {
@@ -206,7 +191,7 @@ namespace Audionix.Components.Pages.FileManager
                     var host = request.Host.ToUriComponent();
                     var scheme = request.Scheme;
 
-                    string encodedFilename = System.Net.WebUtility.UrlEncode(audioFile.Name);
+                    string encodedFilename = System.Net.WebUtility.UrlEncode(audioMetadata.Filename);
                     string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFilename}";
                     Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
 
@@ -221,7 +206,7 @@ namespace Audionix.Components.Pages.FileManager
                             var contentStream = await response.Content.ReadAsStreamAsync();
                             wavePlayer?.Load(url);
 
-                            audioMetadata = new AudioMetadataList().GetMetadata(audioFile.FullName);
+                            audioMetadata = new AudioMetadataList().GetMetadata(audioMetadata.Filename);
 
                             if (wavePlayer != null)
                             {

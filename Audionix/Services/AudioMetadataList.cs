@@ -42,12 +42,6 @@ namespace Audionix.Services
                 AudioMetadata.Filename = theTrack.Title;
                 AudioMetadata.Artist = theTrack.Artist;
 
-                //if (theTrack.AdditionalFields.TryGetValue("disp.entry[0].value", out var title))
-                //{
-                //    Console.WriteLine("================================== Title: " + title);
-                //    AudioMetadata.Title = title;
-                //}
-
                 if (additionalFields.TryGetValue("disp.entry[0].value", out string? title))
                 {
                     AudioMetadata.Title = title;
@@ -65,7 +59,7 @@ namespace Audionix.Services
 
                 AudioMetadata.IntroSeconds = AudioMetadata.Intro * .001;
                 AudioMetadata.SegueSeconds = AudioMetadata.Segue * .001;
-                AudioMetadata.Duration = theTrack.Duration * 1000;
+                AudioMetadata.Duration = theTrack.Duration;
 
                 Log.Information("--- AudioMetadata -- GetMetadata() - Audio AudioMetadata.IntroSeconds:  " + AudioMetadata.IntroSeconds);
                 Log.Information("--- AudioMetadata -- GetMetadata() - AudioMetadata.SegueSeconds:  " + AudioMetadata.SegueSeconds);

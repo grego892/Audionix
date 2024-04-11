@@ -24,9 +24,12 @@
             <MudPaper Width="200px" Class="mp-1 pl-1">
                 <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Value="SelectedStation"
                            Variant="Variant.Outlined" Placeholder="Select a station">
-                    @foreach (var cnt in stations)
+                    @if (stations != null)
                     {
-                        <MudSelectItem Value="@cnt.CallLetters" />
+                        @foreach (var cnt in stations)
+                        {
+                            <MudSelectItem Value="@cnt.CallLetters" />
+                        }
                     }
                 </MudSelect>
             </MudPaper>
@@ -57,27 +60,37 @@
         </MudStack>
     </MudPaper>
 
-    @if (filesInDirectory.Count > 0)
+    @if (SelectedStation != "" && filesInDirectory.Count > 0)
     {
         <MudPaper Class="border-solid border-2 mud-border-primary ma-1" Style="overflow:auto">
             <MudDataGrid Items="filesInDirectory"
-                Bordered="true"
-                T="AudioFile"
-                SortMode="SortMode.None"
-                FixedHeader="true"
-                Virtualize="false"
-                Dense="true">
+                         Bordered="true"
+                         T="AudioMetadata"
+                         SortMode="SortMode.None"
+                         FixedHeader="true"
+                         Virtualize="false"
+                         Dense="true">
                 <Columns>
-                    <PropertyColumn Property="x => x.Name" />
-                    <PropertyColumn Property="x => x.Size"/>
+                    <PropertyColumn Property="x => x.Title" />
+                    <PropertyColumn Property="x => x.Artist" />
+
                     <TemplateColumn>
-                        <CellTemplate >
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => EditAudio(context.Item)" >Edit</MudButton>
+                        <HeaderTemplate>
+                            <MudText>Duration (mm:ss)</MudText>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudText>@TimeSpan.FromSeconds(context.Item.Duration).ToString(@"mm\:ss")</MudText>
                         </CellTemplate>
                     </TemplateColumn>
-                    <TemplateColumn >
-                            <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteAudio(context.Item)" />
+                    <PropertyColumn Property="x => x.Filename" />
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => EditAudio(context.Item)">Edit</MudButton>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteAudioAsync(context.Item)" />
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
