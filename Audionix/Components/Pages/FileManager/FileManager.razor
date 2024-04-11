@@ -73,16 +73,32 @@
                 <Columns>
                     <PropertyColumn Property="x => x.Title" />
                     <PropertyColumn Property="x => x.Artist" />
-
                     <TemplateColumn>
                         <HeaderTemplate>
-                            <MudText>Duration (mm:ss)</MudText>
+                            <MudText>Duration</MudText>
                         </HeaderTemplate>
                         <CellTemplate>
                             <MudText>@TimeSpan.FromSeconds(context.Item.Duration).ToString(@"mm\:ss")</MudText>
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.Filename" />
+
+                    <TemplateColumn>
+                        <HeaderTemplate>
+                            <MudText>Intro</MudText>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudText>@(((double)context.Item.Intro / 1000).ToString("F1"))</MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn>
+                        <HeaderTemplate>
+                            <MudText>Segue</MudText>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudText>@(((double)context.Item.Segue / 1000).ToString("F1"))</MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
                     <TemplateColumn>
                         <CellTemplate>
                             <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => EditAudio(context.Item)">Edit</MudButton>

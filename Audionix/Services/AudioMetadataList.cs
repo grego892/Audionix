@@ -57,8 +57,8 @@ namespace Audionix.Services
                     AudioMetadata.Segue = segue;
                 }
 
-                AudioMetadata.IntroSeconds = AudioMetadata.Intro * .001;
-                AudioMetadata.SegueSeconds = AudioMetadata.Segue * .001;
+                AudioMetadata.IntroSeconds = AudioMetadata.Intro;
+                AudioMetadata.SegueSeconds = AudioMetadata.Segue;
                 AudioMetadata.Duration = theTrack.Duration;
 
                 Log.Information("--- AudioMetadata -- GetMetadata() - Audio AudioMetadata.IntroSeconds:  " + AudioMetadata.IntroSeconds);
