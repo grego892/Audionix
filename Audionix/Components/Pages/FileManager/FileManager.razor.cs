@@ -222,7 +222,7 @@ namespace Audionix.Components.Pages.FileManager
                                             new WavesurferRegion()
                                             {
                                                 Start = 0,
-                                                End = (float)audioMetadata.IntroSeconds,
+                                                End = ((float)audioMetadata.Intro) / 1000,
                                                 Resize = true,
                                                 Color = "rgba(10,200,25,0.3)",
                                                 Drag = true,
