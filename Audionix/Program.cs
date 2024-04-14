@@ -134,19 +134,28 @@ void ConfigureHost(WebApplicationBuilder builder)
     Log.Information("--- Program.cs - builder.Environment.EnvironmentName:  " + builder.Environment.EnvironmentName);
     var assembly = System.Reflection.Assembly.GetExecutingAssembly();
     Log.Information("--- Program.cs - Running version: " + assembly.GetName().Version);
-    builder.WebHost.UseKestrel(options =>
+
+
+    if (!builder.Environment.IsDevelopment())
     {
-        options.ConfigureHttpsDefaults(httpsOptions =>
+        builder.WebHost.UseKestrel(options =>
         {
-            var certificatePath = Path.Combine(AppContext.BaseDirectory, "certificate.pfx");
-            if (!File.Exists(certificatePath))
+            options.ConfigureHttpsDefaults(httpsOptions =>
             {
-                Log.Error($"Certificate file not found at path: {certificatePath}");
-                throw new FileNotFoundException($"Certificate file not found at path: {certificatePath}");
-            }
-            httpsOptions.ServerCertificate = new X509Certificate2(certificatePath, "Teamone1!");
+                var certificatePath = Path.Combine(AppContext.BaseDirectory, "certificate.pfx");
+                if (!File.Exists(certificatePath))
+                {
+                    Log.Error($"Certificate file not found at path: {certificatePath}");
+                    throw new FileNotFoundException($"Certificate file not found at path: {certificatePath}");
+                }
+                httpsOptions.ServerCertificate = new X509Certificate2(certificatePath, "Teamone1!");
+            });
         });
-    });
+    }
+
+
+
+
 
     if (!builder.Environment.IsDevelopment())
     {

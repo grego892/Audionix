@@ -16,47 +16,34 @@ namespace Audionix.Components.Pages.FileManager
             if (percent == 100)
             {
                 Log.Information("--- FileManagerWaveSurfer - WaveLoading() -- Wave load progress complete.  Percent: " + percent);
-                Task.Run(async () =>
-                {
-                    await Task.Delay(2000); // Wait for 2 seconds before resetting the progress
-                    progress = 0;
-                    await InvokeAsync(StateHasChanged); // Notify Blazor about the state change
-                });
+                isUploading = false;
             }
         }
 
         public void WavePlayerPlay()
         {
             Log.Information("--- FileManagerWaveSurfer - WavePlayerPlay()");
-            if (wavePlayer != null)
-            {
-                wavePlayer.Play();
-            }
+            wavePlayer?.Play();
         }
+
         public void WavePlayerPause()
         {
             Log.Information("--- FileManagerWaveSurfer - WavePlayerPause()");
-            if (wavePlayer != null)
-            {
-                wavePlayer.Pause();
-            }
+            wavePlayer?.Pause();
         }
+
         public void WavePlayerStop()
         {
             Log.Information("--- FileManagerWaveSurfer - WavePlayerStop()");
-            if (wavePlayer != null)
-            {
-                wavePlayer.Stop();
-            }
+            wavePlayer?.Stop();
         }
+
         public void WavePlayerMute()
         {
             Log.Information("--- FileManagerWaveSurfer - WavePlayerMute()");
-            if (wavePlayer != null)
-            {
-                wavePlayer.ToggleMute();
-            }
+            wavePlayer?.ToggleMute();
         }
+
         public async Task GetWavePlayerCurrentPosition()
         {
             if (wavePlayer != null)

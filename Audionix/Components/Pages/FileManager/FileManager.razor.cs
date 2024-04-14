@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using Serilog;
 using System.Configuration;
 using System.Linq;
@@ -16,14 +17,24 @@ namespace Audionix.Components.Pages.FileManager
     {
         private string selectedStation = string.Empty;
         private int progress = 0;
+        private bool isUploading;
         private WavesurferPlayer? wavePlayer;
         readonly IList<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
-        [Inject]
-        public AppSettings? AppSettings { get; set; }
-        [Inject]
-        public IConfiguration? Configuration { get; set; }
+        public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
+
+        [Inject] public AppSettings? AppSettings { get; set; }
+        [Inject] public IConfiguration? Configuration { get; set; }
+        [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
+        public string EditorTitle = string.Empty;
+        public string EditorArtist = string.Empty;
+        public double EditorIntro { get; set; } = 0;
+        public double EditorSegue { get; set; } = 0;
+        public double EditorDuration { get; set; } = 0;
+        //public double WavePlayerCurrentPosition { get; set; } = 0;
+        //public double WavePlayerZoom { get; set; } = 0;
+
 
         protected override async Task OnInitializedAsync()
         {
@@ -31,14 +42,8 @@ namespace Audionix.Components.Pages.FileManager
 
             // Fetch data from the database
             filesInDirectory = await DbContext.AudioMetadatas.ToListAsync();
-        }
 
-        public AudioMetadata audioMetadata { get; set; } = new AudioMetadata();
-        private IEnumerable<WavesurferOption> options = new List<WavesurferOption>
-            {
-                new WavesurferOption(WavesurferOptionKey.hideScrollbar, true),
-                new WavesurferOption(WavesurferOptionKey.mediaControls, true)
-            };
+        }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
@@ -46,11 +51,20 @@ namespace Audionix.Components.Pages.FileManager
             filesToUpload.Clear();
             foreach (var file in selectedFiles)
             {
+                // Check if a file with the same name already exists
+                if (filesInDirectory.Any(f => f.Filename == file.Name))
+                {
+                    Log.Information("--- FileManager - UploadFiles() -- Duplicate file found: {Filename}", file.Name);
+                    Snackbar.Add("Duplicate file: " + file.Name, Severity.Error);
+                    // If a duplicate file is found, skip the current iteration
+                    continue;
+                }
+
                 filesToUpload.Add(file);
             }
             await LoadFiles(new List<IBrowserFile>(filesToUpload)); // Clone the list
             GetFolderFileList();
-            StateHasChanged();
+            //StateHasChanged();
         }
 
         private List<IBrowserFile> loadedFiles = new();
@@ -58,6 +72,7 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task LoadFiles(IList<IBrowserFile> selectedFiles)
         {
+            isUploading = true;
             Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
             loadedFiles.Clear();
 
@@ -70,20 +85,26 @@ namespace Audionix.Components.Pages.FileManager
                     // Use a using statement to ensure the FileStream is disposed of
                     await using (var fs = new FileStream(path, FileMode.Create))
                     {
+                        isUploading = true;
                         var stream = file.OpenReadStream(maxFileSize);
 
                         var buffer = new byte[81920]; // 80 KB chunks
                         int bytesRead;
                         long totalRead = 0;
 
+                        var lastUpdate = DateTime.Now;
                         while ((bytesRead = await stream.ReadAsync(buffer)) != 0)
                         {
                             await fs.WriteAsync(buffer.AsMemory(0, bytesRead));
                             totalRead += bytesRead;
 
                             // Update progress
-                            progress = (int)(totalRead * 100 / file.Size);
-                            StateHasChanged(); // Notify Blazor about the state change
+                            if ((DateTime.Now - lastUpdate).TotalSeconds >= .25)
+                            {
+                                progress = (int)(totalRead * 100 / file.Size);
+                                StateHasChanged();
+                                lastUpdate = DateTime.Now;
+                            }
                         }
 
                         await fs.FlushAsync();
@@ -91,20 +112,11 @@ namespace Audionix.Components.Pages.FileManager
 
                     loadedFiles.Add(file);
                     await Task.Delay(1000);
+                    isUploading = false;
                     progress = 0;
                     Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
 
-                    // Get the metadata of the current file
-
                     var audioMetadata = new AudioMetadataList().GetMetadata(path);
-
-                    Console.WriteLine("=================================");
-                    Console.WriteLine("Title: " + audioMetadata.Title);
-                    Console.WriteLine("Artist: " + audioMetadata.Artist);
-                    Console.WriteLine("Duration: " + audioMetadata.Duration);
-                    Console.WriteLine("Intro: " + audioMetadata.Intro);
-                    Console.WriteLine("Segue: " + audioMetadata.Segue);
-                    Console.WriteLine("=================================");
 
                     // Create a new AudioMetadata instance and set its properties
                     var audioMetadataForDb = new AudioMetadata
@@ -114,7 +126,7 @@ namespace Audionix.Components.Pages.FileManager
                         Artist = audioMetadata.Artist,
                         Duration = audioMetadata.Duration,
                         Intro = audioMetadata.Intro,
-                        Segue = audioMetadata.Segue,
+                        Segue = audioMetadata.Segue
                     };
 
                     // Find the station with the selected call letters and assign its ID to StationId
@@ -129,19 +141,20 @@ namespace Audionix.Components.Pages.FileManager
                     }
 
                     // Add the new audio metadata to the database
-                    DbContext.AudioMetadatas.Add(audioMetadataForDb);
-            }
+                    await DbContext.AudioMetadatas.AddAsync(audioMetadataForDb);
+                }
                 catch (Exception ex)
                 {
                     Log.Error("++++++ FileManager - LoadFiles() -- File: {Filename} Error: {Error}",
                         file.Name, ex.Message);
                 }
+
+                isUploading = false;
             }
 
             await DbContext.SaveChangesAsync();
             GetFolderFileList();
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
-
         }
 
         private void GetFolderFileList()
@@ -168,12 +181,14 @@ namespace Audionix.Components.Pages.FileManager
             DbContext.AudioMetadatas.Remove(audioMetadata);
             await DbContext.SaveChangesAsync();
             GetFolderFileList();
-            StateHasChanged();
+            //StateHasChanged();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
 
         private async Task EditAudio(AudioMetadata audioMetadata)
         {
+            isUploading = true;
+            progress = 0;
             Log.Information("--- FileManager - EditAudio() -- EditAudio() START** -aidofile: " + audioMetadata.Filename);
 
             if (wavePlayer != null)
@@ -182,10 +197,8 @@ namespace Audionix.Components.Pages.FileManager
                 await wavePlayer.Empty();
                 await wavePlayer.RegionClearRegions();
 
-                StateHasChanged();
-
                 //-----------  Begin Requesting File from API -------------
-                var request = HttpContextAccessor.HttpContext?.Request;
+                var request = HttpContextAccessor?.HttpContext?.Request;
                 if (request != null)
                 {
                     var host = request.Host.ToUriComponent();
@@ -206,7 +219,11 @@ namespace Audionix.Components.Pages.FileManager
                             var contentStream = await response.Content.ReadAsStreamAsync();
                             wavePlayer?.Load(url);
 
-                            audioMetadata = new AudioMetadataList().GetMetadata(audioMetadata.Filename);
+                            //audioMetadata = new AudioMetadataList().GetMetadata(audioMetadata.Filename);
+                            audioMetadata = DbContext.AudioMetadatas.FirstOrDefault(am => am.Filename == audioMetadata.Filename);
+
+
+
 
                             if (wavePlayer != null)
                             {
@@ -244,8 +261,8 @@ namespace Audionix.Components.Pages.FileManager
                                         await wavePlayer.RegionAddRegion(
                                             new WavesurferRegion()
                                             {
-                                                Start = (float)(duration.HasValue ? ((audioMetadata.Duration - audioMetadata.Segue) / 1000) : 0),
-                                                End = duration.HasValue ? (float)(audioMetadata.Duration / 1000) : 0,
+                                                Start = (float)audioMetadata.Duration - ((audioMetadata.Segue) / 1000),
+                                                End = duration.HasValue ? (float)audioMetadata.Duration : 0,
                                                 Resize = true,
                                                 Color = "rgba(200,10,25,0.3)",
                                                 Drag = true,
@@ -254,8 +271,8 @@ namespace Audionix.Components.Pages.FileManager
                                     }
                                     else
                                     {
-                                        segueRegion.Start = (float)(duration.HasValue ? ((audioMetadata.Duration - audioMetadata.Segue) / 1000) : 0);
-                                        segueRegion.End = duration.HasValue ? (float)(audioMetadata.Duration / 1000) : 0;
+                                        segueRegion.Start = (float)(duration.HasValue ? ((audioMetadata.Duration - audioMetadata.Segue)) : 0);
+                                        segueRegion.End = duration.HasValue ? (float)(audioMetadata.Duration) : 0;
                                     }
                                     await wavePlayer.RegionListUpdate(regions);
                                 }
@@ -264,6 +281,13 @@ namespace Audionix.Components.Pages.FileManager
                             {
                                 Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
                             }
+
+                            EditorTitle = audioMetadata?.Title ?? string.Empty;
+                            EditorArtist = audioMetadata?.Artist ?? string.Empty;
+                            EditorIntro = audioMetadata.Intro;
+                            EditorSegue = audioMetadata.Segue;
+                            StateHasChanged();
+
                         }
                         else
                         {
@@ -308,6 +332,27 @@ namespace Audionix.Components.Pages.FileManager
                 GetFolderFileList();
             }
         }
-
+        public double RoundedEditorIntro
+        {
+            get
+            {
+                return Math.Round(EditorIntro / 1000.0, 1);
+            }
+            set
+            {
+                EditorIntro = value * 1000;
+            }
+        }
+        public double RoundedEditorSegue
+        {
+            get
+            {
+                return Math.Round(EditorSegue / 1000.0, 1);
+            }
+            set
+            {
+                EditorSegue = value * 1000;
+            }
+        }
     }
 }

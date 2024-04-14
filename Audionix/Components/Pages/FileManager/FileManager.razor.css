@@ -1,1 +1,21 @@
-﻿
+﻿.file-manager {
+    min-height: calc(100vh - 68px);
+    max-height: calc(100vh - 68px);
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-container > .mud-progress-linear > div {
+    transition: width 0.2s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.wavesurfer-bottom-button-row {
+    height: 50px; /* Adjust as needed */
+}

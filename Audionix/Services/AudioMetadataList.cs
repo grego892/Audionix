@@ -1,9 +1,6 @@
 ﻿using Audionix.Models;
 using Serilog;
 using ATL;
-using Microsoft.VisualStudio.TextTemplating;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Audionix.Services
 {
@@ -44,7 +41,7 @@ namespace Audionix.Services
 
                 if (additionalFields.TryGetValue("disp.entry[0].value", out string? title))
                 {
-                    AudioMetadata.Title = title;
+                    AudioMetadata.Title = title.Trim('\0');
                 }
 
                 if (additionalFields.TryGetValue("info.ISRF", out var ISRFfield) && Int16.TryParse(ISRFfield, out var intro))
@@ -57,8 +54,6 @@ namespace Audionix.Services
                     AudioMetadata.Segue = segue;
                 }
 
-                //AudioMetadata.IntroSeconds = AudioMetadata.Intro / 1000;
-                //AudioMetadata.SegueSeconds = AudioMetadata.Segue / 1000;
                 AudioMetadata.Duration = theTrack.Duration;
 
                 Log.Information("--- AudioMetadata -- GetMetadata() - Audio AudioMetadata.IntroSeconds:  " + AudioMetadata.IntroSeconds);

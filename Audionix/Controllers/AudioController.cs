@@ -58,7 +58,7 @@ public class AudioController : ControllerBase
     {
         return new Dictionary<string, string>
         {
-            {".mp3", "audio/mpeg"},
+            //{".mp3", "audio/mpeg"},
             {".wav", "audio/wav"},
             // Add more if needed
         };
