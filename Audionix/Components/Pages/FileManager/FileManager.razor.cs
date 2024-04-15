@@ -24,7 +24,6 @@ namespace Audionix.Components.Pages.FileManager
         private List<Station>? stations;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
-
         [Inject] public AppSettings? AppSettings { get; set; }
         [Inject] public IConfiguration? Configuration { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
@@ -173,7 +172,6 @@ namespace Audionix.Components.Pages.FileManager
             DbContext.AudioMetadatas.Remove(audioMetadata);
             await DbContext.SaveChangesAsync();
             GetFolderFileList();
-            //StateHasChanged();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
 
