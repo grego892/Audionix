@@ -7,7 +7,7 @@
     <UserSecretsId>aspnet-Audionix-3fee9436-e3e8-4df8-adaa-a2116df53e85</UserSecretsId>
     <ApplicationIcon>Audionix.ico</ApplicationIcon>
     <PackageIcon>AudionixLogo.png</PackageIcon>
-    <Version>0.0.2.10</Version>
+    <Version>0.0.2.13</Version>
     <Configurations>Debug;Release;test</Configurations>
   </PropertyGroup>
 

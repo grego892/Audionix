@@ -19,10 +19,11 @@ namespace Audionix.Components.Pages.FileManager
         private int progress = 0;
         private bool isUploading;
         private WavesurferPlayer? wavePlayer;
-        readonly IList<IBrowserFile> filesToUpload = new List<IBrowserFile>();
+        readonly List<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
+
 
         [Inject] public AppSettings? AppSettings { get; set; }
         [Inject] public IConfiguration? Configuration { get; set; }
@@ -32,40 +33,27 @@ namespace Audionix.Components.Pages.FileManager
         public double EditorIntro { get; set; } = 0;
         public double EditorSegue { get; set; } = 0;
         public double EditorDuration { get; set; } = 0;
-        //public double WavePlayerCurrentPosition { get; set; } = 0;
-        //public double WavePlayerZoom { get; set; } = 0;
 
 
         protected override async Task OnInitializedAsync()
         {
-            stations = await DbContext.Stations.ToListAsync();
-
-            // Fetch data from the database
-            filesInDirectory = await DbContext.AudioMetadatas.ToListAsync();
-
+            stations = await DbContext.Stations.AsNoTracking().ToListAsync();
+            filesInDirectory = await DbContext.AudioMetadatas.AsNoTracking().ToListAsync();
         }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
-            filesToUpload.Clear();
-            foreach (var file in selectedFiles)
-            {
-                // Check if a file with the same name already exists
-                if (filesInDirectory.Any(f => f.Filename == file.Name))
-                {
-                    Log.Information("--- FileManager - UploadFiles() -- Duplicate file found: {Filename}", file.Name);
-                    Snackbar.Add("Duplicate file: " + file.Name, Severity.Error);
-                    // If a duplicate file is found, skip the current iteration
-                    continue;
-                }
 
-                filesToUpload.Add(file);
-            }
+            // Filter out the files that already exist before adding them to filesToUpload
+            var distinctFiles = selectedFiles.Where(file => !filesInDirectory.Any(f => f.Filename == file.Name)).ToList();
+            filesToUpload.Clear();
+            filesToUpload.AddRange(distinctFiles);
+
             await LoadFiles(new List<IBrowserFile>(filesToUpload)); // Clone the list
             GetFolderFileList();
-            //StateHasChanged();
         }
+
 
         private List<IBrowserFile> loadedFiles = new();
         private long maxFileSize = 1024 * 1024 * 1024;
@@ -130,7 +118,7 @@ namespace Audionix.Components.Pages.FileManager
                     };
 
                     // Find the station with the selected call letters and assign its ID to StationId
-                    var station = DbContext.Stations.FirstOrDefault(s => s.CallLetters == selectedStation);
+                    var station = DbContext.Stations.AsNoTracking().FirstOrDefault(s => s.CallLetters == selectedStation);
                     if (station != null)
                     {
                         audioMetadataForDb.StationId = station.Id;
@@ -141,7 +129,7 @@ namespace Audionix.Components.Pages.FileManager
                     }
 
                     // Add the new audio metadata to the database
-                    await DbContext.AudioMetadatas.AddAsync(audioMetadataForDb);
+                    DbContext.AudioMetadatas.Add(audioMetadataForDb);
                 }
                 catch (Exception ex)
                 {
@@ -157,22 +145,26 @@ namespace Audionix.Components.Pages.FileManager
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
 
+
         private void GetFolderFileList()
         {
-            Log.Information("--- FileManager - LoadFiles() -- Start - GetFolderFileList: {Station}", selectedStation);
+            Log.Information("--- FileManager - GetFolderFileList() -- Start");
+            filesInDirectory.Clear();
+
             if (!string.IsNullOrEmpty(selectedStation) && stations != null)
             {
                 var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
                 if (station != null)
                 {
                     filesInDirectory = DbContext.AudioMetadatas
+                        .AsNoTracking()
                         .Where(am => am.StationId == station.Id)
                         .ToList();
                 }
             }
-            Log.Information("--- FileManager - GetFolderFileList() -- End - GetFolderFileList: {Station}", selectedStation);
-        }
 
+            Log.Information("--- FileManager - GetFolderFileList() -- End - filesInDirectory: {Count}", filesInDirectory.Count);
+        }
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
@@ -219,11 +211,7 @@ namespace Audionix.Components.Pages.FileManager
                             var contentStream = await response.Content.ReadAsStreamAsync();
                             wavePlayer?.Load(url);
 
-                            //audioMetadata = new AudioMetadataList().GetMetadata(audioMetadata.Filename);
                             audioMetadata = DbContext.AudioMetadatas.FirstOrDefault(am => am.Filename == audioMetadata.Filename);
-
-
-
 
                             if (wavePlayer != null)
                             {
@@ -309,6 +297,7 @@ namespace Audionix.Components.Pages.FileManager
                 Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
             }
         }
+
 
         public string SelectedStation
         {
