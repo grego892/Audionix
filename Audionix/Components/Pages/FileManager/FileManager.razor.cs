@@ -55,16 +55,11 @@ namespace Audionix.Components.Pages.FileManager
             filesInDirectory = StationSvc?.GetFolderFileList(selectedStation, stations, DbContext) ?? new List<AudioMetadata>();
         }
 
-
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
-            Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
-            File.Delete(Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", audioMetadata.Filename));
-            DbContext.AudioMetadatas.Remove(audioMetadata);
-            await DbContext.SaveChangesAsync();
-            GetFolderFileList();
-            Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
+            await FileManagerSvc?.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, GetFolderFileList);
         }
+
 
         private async Task EditAudio(AudioMetadata audioMetadata)
         {
