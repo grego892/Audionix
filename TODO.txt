@@ -1,0 +1,1 @@
+- FileManager - switch...where metadata is looked at before file is uploaded.  That was we can see if file already exists.

@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject ISnackbar Snackbar
 
-
 <PageTitle>File Manager</PageTitle>
 
 <MudPaper Style="min-height:calc(100vh - 68px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
@@ -13,12 +12,9 @@
         <MudStack Row="true">
             <MudPaper Width="200px" Class="mp-1 pl-1">
                 <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Text="selectedStation" SelectedValuesChanged="GetFolderFileList" Variant="Variant.Outlined">
-                    @if (stations != null)
+                    @foreach (var station in stations ?? Enumerable.Empty<Station>())
                     {
-                        for (var i = 0; i < stations.Count; i++)
-                        {
-                            <MudSelectItem Value="@stations[i].CallLetters" />
-                        }
+                        <MudSelectItem Value="@station.CallLetters" />
                     }
                 </MudSelect>
             </MudPaper>
@@ -26,9 +22,9 @@
                 <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
                     <ButtonTemplate>
                         <MudButton HtmlTag="label"
-                                    Variant="Variant.Outlined"
-                                    Color="Color.Primary"
-                                    for="@context.Id">
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   for="@context.Id">
                             Upload Files
                         </MudButton>
                     </ButtonTemplate>
@@ -52,7 +48,7 @@
         </MudStack>
     </MudPaper>
 
-    @if (SelectedStation != "" && filesInDirectory.Count > 0)
+    @if (!string.IsNullOrEmpty(SelectedStation) && filesInDirectory.Any())
     {
         <MudPaper Class="border-solid border-2 mud-border-primary ma-1" Style="overflow:auto">
             <MudDataGrid Items="filesInDirectory"
@@ -115,13 +111,12 @@
                     <MudSlider Value="@WavePlayerVolume" Immediate="true" ValueChanged="@(async (double value) => await SetWavePlayerVolume(value))">Volume: @WavePlayerVolume.ToString()</MudSlider>
                     <MudIconButton OnClick="WavePlayerMute" Icon="@Icons.Material.Filled.VolumeMute" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" />
                 </MudStack>
-                <WavesurferPlayer
-                    ShowTimeline="false"
-                    ShowMinimap="false"
-                    OnLoading="WaveLoading"
-                    OnAudioProcess="GetWavePlayerCurrentPosition"
-                    OnSeek="GetWavePlayerCurrentPosition"
-                    @ref="wavePlayer">
+                <WavesurferPlayer ShowTimeline="false"
+                                  ShowMinimap="false"
+                                  OnLoading="WaveLoading"
+                                  OnAudioProcess="GetWavePlayerCurrentPosition"
+                                  OnSeek="GetWavePlayerCurrentPosition"
+                                  @ref="wavePlayer">
                 </WavesurferPlayer>
                 <MudStack Row="true" Class="ma-1" wavesurfer-bottom-button-row>
                     <MudIconButton OnClick="GotoBeginning" Icon="@Icons.Material.Filled.FirstPage" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small"></MudIconButton>
@@ -134,4 +129,4 @@
             </MudStack>
         </MudPaper>
     }
-</MudPaper>
+    </MudPaper>

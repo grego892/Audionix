@@ -1,12 +1,14 @@
 ﻿using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Audionix.Services
 {
     public class StationService
     {
-        public List<AudioMetadata> GetFolderFileList(string selectedStation, List<Station>? stations, AudionixDbContext DbContext)
+        public List<AudioMetadata> GetFolderFileList(string selectedStation, List<Station>? stations, AudionixDbContext dbContext)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
             var filesInDirectory = new List<AudioMetadata>();
@@ -16,7 +18,7 @@ namespace Audionix.Services
                 var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
                 if (station != null)
                 {
-                    filesInDirectory = DbContext.AudioMetadatas
+                    filesInDirectory = dbContext.AudioMetadatas
                         .AsNoTracking()
                         .Where(am => am.StationId == station.Id)
                         .ToList();
@@ -26,6 +28,5 @@ namespace Audionix.Services
             Log.Information("--- StationService - GetFolderFileList() -- End - filesInDirectory: {Count}", filesInDirectory.Count);
             return filesInDirectory;
         }
-
     }
 }

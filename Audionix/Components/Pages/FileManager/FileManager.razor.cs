@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using WavesurferBlazorWrapper;
+using System.Threading.Tasks;
+using MudBlazor;
 
 namespace Audionix.Components.Pages.FileManager
 {
@@ -25,6 +27,8 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
         [Inject] public StationService? StationSvc { get; set; }
         [Inject] public AudionixDbContext DbContext { get; set; }
+        [Inject] FileManagerService FileManagerService { get; set; }
+
 
         public string EditorTitle = string.Empty;
         public string EditorArtist = string.Empty;
@@ -36,20 +40,22 @@ namespace Audionix.Components.Pages.FileManager
         {
             stations = await DbContext.Stations.AsNoTracking().ToListAsync();
             filesInDirectory = await DbContext.AudioMetadatas.AsNoTracking().ToListAsync();
+            GetFolderFileList();
         }
-        private void updateProgress(int progress)
-        {
-            this.progress = progress;
-        }
+
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
             isUploading = true;
             progress = 0;
-            await FileManagerSvc?.UploadFiles(selectedFiles, selectedStation, filesToUpload, filesInDirectory, () => LoadFiles(selectedFiles, selectedStation, updateProgress), GetFolderFileList, updateProgress);
+            var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, filesToUpload, filesInDirectory, () => LoadFiles(selectedFiles, selectedStation, updateProgress), GetFolderFileList, updateProgress);
+
+            foreach (var file in duplicateFiles)
+            {
+                Snackbar.Add($"File {file.Name} has already been uploaded.", Severity.Error);
+            }
             isUploading = false;
             progress = 0;
         }
-
 
         public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, Action<int> updateProgress)
         {
@@ -57,8 +63,8 @@ namespace Audionix.Components.Pages.FileManager
             progress = 0;
             await FileManagerSvc?.LoadFiles(selectedFiles as IReadOnlyList<IBrowserFile>, selectedStation, updateProgress);
             GetFolderFileList();
+            isUploading = false;
         }
-
 
         private void GetFolderFileList()
         {
@@ -114,5 +120,11 @@ namespace Audionix.Components.Pages.FileManager
                 EditorSegue = value * 1000;
             }
         }
+        private void updateProgress(int value)
+        {
+            progress = value;
+            StateHasChanged();
+        }
+
     }
 }
