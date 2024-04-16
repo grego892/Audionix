@@ -66,6 +66,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddInteractiveServerComponents();
 
     builder.Services.AddCascadingAuthenticationState()
+    .AddScoped<FileManagerService>()
     .AddScoped<IdentityUserAccessor>()
     .AddScoped<IdentityRedirectManager>()
     .AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()
@@ -152,10 +153,6 @@ void ConfigureHost(WebApplicationBuilder builder)
             });
         });
     }
-
-
-
-
 
     if (!builder.Environment.IsDevelopment())
     {

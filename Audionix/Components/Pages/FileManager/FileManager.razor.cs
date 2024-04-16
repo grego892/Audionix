@@ -2,7 +2,6 @@
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using Serilog;
@@ -10,14 +9,13 @@ using System.Configuration;
 using System.Linq;
 using WavesurferBlazorWrapper;
 
-
 namespace Audionix.Components.Pages.FileManager
 {
     partial class FileManager
     {
         private string selectedStation = string.Empty;
-        private int progress = 0;
         private bool isUploading;
+        private int progress;
         private WavesurferPlayer? wavePlayer;
         readonly List<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
@@ -27,12 +25,12 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] public AppSettings? AppSettings { get; set; }
         [Inject] public IConfiguration? Configuration { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
+        [Inject] public FileManagerService? FileManagerSvc { get; set; }
         public string EditorTitle = string.Empty;
         public string EditorArtist = string.Empty;
         public double EditorIntro { get; set; } = 0;
         public double EditorSegue { get; set; } = 0;
         public double EditorDuration { get; set; } = 0;
-
 
         protected override async Task OnInitializedAsync()
         {
@@ -42,106 +40,15 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
-            Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
-
-            // Filter out the files that already exist before adding them to filesToUpload
-            var distinctFiles = selectedFiles.Where(file => !filesInDirectory.Any(f => f.Filename == file.Name)).ToList();
-            filesToUpload.Clear();
-            filesToUpload.AddRange(distinctFiles);
-
-            await LoadFiles(new List<IBrowserFile>(filesToUpload)); // Clone the list
-            GetFolderFileList();
+            await FileManagerSvc?.UploadFiles(selectedFiles, filesToUpload, filesInDirectory, () => LoadFiles(new List<IBrowserFile>(filesToUpload)), GetFolderFileList);
         }
-
-
-        private List<IBrowserFile> loadedFiles = new();
-        private long maxFileSize = 1024 * 1024 * 1024;
 
         private async Task LoadFiles(IList<IBrowserFile> selectedFiles)
         {
             isUploading = true;
-            Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
-            loadedFiles.Clear();
-
-            foreach (var file in selectedFiles)
-            {
-                try
-                {
-                    var path = Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", file.Name);
-
-                    // Use a using statement to ensure the FileStream is disposed of
-                    await using (var fs = new FileStream(path, FileMode.Create))
-                    {
-                        isUploading = true;
-                        var stream = file.OpenReadStream(maxFileSize);
-
-                        var buffer = new byte[81920]; // 80 KB chunks
-                        int bytesRead;
-                        long totalRead = 0;
-
-                        var lastUpdate = DateTime.Now;
-                        while ((bytesRead = await stream.ReadAsync(buffer)) != 0)
-                        {
-                            await fs.WriteAsync(buffer.AsMemory(0, bytesRead));
-                            totalRead += bytesRead;
-
-                            // Update progress
-                            if ((DateTime.Now - lastUpdate).TotalSeconds >= .25)
-                            {
-                                progress = (int)(totalRead * 100 / file.Size);
-                                StateHasChanged();
-                                lastUpdate = DateTime.Now;
-                            }
-                        }
-
-                        await fs.FlushAsync();
-                    }
-
-                    loadedFiles.Add(file);
-                    await Task.Delay(1000);
-                    isUploading = false;
-                    progress = 0;
-                    Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
-
-                    var audioMetadata = new AudioMetadataList().GetMetadata(path);
-
-                    // Create a new AudioMetadata instance and set its properties
-                    var audioMetadataForDb = new AudioMetadata
-                    {
-                        Filename = file.Name,
-                        Title = audioMetadata.Title,
-                        Artist = audioMetadata.Artist,
-                        Duration = audioMetadata.Duration,
-                        Intro = audioMetadata.Intro,
-                        Segue = audioMetadata.Segue
-                    };
-
-                    // Find the station with the selected call letters and assign its ID to StationId
-                    var station = DbContext.Stations.AsNoTracking().FirstOrDefault(s => s.CallLetters == selectedStation);
-                    if (station != null)
-                    {
-                        audioMetadataForDb.StationId = station.Id;
-                    }
-                    else
-                    {
-                        Log.Error("Station with call letters {CallLetters} not found", selectedStation);
-                    }
-
-                    // Add the new audio metadata to the database
-                    DbContext.AudioMetadatas.Add(audioMetadataForDb);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("++++++ FileManager - LoadFiles() -- File: {Filename} Error: {Error}",
-                        file.Name, ex.Message);
-                }
-
-                isUploading = false;
-            }
-
-            await DbContext.SaveChangesAsync();
+            progress = 0;
+            await FileManagerSvc?.LoadFiles(selectedFiles, selectedStation);
             GetFolderFileList();
-            Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
 
 
@@ -270,8 +177,8 @@ namespace Audionix.Components.Pages.FileManager
 
                             EditorTitle = audioMetadata?.Title ?? string.Empty;
                             EditorArtist = audioMetadata?.Artist ?? string.Empty;
-                            EditorIntro = audioMetadata.Intro;
-                            EditorSegue = audioMetadata.Segue;
+                            EditorIntro = audioMetadata?.Intro ?? 0;
+                            EditorSegue = audioMetadata?.Segue ?? 0;
                             StateHasChanged();
 
                         }
