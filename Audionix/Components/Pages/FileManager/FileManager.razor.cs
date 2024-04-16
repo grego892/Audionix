@@ -24,6 +24,7 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
         [Inject] public StationService? StationSvc { get; set; }
+        [Inject] public AudionixDbContext DbContext { get; set; }
 
         public string EditorTitle = string.Empty;
         public string EditorArtist = string.Empty;
@@ -36,19 +37,28 @@ namespace Audionix.Components.Pages.FileManager
             stations = await DbContext.Stations.AsNoTracking().ToListAsync();
             filesInDirectory = await DbContext.AudioMetadatas.AsNoTracking().ToListAsync();
         }
-
-        private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
+        private void updateProgress(int progress)
         {
-            await FileManagerSvc?.UploadFiles(selectedFiles, filesToUpload, filesInDirectory, () => LoadFiles(new List<IBrowserFile>(filesToUpload)), GetFolderFileList);
+            this.progress = progress;
         }
-
-        private async Task LoadFiles(IList<IBrowserFile> selectedFiles)
+        private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
             isUploading = true;
             progress = 0;
-            await FileManagerSvc?.LoadFiles(selectedFiles, selectedStation);
+            await FileManagerSvc?.UploadFiles(selectedFiles, selectedStation, filesToUpload, filesInDirectory, () => LoadFiles(selectedFiles, selectedStation, updateProgress), GetFolderFileList, updateProgress);
+            isUploading = false;
+            progress = 0;
+        }
+
+
+        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, Action<int> updateProgress)
+        {
+            isUploading = true;
+            progress = 0;
+            await FileManagerSvc?.LoadFiles(selectedFiles as IReadOnlyList<IBrowserFile>, selectedStation, updateProgress);
             GetFolderFileList();
         }
+
 
         private void GetFolderFileList()
         {
@@ -59,129 +69,6 @@ namespace Audionix.Components.Pages.FileManager
         {
             await FileManagerSvc?.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, GetFolderFileList);
         }
-
-
-        private async Task EditAudio(AudioMetadata audioMetadata)
-        {
-            isUploading = true;
-            progress = 0;
-            Log.Information("--- FileManager - EditAudio() -- EditAudio() START** -aidofile: " + audioMetadata.Filename);
-
-            if (wavePlayer != null)
-            {
-                await wavePlayer.Stop();
-                await wavePlayer.Empty();
-                await wavePlayer.RegionClearRegions();
-
-                //-----------  Begin Requesting File from API -------------
-                var request = HttpContextAccessor?.HttpContext?.Request;
-                if (request != null)
-                {
-                    var host = request.Host.ToUriComponent();
-                    var scheme = request.Scheme;
-
-                    string encodedFilename = System.Net.WebUtility.UrlEncode(audioMetadata.Filename);
-                    string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFilename}";
-                    Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
-
-                    try
-                    {
-                        var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(url);
-                        Log.Information("--- FileManager - EditAudio() -- EditAudio response: " + response.StatusCode);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var contentStream = await response.Content.ReadAsStreamAsync();
-                            wavePlayer?.Load(url);
-
-                            audioMetadata = DbContext.AudioMetadatas.FirstOrDefault(am => am.Filename == audioMetadata.Filename);
-
-                            if (wavePlayer != null)
-                            {
-                                IEnumerable<WavesurferRegion>? regions = await wavePlayer.RegionList();
-
-                                if (regions != null)
-                                {
-                                    var introRegion = regions.FirstOrDefault(r => r.Id == "Intro");
-
-                                    if (introRegion == null)
-                                    {
-                                        await wavePlayer.RegionAddRegion(
-                                            new WavesurferRegion()
-                                            {
-                                                Start = 0,
-                                                End = ((float)audioMetadata.Intro) / 1000,
-                                                Resize = true,
-                                                Color = "rgba(10,200,25,0.3)",
-                                                Drag = true,
-                                                Id = "Intro"
-                                            });
-                                    }
-                                    else
-                                    {
-                                        introRegion.Start = 0;
-                                        introRegion.End = (float)audioMetadata.IntroSeconds;
-                                    }
-                                    await wavePlayer.RegionListUpdate(regions);
-
-                                    float? duration = await wavePlayer.GetDuration();
-
-                                    var segueRegion = regions.FirstOrDefault(r => r.Id == "Segue");
-                                    if (segueRegion == null)
-                                    {
-                                        await wavePlayer.RegionAddRegion(
-                                            new WavesurferRegion()
-                                            {
-                                                Start = (float)audioMetadata.Duration - ((audioMetadata.Segue) / 1000),
-                                                End = duration.HasValue ? (float)audioMetadata.Duration : 0,
-                                                Resize = true,
-                                                Color = "rgba(200,10,25,0.3)",
-                                                Drag = true,
-                                                Id = "Segue"
-                                            });
-                                    }
-                                    else
-                                    {
-                                        segueRegion.Start = (float)(duration.HasValue ? ((audioMetadata.Duration - audioMetadata.Segue)) : 0);
-                                        segueRegion.End = duration.HasValue ? (float)(audioMetadata.Duration) : 0;
-                                    }
-                                    await wavePlayer.RegionListUpdate(regions);
-                                }
-                            }
-                            else
-                            {
-                                Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
-                            }
-
-                            EditorTitle = audioMetadata?.Title ?? string.Empty;
-                            EditorArtist = audioMetadata?.Artist ?? string.Empty;
-                            EditorIntro = audioMetadata?.Intro ?? 0;
-                            EditorSegue = audioMetadata?.Segue ?? 0;
-                            StateHasChanged();
-
-                        }
-                        else
-                        {
-                            Log.Error("++++++ FileManager - EditAudio() -- Error making HTTP request");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "++++++ FileManager - EditAudio() - FileManager - EditAudio() - Error making HTTP request");
-                    }
-                }
-                else
-                {
-                    Log.Error("--- FileManager - EditAudio() -- No HttpContextAccessor.HttpContext?.Request found");
-                }
-            }
-            else
-            {
-                Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
-            }
-        }
-
 
         public string SelectedStation
         {

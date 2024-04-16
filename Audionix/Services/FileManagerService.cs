@@ -22,7 +22,7 @@ namespace Audionix.Services
             _appSettings = appSettings;
         }
 
-        public async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Func<Task> loadFiles, Action getFolderFileList)
+        public async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Func<Task> loadFiles, Action getFolderFileList, Action<int> updateProgress)
         {
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
@@ -31,12 +31,12 @@ namespace Audionix.Services
             filesToUpload.Clear();
             filesToUpload.AddRange(distinctFiles);
 
-            await loadFiles(); // Clone the list
+            await LoadFiles(selectedFiles, selectedStation, updateProgress);
             getFolderFileList();
         }
-        public async Task LoadFiles(IList<IBrowserFile> selectedFiles, string selectedStation)
+
+        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, Action<int> updateProgress)
         {
-            isUploading = true;
             Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
             loadedFiles.Clear();
 
@@ -44,7 +44,7 @@ namespace Audionix.Services
             {
                 try
                 {
-                    var path = Path.Combine(_appSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", file.Name);
+                    var path = Path.Combine(_appSettings?.DataPath ?? string.Empty, "Stations", selectedStation, "Audio", file.Name);
 
                     // Use a using statement to ensure the FileStream is disposed of
                     await using (var fs = new FileStream(path, FileMode.Create))
@@ -66,6 +66,7 @@ namespace Audionix.Services
                             if ((DateTime.Now - lastUpdate).TotalSeconds >= .25)
                             {
                                 progress = (int)(totalRead * 100 / file.Size);
+                                updateProgress(progress);
                                 lastUpdate = DateTime.Now;
                             }
                         }
@@ -122,8 +123,17 @@ namespace Audionix.Services
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
-            dbContext.AudioMetadatas.Remove(audioMetadata);
-            await dbContext.SaveChangesAsync();
+
+            // Fetch the audioMetadata without tracking it
+            var audioMetadataForDb = dbContext.AudioMetadatas.AsNoTracking().FirstOrDefault(am => am.Id == audioMetadata.Id);
+            if (audioMetadataForDb != null)
+            {
+                // Attach the entity to the DbContext before removing it
+                dbContext.AudioMetadatas.Attach(audioMetadataForDb);
+                dbContext.AudioMetadatas.Remove(audioMetadataForDb);
+                await dbContext.SaveChangesAsync();
+            }
+
             getFolderFileList();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }

@@ -13,6 +13,8 @@ namespace Audionix.Components.Pages.FileManager
         {
             progress = percent;
 
+            Log.Debug("--- FileManagerWaveSurfer - WaveLoading() -- Wave load progress.  Percent: " + percent);
+
             if (percent == 100)
             {
                 Log.Information("--- FileManagerWaveSurfer - WaveLoading() -- Wave load progress complete.  Percent: " + percent);
