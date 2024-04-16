@@ -79,7 +79,7 @@ namespace Audionix.Services
                     progress = 0;
                     Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
 
-                    var audioMetadata = new AudioMetadataList().GetMetadata(path);
+                    var audioMetadata = new AudioMetadataService().GetMetadata(path);
 
                     // Create a new AudioMetadata instance and set its properties
                     var audioMetadataForDb = new AudioMetadata

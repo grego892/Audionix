@@ -67,6 +67,7 @@ void ConfigureServices(WebApplicationBuilder builder)
 
     builder.Services.AddCascadingAuthenticationState()
     .AddScoped<FileManagerService>()
+    .AddScoped<StationService>()
     .AddScoped<IdentityUserAccessor>()
     .AddScoped<IdentityRedirectManager>()
     .AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()

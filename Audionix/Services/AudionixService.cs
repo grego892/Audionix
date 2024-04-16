@@ -1,9 +1,6 @@
 ﻿using Audionix.Models;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace Audionix.Services
 {

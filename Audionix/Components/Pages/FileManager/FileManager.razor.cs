@@ -3,10 +3,7 @@ using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 using Serilog;
-using System.Configuration;
-using System.Linq;
 using WavesurferBlazorWrapper;
 
 namespace Audionix.Components.Pages.FileManager
@@ -26,6 +23,8 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] public IConfiguration? Configuration { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
+        [Inject] public StationService? StationSvc { get; set; }
+
         public string EditorTitle = string.Empty;
         public string EditorArtist = string.Empty;
         public double EditorIntro { get; set; } = 0;
@@ -51,26 +50,11 @@ namespace Audionix.Components.Pages.FileManager
             GetFolderFileList();
         }
 
-
         private void GetFolderFileList()
         {
-            Log.Information("--- FileManager - GetFolderFileList() -- Start");
-            filesInDirectory.Clear();
-
-            if (!string.IsNullOrEmpty(selectedStation) && stations != null)
-            {
-                var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
-                if (station != null)
-                {
-                    filesInDirectory = DbContext.AudioMetadatas
-                        .AsNoTracking()
-                        .Where(am => am.StationId == station.Id)
-                        .ToList();
-                }
-            }
-
-            Log.Information("--- FileManager - GetFolderFileList() -- End - filesInDirectory: {Count}", filesInDirectory.Count);
+            filesInDirectory = StationSvc?.GetFolderFileList(selectedStation, stations, DbContext) ?? new List<AudioMetadata>();
         }
+
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
