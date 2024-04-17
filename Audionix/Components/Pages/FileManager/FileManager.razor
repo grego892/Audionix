@@ -1,6 +1,5 @@
 ﻿@page "/filemanager"
 @rendermode InteractiveServer
-@inject ISnackbar Snackbar
 
 <PageTitle>File Manager</PageTitle>
 
@@ -18,6 +17,17 @@
                     }
                 </MudSelect>
             </MudPaper>
+
+            <MudPaper Width="200px" Class="mp-1 pl-1">
+                <MudSelect Margin="Margin.Dense" T="string" Label="Folders" @bind-Text="selectedFolder" Variant="Variant.Outlined">
+                    @foreach (var folder in folders ?? Enumerable.Empty<string>())
+                    {
+                        <MudSelectItem Value="@folder" />
+                    }
+                </MudSelect>
+            </MudPaper>
+
+
             <MudPaper Class="pl-1 pr-1" Width="150px">
                 <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
                     <ButtonTemplate>

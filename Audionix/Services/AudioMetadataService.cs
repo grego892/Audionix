@@ -1,11 +1,17 @@
 ﻿using Audionix.Models;
 using Serilog;
 using ATL;
+using Microsoft.EntityFrameworkCore;
 
 namespace Audionix.Services
 {
     public class AudioMetadataService
     {
+        private readonly AudionixDbContext _dbContext;
+        public AudioMetadataService(AudionixDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
         public async Task<AudioMetadata> GetMetadataAsync(string filepath)
         {
             Track? theTrack = null;
@@ -58,5 +64,34 @@ namespace Audionix.Services
                 throw new Exception("Unable to create Track from filepath.");
             }
         }
+
+        public async Task SaveAudioMetadata(AudioMetadata audioMetadata, string fileName, string selectedStation)
+        {
+            // Create a new AudioMetadata instance and set its properties
+            var audioMetadataForDb = new AudioMetadata
+            {
+                Filename = fileName,
+                Title = audioMetadata.Title,
+                Artist = audioMetadata.Artist,
+                Duration = audioMetadata.Duration,
+                Intro = audioMetadata.Intro,
+                Segue = audioMetadata.Segue
+            };
+
+            // Find the station with the selected call letters and assign its ID to StationId
+            var station = _dbContext.Stations.AsNoTracking().FirstOrDefault(s => s.CallLetters == selectedStation);
+            if (station != null)
+            {
+                audioMetadataForDb.StationId = station.Id;
+            }
+            else
+            {
+                Log.Error("Station with call letters {CallLetters} not found", selectedStation);
+            }
+
+            _dbContext.AudioMetadatas.Add(audioMetadataForDb);
+            await _dbContext.SaveChangesAsync();
+        }
     }
+
 }

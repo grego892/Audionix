@@ -13,21 +13,23 @@ namespace Audionix.Components.Pages.FileManager
     partial class FileManager
     {
         private string selectedStation = string.Empty;
+        private string selectedFolder = string.Empty;
         private bool isUploading;
         private int progress;
         private WavesurferPlayer? wavePlayer;
         readonly List<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
+        private List<string>? folders;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
         [Inject] public AppSettings? AppSettings { get; set; }
-        [Inject] public IConfiguration? Configuration { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
         [Inject] public StationService? StationSvc { get; set; }
-        [Inject] public AudionixDbContext DbContext { get; set; }
-        [Inject] FileManagerService FileManagerService { get; set; }
+        [Inject] public AudionixDbContext? DbContext { get; set; }
+        [Inject] FileManagerService? FileManagerService { get; set; }
+        [Inject] ISnackbar? Snackbar { get; set; }
 
 
         public string EditorTitle = string.Empty;
@@ -51,7 +53,7 @@ namespace Audionix.Components.Pages.FileManager
 
             foreach (var file in duplicateFiles)
             {
-                Snackbar.Add($"File {file.Name} has already been uploaded.", Severity.Error);
+                Snackbar.Add("Folder with the same name already exists for this station", Severity.Error);
             }
             isUploading = false;
             progress = 0;

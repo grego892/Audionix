@@ -51,7 +51,7 @@
                     @if (context.Id == StationEditing)
                     {
                     <MudTd DataLabel="Id">
-                            <MudTextField @bind-Value="@context.Id" Label="Id" Variant="Variant.Outlined" Margin="Margin.Dense" ></MudTextField>
+                        <MudTextField @bind-Value="@context.Id" Label="Id" Variant="Variant.Outlined" Margin="Margin.Dense" ></MudTextField>
                     </MudTd>
 
                     <MudTd DataLabel="CallLetters">
@@ -112,5 +112,47 @@
     else
     {
     }
-    
+
+
+    @if (AppSettings != null && AppSettings.IsDatapathSetup)
+    {
+        <MudCard Outlined="true" Class="ma-8" Elevation="25">
+            <MudCardContent>
+                <MudText>Setup Station Folders</MudText>
+                <MudPaper Width="200px" Class="mp-1 pl-1">
+                    <MudSelect Margin="Margin.Dense" T="Station" Label="Stations" @bind-Value="SelectedStation" Variant="Variant.Outlined">
+                        @foreach (var station in stations)
+                        {
+                            <MudSelectItem Value="@station">@station.CallLetters</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudPaper>
+            </MudCardContent>
+
+            <MudTable Items="@folders"
+                ReadOnly=false
+                Dense=true
+                Bordered=true
+                Class="border-solid">
+                <HeaderContent>
+                    <MudTh>Call Letters</MudTh>
+                    <MudTh>Delete</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Call Letters">@context.Name</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveFolder(@context))">Delete</MudButton>
+                    </MudTd>
+                    </RowTemplate>
+            </MudTable>
+            <MudCardActions>
+                <MudTextField @bind-Value="@newFolder.Name" Label="Folder Name" Variant="Variant.Outlined"></MudTextField>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddFolder">Add Folder</MudButton>
+            </MudCardActions>
+        </MudCard>
+    }
+    else
+    {
+    }
+
 </MudGrid>

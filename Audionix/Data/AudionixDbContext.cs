@@ -11,8 +11,9 @@ namespace Audionix.Models
     {
         public DbSet<Station> Stations { get; set; }
         public DbSet<MusicPattern> MusicPatterns { get; set; }
-        public DbSet<MusicPatternData> MusicPatternsData { get; set; }
         public DbSet<AudioMetadata> AudioMetadatas { get; set; }
+        public DbSet<Folder> Folders { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +23,12 @@ namespace Audionix.Models
                 .HasOne(am => am.Station)
                 .WithMany(s => s.AudioMetadatas)
                 .HasForeignKey(am => am.StationId);
+
+            modelBuilder.Entity<Folder>()
+                .HasOne(f => f.Station)
+                .WithMany(s => s.Folders)
+                .HasForeignKey(f => f.StationId);
         }
+
     }
 }

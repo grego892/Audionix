@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Audionix.Services
 {
@@ -40,8 +41,6 @@ namespace Audionix.Services
 
             return existingFiles;
         }
-
-
 
         public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, Action<int> updateProgress)
         {
@@ -80,8 +79,9 @@ namespace Audionix.Services
 
                     Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
 
-                    var audioMetadata = await new AudioMetadataService().GetMetadataAsync(path);
-                    await SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
+                    var audioMetadataService = new AudioMetadataService(_dbContext);
+                    var audioMetadata = await audioMetadataService.GetMetadataAsync(path);
+                    await audioMetadataService.SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
                 }
                 catch (IOException ioEx)
                 {
@@ -91,34 +91,6 @@ namespace Audionix.Services
 
             await _dbContext.SaveChangesAsync();
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
-        }
-
-        private async Task SaveAudioMetadata(AudioMetadata audioMetadata, string fileName, string selectedStation)
-        {
-            // Create a new AudioMetadata instance and set its properties
-            var audioMetadataForDb = new AudioMetadata
-            {
-                Filename = fileName,
-                Title = audioMetadata.Title,
-                Artist = audioMetadata.Artist,
-                Duration = audioMetadata.Duration,
-                Intro = audioMetadata.Intro,
-                Segue = audioMetadata.Segue
-            };
-
-            // Find the station with the selected call letters and assign its ID to StationId
-            var station = _dbContext.Stations.AsNoTracking().FirstOrDefault(s => s.CallLetters == selectedStation);
-            if (station != null)
-            {
-                audioMetadataForDb.StationId = station.Id;
-            }
-            else
-            {
-                Log.Error("Station with call letters {CallLetters} not found", selectedStation);
-            }
-
-            _dbContext.AudioMetadatas.Add(audioMetadataForDb);
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, AudionixDbContext dbContext, Action getFolderFileList)
@@ -138,6 +110,68 @@ namespace Audionix.Services
 
             getFolderFileList();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
+        }
+        public async Task AddFolder(Folder newFolder, Station selectedStation, AudionixDbContext dbContext, ISnackbar snackbar)
+        {
+            try
+            {
+                var existingFolder = await dbContext.Folders
+                    .FirstOrDefaultAsync(f => f.Name == newFolder.Name && f.StationId == selectedStation.Id);
+
+                if (existingFolder != null)
+                {
+                    snackbar.Add($"Folder with the same name already exists for this station", Severity.Error);
+                }
+                else
+                {
+                    // Create the new folder in the station's path
+                    var path = Path.Combine(_appSettings?.DataPath ?? string.Empty, "Stations", selectedStation.CallLetters, "Audio", newFolder.Name);
+                    Directory.CreateDirectory(path);
+
+                    newFolder.StationId = selectedStation.Id;
+                    dbContext.Folders.Add(newFolder);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ FileManagerService -- AddFolder() - Error adding folder");
+            }
+        }
+
+        public async Task RemoveFolder(Folder folder)
+        {
+            Log.Information("--- FileManager - RemoveFolder() -- Removing Folder: {FolderName}", folder.Name);
+            try
+            {
+                // Get the station associated with the folder
+                var station = await _dbContext.Stations.FirstOrDefaultAsync(s => s.Id == folder.StationId);
+
+                if (station != null)
+                {
+                    // Remove the folder from the file system
+                    var path = Path.Combine(_appSettings?.DataPath ?? string.Empty, "Stations", station.CallLetters, "Audio", folder.Name);
+
+                    if (Directory.Exists(path))
+                    {
+                        Directory.Delete(path, true);
+                    }
+
+                    // Remove the folder from the database
+                    _dbContext.Folders.Remove(folder);
+                    await _dbContext.SaveChangesAsync();
+
+                    Log.Information("--- FileManager - RemoveFolder() -- Folder Removed: {FolderName}", folder.Name);
+                }
+                else
+                {
+                    Log.Error("++++++ FileManager - RemoveFolder() -- Station not found for folder: {FolderName}", folder.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ FileManager - RemoveFolder() -- Error removing folder: {FolderName}", folder.Name);
+            }
         }
     }
 }

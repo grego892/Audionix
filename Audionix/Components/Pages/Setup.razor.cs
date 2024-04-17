@@ -4,6 +4,8 @@ using Audionix.Services;
 using Audionix.Models;
 using System.ServiceProcess;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 
 namespace Audionix.Components.Pages
@@ -14,8 +16,15 @@ namespace Audionix.Components.Pages
         private Station newStation = new();
         private Station tempEditStation = new();
         string? oldDataPath;
+        private Folder newFolder = new();
+        private List<Station> stations = new List<Station>();
+        private Station? selectedStation;
         private AppSettings? AppConfig { get; set; }
+        private List<Folder> folders = new List<Folder>();
         [Inject] private AppSettingsService AppSettingsService { get; set; } = null!;
+        [Inject] ISnackbar? Snackbar { get; set; }
+        [Inject] private FileManagerService FileManagerService { get; set; } = null!;
+
 
         public string DataPath
         {
@@ -41,6 +50,7 @@ namespace Audionix.Components.Pages
             Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Initializing");
             AppSettings = await AppSettingsService.GetOrCreateConfigurationAsync();
             oldDataPath = AppSettings.DataPath;
+            stations = await DbContext.Stations.ToListAsync();
         }
 
 
@@ -158,5 +168,40 @@ namespace Audionix.Components.Pages
                 Log.Error("++++++ Setup - RestartService() -- " + ex.Message);
             }
         }
+
+        private async void AddFolder()
+        {
+            await FileManagerService.AddFolder(newFolder, selectedStation, DbContext, Snackbar);
+            newFolder = new Folder();
+            LoadFolders();
+        }
+
+        private Station SelectedStation
+        {
+            get { return selectedStation; }
+            set
+            {
+                if (selectedStation != value)
+                {
+                    selectedStation = value;
+                    LoadFolders();
+                }
+            }
+        }
+
+        private async void LoadFolders()
+        {
+            if (selectedStation != null)
+            {
+                folders = await DbContext.Folders.Where(f => f.StationId == selectedStation.Id).ToListAsync();
+            }
+        }
+
+        private async void RemoveFolder(Folder folder)
+        {
+            await FileManagerService.RemoveFolder(folder);
+            LoadFolders();
+        }
+
     }
 }
