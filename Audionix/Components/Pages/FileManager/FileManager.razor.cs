@@ -40,8 +40,11 @@ namespace Audionix.Components.Pages.FileManager
 
         protected override async Task OnInitializedAsync()
         {
-            stations = await DbContext.Stations.AsNoTracking().ToListAsync();
-            filesInDirectory = await DbContext.AudioMetadatas.AsNoTracking().ToListAsync();
+            if (DbContext != null)
+            {
+                stations = await DbContext.Stations.AsNoTracking().ToListAsync();
+                filesInDirectory = await DbContext.AudioMetadatas.AsNoTracking().ToListAsync();
+            }
             GetFolderFileList();
         }
 
@@ -49,33 +52,46 @@ namespace Audionix.Components.Pages.FileManager
         {
             isUploading = true;
             progress = 0;
-            var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, filesToUpload, filesInDirectory, () => LoadFiles(selectedFiles, selectedStation, updateProgress), GetFolderFileList, updateProgress);
+            var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, selectedFolder, filesToUpload, filesInDirectory, () => LoadFiles(selectedFiles, selectedStation, selectedFolder, updateProgress), GetFolderFileList, updateProgress);
 
-            foreach (var file in duplicateFiles)
+            if (Snackbar != null)
             {
-                Snackbar.Add("Folder with the same name already exists for this station", Severity.Error);
+                foreach (var file in duplicateFiles)
+                {
+                    Snackbar.Add("Folder with the same name already exists for this station", Severity.Error);
+                }
             }
             isUploading = false;
             progress = 0;
         }
 
-        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, Action<int> updateProgress)
+        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, Action<int> updateProgress)
         {
             isUploading = true;
             progress = 0;
-            await FileManagerSvc?.LoadFiles(selectedFiles as IReadOnlyList<IBrowserFile>, selectedStation, updateProgress);
+            if (FileManagerSvc != null)
+            {
+                await FileManagerSvc.LoadFiles(selectedFiles as IReadOnlyList<IBrowserFile>, selectedStation, selectedFolder, updateProgress);
+            }
             GetFolderFileList();
             isUploading = false;
         }
 
+
         private void GetFolderFileList()
         {
-            filesInDirectory = StationSvc?.GetFolderFileList(selectedStation, stations, DbContext) ?? new List<AudioMetadata>();
+            if (StationSvc != null && DbContext != null)
+            {
+                filesInDirectory = StationSvc.GetFolderFileList(selectedStation, stations, DbContext) ?? new List<AudioMetadata>();
+            }
         }
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
-            await FileManagerSvc?.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, GetFolderFileList);
+            if (FileManagerSvc != null && DbContext != null)
+            {
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, GetFolderFileList);
+            }
         }
 
         public string SelectedStation
@@ -86,20 +102,11 @@ namespace Audionix.Components.Pages.FileManager
                 if (selectedStation != value)
                 {
                     selectedStation = value;
-                    OnSelectedValueChanged(value);
+                    OnSelectedStationValueChanged(value);
                 }
             }
         }
 
-        private void OnSelectedValueChanged(string value)
-        {
-            if (!string.IsNullOrEmpty(value))
-            {
-                Log.Information("--- FileManager - OnSelectedValuesChanged() -- SelectedStation: {Station}", value);
-                SelectedStation = value;
-                GetFolderFileList();
-            }
-        }
         public double RoundedEditorIntro
         {
             get
@@ -122,10 +129,30 @@ namespace Audionix.Components.Pages.FileManager
                 EditorSegue = value * 1000;
             }
         }
+
         private void updateProgress(int value)
         {
             progress = value;
             StateHasChanged();
+        }
+
+        private async void OnSelectedStationValueChanged(string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                Log.Information($"--- FileManager -  OnSelectedStationValueChanged() -- SelectedStation: {value}", value);
+                SelectedStation = value;
+                var station = stations?.FirstOrDefault(s => s.CallLetters == value);
+                if (station != null && FileManagerSvc != null)
+                {
+                    folders = await FileManagerSvc.GetFoldersForStation(station.Id.ToString());
+                }
+                GetFolderFileList();
+            }
+        }
+        private void OnSelectedStationValueChangedWrapper(string value)
+        {
+            OnSelectedStationValueChanged(value);
         }
 
     }

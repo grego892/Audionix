@@ -9,26 +9,23 @@
             <h2 Class="ptb-2 ml-2">File Manager</h2>
         </MudPaper>
         <MudStack Row="true">
-            <MudPaper Width="200px" Class="mp-1 pl-1">
-                <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Text="selectedStation" SelectedValuesChanged="GetFolderFileList" Variant="Variant.Outlined">
-                    @foreach (var station in stations ?? Enumerable.Empty<Station>())
-                    {
-                        <MudSelectItem Value="@station.CallLetters" />
-                    }
-                </MudSelect>
-            </MudPaper>
-
-            <MudPaper Width="200px" Class="mp-1 pl-1">
-                <MudSelect Margin="Margin.Dense" T="string" Label="Folders" @bind-Text="selectedFolder" Variant="Variant.Outlined">
-                    @foreach (var folder in folders ?? Enumerable.Empty<string>())
-                    {
-                        <MudSelectItem Value="@folder" />
-                    }
-                </MudSelect>
-            </MudPaper>
+            <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Text="selectedStation" ValueChanged="@(e => OnSelectedStationValueChangedWrapper(e))" Variant="Variant.Outlined">
+                @foreach (var station in stations ?? Enumerable.Empty<Station>())
+                {
+                    <MudSelectItem Value="@station.CallLetters" />
+                }
+            </MudSelect>
 
 
-            <MudPaper Class="pl-1 pr-1" Width="150px">
+            <MudSelect Margin="Margin.Dense" T="string" Label="Folders" @bind-Text="selectedFolder" Variant="Variant.Outlined">
+                @foreach (var folder in folders ?? Enumerable.Empty<string>())
+                {
+                    <MudSelectItem Value="@folder" />
+                }
+            </MudSelect>
+
+
+            <MudPaper Width="250px" Class="pl-1 pr-1">
                 <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
                     <ButtonTemplate>
                         <MudButton HtmlTag="label"
@@ -40,6 +37,7 @@
                     </ButtonTemplate>
                 </MudFileUpload>
             </MudPaper>
+
             <MudPaper Class="ma-1" Width="calc(99% - 350px)">
                 @if (isUploading)
                 {
