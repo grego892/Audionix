@@ -25,7 +25,7 @@ namespace Audionix.Services
             _appSettings = appSettings;
         }
 
-        public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Func<Task> loadFiles, Action getFolderFileList, Action<int> updateProgress)
+        public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
         {
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
@@ -37,10 +37,12 @@ namespace Audionix.Services
             filesToUpload.AddRange(distinctFiles);
 
             await LoadFiles(selectedFiles, selectedStation, selectedFolder, updateProgress);
-            getFolderFileList();
+            //GetFolderFileList();
+
 
             return existingFiles;
         }
+
 
         public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, Action<int> updateProgress)
         {

@@ -52,7 +52,7 @@ namespace Audionix.Components.Pages.FileManager
         {
             isUploading = true;
             progress = 0;
-            var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, selectedFolder, filesToUpload, filesInDirectory, () => LoadFiles(selectedFiles, selectedStation, selectedFolder, updateProgress), GetFolderFileList, updateProgress);
+            var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, selectedFolder, filesToUpload, filesInDirectory, updateProgress);
 
             if (Snackbar != null)
             {
@@ -63,18 +63,6 @@ namespace Audionix.Components.Pages.FileManager
             }
             isUploading = false;
             progress = 0;
-        }
-
-        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, Action<int> updateProgress)
-        {
-            isUploading = true;
-            progress = 0;
-            if (FileManagerSvc != null)
-            {
-                await FileManagerSvc.LoadFiles(selectedFiles as IReadOnlyList<IBrowserFile>, selectedStation, selectedFolder, updateProgress);
-            }
-            GetFolderFileList();
-            isUploading = false;
         }
 
 
@@ -141,17 +129,22 @@ namespace Audionix.Components.Pages.FileManager
             if (!string.IsNullOrEmpty(value))
             {
                 Log.Information($"--- FileManager -  OnSelectedStationValueChanged() -- SelectedStation: {value}", value);
+                filesInDirectory.Clear();
+                selectedFolder = string.Empty;
                 SelectedStation = value;
                 var station = stations?.FirstOrDefault(s => s.CallLetters == value);
                 if (station != null && FileManagerSvc != null)
                 {
                     folders = await FileManagerSvc.GetFoldersForStation(station.Id.ToString());
                 }
-                GetFolderFileList();
             }
         }
+
         private void OnSelectedStationValueChangedWrapper(string value)
         {
+            
+            folders = new List<string>();
+            StateHasChanged();
             OnSelectedStationValueChanged(value);
         }
 

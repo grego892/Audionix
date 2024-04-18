@@ -9,13 +9,12 @@
             <h2 Class="ptb-2 ml-2">File Manager</h2>
         </MudPaper>
         <MudStack Row="true">
-            <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Text="selectedStation" ValueChanged="@(e => OnSelectedStationValueChangedWrapper(e))" Variant="Variant.Outlined">
+            <MudSelect Margin="Margin.Dense" T="string" Label="Station" @bind-Text="selectedStation" ValueChanged="@(e => OnSelectedStationValueChanged(e))" Variant="Variant.Outlined">
                 @foreach (var station in stations ?? Enumerable.Empty<Station>())
                 {
                     <MudSelectItem Value="@station.CallLetters" />
                 }
             </MudSelect>
-
 
             <MudSelect Margin="Margin.Dense" T="string" Label="Folders" @bind-Text="selectedFolder" Variant="Variant.Outlined">
                 @foreach (var folder in folders ?? Enumerable.Empty<string>())
@@ -24,6 +23,7 @@
                 }
             </MudSelect>
 
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => GetFolderFileList()">Refresh</MudButton>
 
             <MudPaper Width="250px" Class="pl-1 pr-1">
                 <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
