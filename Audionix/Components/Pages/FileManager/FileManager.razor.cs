@@ -43,7 +43,7 @@ namespace Audionix.Components.Pages.FileManager
             if (DbContext != null)
             {
                 stations = await DbContext.Stations.AsNoTracking().ToListAsync();
-                filesInDirectory = await DbContext.AudioMetadatas.AsNoTracking().ToListAsync();
+                filesInDirectory = await DbContext.AudioFiles.AsNoTracking().ToListAsync();
             }
             GetFolderFileList();
         }

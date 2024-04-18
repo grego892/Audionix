@@ -30,7 +30,7 @@ namespace Audionix.Services
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
             // Filter out the files that already exist in the database before adding them to filesToUpload
-            var distinctFiles = selectedFiles.Where(file => !_dbContext.AudioMetadatas.Any(f => f.Filename == file.Name)).ToList();
+            var distinctFiles = selectedFiles.Where(file => !_dbContext.AudioFiles.Any(f => f.Filename == file.Name)).ToList();
             var existingFiles = selectedFiles.Except(distinctFiles).ToList();
 
             filesToUpload.Clear();
@@ -101,12 +101,12 @@ namespace Audionix.Services
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
 
             // Fetch the audioMetadata without tracking it
-            var audioMetadataForDb = dbContext.AudioMetadatas.AsNoTracking().FirstOrDefault(am => am.Id == audioMetadata.Id);
+            var audioMetadataForDb = dbContext.AudioFiles.AsNoTracking().FirstOrDefault(am => am.Id == audioMetadata.Id);
             if (audioMetadataForDb != null)
             {
                 // Attach the entity to the DbContext before removing it
-                dbContext.AudioMetadatas.Attach(audioMetadataForDb);
-                dbContext.AudioMetadatas.Remove(audioMetadataForDb);
+                dbContext.AudioFiles.Attach(audioMetadataForDb);
+                dbContext.AudioFiles.Remove(audioMetadataForDb);
                 await dbContext.SaveChangesAsync();
             }
 

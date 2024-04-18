@@ -89,7 +89,7 @@ namespace Audionix.Services
                 Log.Error("Station with call letters {CallLetters} not found", selectedStation);
             }
 
-            _dbContext.AudioMetadatas.Add(audioMetadataForDb);
+            _dbContext.AudioFiles.Add(audioMetadataForDb);
             await _dbContext.SaveChangesAsync();
         }
     }

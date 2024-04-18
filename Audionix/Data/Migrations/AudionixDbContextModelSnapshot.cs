@@ -133,7 +133,7 @@ namespace Audionix.Data.Migrations
 
                     b.HasIndex("StationId");
 
-                    b.ToTable("AudioMetadatas");
+                    b.ToTable("AudioFiles");
                 });
 
             modelBuilder.Entity("Audionix.Models.Folder", b =>
@@ -337,7 +337,7 @@ namespace Audionix.Data.Migrations
             modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
                 {
                     b.HasOne("Audionix.Models.Station", "Station")
-                        .WithMany("AudioMetadatas")
+                        .WithMany("AudioFiles")
                         .HasForeignKey("StationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -421,7 +421,7 @@ namespace Audionix.Data.Migrations
 
             modelBuilder.Entity("Audionix.Models.Station", b =>
                 {
-                    b.Navigation("AudioMetadatas");
+                    b.Navigation("AudioFiles");
 
                     b.Navigation("Folders");
                 });

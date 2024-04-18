@@ -18,7 +18,7 @@ namespace Audionix.Services
                 var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
                 if (station != null)
                 {
-                    filesInDirectory = dbContext.AudioMetadatas
+                    filesInDirectory = dbContext.AudioFiles
                         .AsNoTracking()
                         .Where(am => am.StationId == station.Id)
                         .ToList();
