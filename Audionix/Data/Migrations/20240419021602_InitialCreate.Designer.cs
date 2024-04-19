@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(AudionixDbContext))]
-    [Migration("20240418195633_InitialCreate")]
+    [Migration("20240419021602_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -102,6 +102,9 @@ namespace Audionix.Data.Migrations
 
                     b.Property<string>("Filename")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Folder")
                         .HasColumnType("TEXT");
 
                     b.Property<short>("Intro")

@@ -220,7 +220,8 @@ namespace Audionix.Data.Migrations
                     IntroSeconds = table.Column<double>(type: "REAL", nullable: false),
                     SegueSeconds = table.Column<double>(type: "REAL", nullable: false),
                     Duration = table.Column<double>(type: "REAL", nullable: false),
-                    StationId = table.Column<int>(type: "INTEGER", nullable: false)
+                    StationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Folder = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

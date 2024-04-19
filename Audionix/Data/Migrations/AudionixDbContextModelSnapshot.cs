@@ -101,6 +101,9 @@ namespace Audionix.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Folder")
+                        .HasColumnType("TEXT");
+
                     b.Property<short>("Intro")
                         .HasColumnType("INTEGER");
 

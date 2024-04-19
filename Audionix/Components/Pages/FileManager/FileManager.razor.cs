@@ -26,7 +26,6 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] public AppSettings? AppSettings { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
-        [Inject] public StationService? StationSvc { get; set; }
         [Inject] public AudionixDbContext? DbContext { get; set; }
         [Inject] FileManagerService? FileManagerService { get; set; }
         [Inject] ISnackbar? Snackbar { get; set; }
@@ -68,11 +67,12 @@ namespace Audionix.Components.Pages.FileManager
 
         private void GetFolderFileList()
         {
-            if (StationSvc != null && DbContext != null)
+            if (FileManagerService != null && DbContext != null)
             {
-                filesInDirectory = StationSvc.GetFolderFileList(selectedStation, stations, DbContext) ?? new List<AudioMetadata>();
+                filesInDirectory = FileManagerService.GetFolderFileList(selectedStation, selectedFolder, stations, DbContext) ?? new List<AudioMetadata>();
             }
         }
+
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {

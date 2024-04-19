@@ -189,5 +189,25 @@ namespace Audionix.Services
                 .Select(f => f.Name)
                 .ToListAsync();
         }
+        public List<AudioMetadata> GetFolderFileList(string selectedStation, string selectedFolder, List<Station>? stations, AudionixDbContext dbContext)
+        {
+            Log.Information("--- StationService - GetFolderFileList() -- Start");
+            var filesInDirectory = new List<AudioMetadata>();
+
+            if (!string.IsNullOrEmpty(selectedStation) && stations != null)
+            {
+                var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
+                if (station != null)
+                {
+                    filesInDirectory = dbContext.AudioFiles
+                        .AsNoTracking()
+                        .Where(am => am.StationId == station.Id && am.Folder == selectedFolder)
+                        .ToList();
+                }
+            }
+
+            Log.Information("--- StationService - GetFolderFileList() -- End - filesInDirectory: {Count}", filesInDirectory.Count);
+            return filesInDirectory;
+        }
     }
 }

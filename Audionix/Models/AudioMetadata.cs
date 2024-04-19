@@ -18,5 +18,6 @@
 
         public int StationId { get; set; }
         public Station? Station { get; set; }
+        public string? Folder { get; set; }
     }
 }
