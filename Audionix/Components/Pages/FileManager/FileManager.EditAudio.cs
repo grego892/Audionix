@@ -44,15 +44,15 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task<string> RequestFileFromAPI(AudioMetadata audioMetadata)
         {
-            //-----------  Begin Requesting File from API -------------
             var request = HttpContextAccessor?.HttpContext?.Request;
             if (request != null)
             {
                 var host = request.Host.ToUriComponent();
                 var scheme = request.Scheme;
-
                 string encodedFilename = System.Net.WebUtility.UrlEncode(audioMetadata.Filename);
-                string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFilename}";
+                string encodedFoldername = System.Net.WebUtility.UrlEncode(audioMetadata.Folder);
+                string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFoldername}/{encodedFilename}";
+
                 Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
 
                 try

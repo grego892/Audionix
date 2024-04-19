@@ -18,9 +18,9 @@ public class AudioController : ControllerBase
         _appSettings = appSettings;
     }
 
-    
-    [HttpGet("{station}/{filename}")]
-    public IActionResult Get(string station, string filename)
+
+    [HttpGet("{station}/{foldername}/{filename}")]
+    public IActionResult Get(string station, string foldername, string filename)
     {
         filename = System.Net.WebUtility.UrlDecode(filename);
 
@@ -28,7 +28,7 @@ public class AudioController : ControllerBase
 
         if (_appSettings.DataPath != null)
         {
-            var path = Path.Combine(_appSettings.DataPath, "Stations", station, "Audio", filename);
+            var path = Path.Combine(_appSettings.DataPath, "Stations", station, "Audio", foldername, filename);
             Log.Information("AudioController.Get: {path}", path);
             var memory = new MemoryStream();
             using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite))
