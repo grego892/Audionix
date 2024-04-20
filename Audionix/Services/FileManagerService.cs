@@ -83,6 +83,7 @@ namespace Audionix.Services
 
                     var audioMetadataService = new AudioMetadataService(_dbContext);
                     var audioMetadata = await audioMetadataService.GetMetadataAsync(path);
+                    audioMetadata.Folder = selectedFolder;
                     await audioMetadataService.SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
                 }
                 catch (IOException ioEx)

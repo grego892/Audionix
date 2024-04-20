@@ -44,7 +44,7 @@ namespace Audionix.Components.Pages.FileManager
                 stations = await DbContext.Stations.AsNoTracking().ToListAsync();
                 filesInDirectory = await DbContext.AudioFiles.AsNoTracking().ToListAsync();
             }
-            GetFolderFileList();
+            //GetFolderFileList();
         }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
@@ -62,6 +62,7 @@ namespace Audionix.Components.Pages.FileManager
             }
             isUploading = false;
             progress = 0;
+            GetFolderFileList();
         }
 
 
@@ -139,14 +140,18 @@ namespace Audionix.Components.Pages.FileManager
                 }
             }
         }
-
-        private void OnSelectedStationValueChangedWrapper(string value)
+        public string SelectedFolder
         {
-            
-            folders = new List<string>();
-            StateHasChanged();
-            OnSelectedStationValueChanged(value);
+            get => selectedFolder;
+            set
+            {
+                if (selectedFolder != value)
+                {
+                    selectedFolder = value;
+                    filesInDirectory.Clear();
+                    StateHasChanged();
+                }
+            }
         }
-
     }
 }

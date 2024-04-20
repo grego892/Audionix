@@ -16,7 +16,7 @@
                 }
             </MudSelect>
 
-            <MudSelect Margin="Margin.Dense" T="string" Label="Folders" @bind-Text="selectedFolder" Variant="Variant.Outlined">
+            <MudSelect Margin="Margin.Dense" T="string" Label="Folders" @bind-Value="SelectedFolder" Variant="Variant.Outlined">
                 @foreach (var folder in folders ?? Enumerable.Empty<string>())
                 {
                     <MudSelectItem Value="@folder" />
