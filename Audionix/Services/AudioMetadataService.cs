@@ -75,7 +75,8 @@ namespace Audionix.Services
                 Artist = audioMetadata.Artist,
                 Duration = audioMetadata.Duration,
                 Intro = audioMetadata.Intro,
-                Segue = audioMetadata.Segue
+                Segue = audioMetadata.Segue,
+                Folder = audioMetadata.Folder
             };
 
             // Find the station with the selected call letters and assign its ID to StationId
