@@ -36,13 +36,10 @@ namespace Audionix.Services
             filesToUpload.Clear();
             filesToUpload.AddRange(distinctFiles);
 
-            await LoadFiles(selectedFiles, selectedStation, selectedFolder, updateProgress);
-            //GetFolderFileList();
-
+            await LoadFiles(distinctFiles, selectedStation, selectedFolder, updateProgress);
 
             return existingFiles;
         }
-
 
         public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, Action<int> updateProgress)
         {

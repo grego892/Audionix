@@ -65,7 +65,6 @@ namespace Audionix.Components.Pages.FileManager
             GetFolderFileList();
         }
 
-
         private void GetFolderFileList()
         {
             if (FileManagerService != null && DbContext != null)
