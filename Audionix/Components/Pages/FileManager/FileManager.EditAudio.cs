@@ -17,16 +17,27 @@ namespace Audionix.Components.Pages.FileManager
 
             if (wavePlayer != null)
             {
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - about to StopAndEmptyWavePlayer()");
                 await StopAndEmptyWavePlayer();
 
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - finished StopAndEmptyWavePlayer() -- about the RequestFileFromAPI(audioMetadata)");
+
+
                 var url = await RequestFileFromAPI(audioMetadata);
+
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - finished RequestFileFromAPI(audioMetadata) -- about to LoadFileIntoWavePlayer(url, audioMetadata)");
+
                 if (!string.IsNullOrEmpty(url))
                 {
                     await LoadFileIntoWavePlayer(url, audioMetadata);
 
+                    Log.Debug("--- FileManager - EditAudio() -- EditAudio() - finished LoadFileIntoWavePlayer(url, audioMetadata) -- about to UpdateWavePlayerRegions(audioMetadata)");
                     await UpdateWavePlayerRegions(audioMetadata);
 
+                    Log.Debug("--- FileManager - EditAudio() -- EditAudio() - finished UpdateWavePlayerRegions(audioMetadata) -- about to UpdateEditorFields(audioMetadata)");
                     UpdateEditorFields(audioMetadata);
+
+                    Log.Debug("--- FileManager - EditAudio() -- EditAudio() - finished UpdateEditorFields(audioMetadata)");
                 }
             }
             else
@@ -44,13 +55,23 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task<string> RequestFileFromAPI(AudioMetadata audioMetadata)
         {
+            Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - audioMetadata.Filename: " + audioMetadata.Filename);
+
             var request = HttpContextAccessor?.HttpContext?.Request;
+
+            Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - request: " + request);
+
             if (request != null)
             {
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - request.Host: " + request.Host);
                 var host = request.Host.ToUriComponent();
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - host: " + host);
                 var scheme = request.Scheme;
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - scheme: " + scheme);
                 string encodedFilename = System.Net.WebUtility.UrlEncode(audioMetadata.Filename);
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFilename: " + encodedFilename);
                 string encodedFoldername = System.Net.WebUtility.UrlEncode(audioMetadata.Folder);
+                Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFoldername: " + encodedFoldername);
                 string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFoldername}/{encodedFilename}";
 
                 Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
@@ -58,6 +79,7 @@ namespace Audionix.Components.Pages.FileManager
                 try
                 {
                     var httpClient = new HttpClient();
+                    Log.Debug("--- FileManager - EditAudio() -- EditAudio() - about to httpClient.GetAsync(url)");
                     var response = await httpClient.GetAsync(url);
                     Log.Information("--- FileManager - EditAudio() -- EditAudio response: " + response.StatusCode);
 

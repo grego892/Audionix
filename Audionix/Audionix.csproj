@@ -7,7 +7,7 @@
     <UserSecretsId>aspnet-Audionix-3fee9436-e3e8-4df8-adaa-a2116df53e85</UserSecretsId>
     <ApplicationIcon>Audionix.ico</ApplicationIcon>
     <PackageIcon>AudionixLogo.png</PackageIcon>
-    <Version>0.0.2.16</Version>
+    <Version>0.0.2.19</Version>
     <Configurations>Debug;Release;test</Configurations>
   </PropertyGroup>
 
@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.11.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
@@ -38,14 +39,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.60.3" />
     <PackageReference Include="MudBlazor" Version="6.19.1" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="6.6.0" />
     <PackageReference Include="WavesurferBlazorWrapper" Version="0.4.0" />
-    <PackageReference Include="z440.atl.core" Version="5.21.0" />
+    <PackageReference Include="z440.atl.core" Version="5.22.0" />
   </ItemGroup>
 
   <ItemGroup>

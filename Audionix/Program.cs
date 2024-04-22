@@ -10,6 +10,7 @@ using MudBlazor.Services;
 using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
+using Serilog.Settings.Configuration;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,7 +124,10 @@ void ConfigureDatabase(WebApplicationBuilder builder)
 void ConfigureLogger(WebApplicationBuilder builder)
 {
     string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "Audionix.log");
+    var configuration = builder.Configuration;
+    var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
     Log.Logger = new LoggerConfiguration()
+        .ReadFrom.Configuration(configuration, options)
         .WriteTo.File(Path.Combine(_logPath), rollingInterval: RollingInterval.Day)
         .WriteTo.Console()
         .CreateLogger();

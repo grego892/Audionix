@@ -51,21 +51,24 @@ namespace Audionix.Components.Pages.FileManager
         {
             isUploading = true;
             progress = 0;
-            var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, selectedFolder, filesToUpload, filesInDirectory, updateProgress);
-
-            if (Snackbar != null)
+            if (FileManagerService != null)
             {
-                foreach (var file in duplicateFiles)
+                var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, selectedFolder, filesToUpload, filesInDirectory, updateProgress);
+
+                if (Snackbar != null)
                 {
-                    Snackbar.Add("Folder with the same name already exists for this station", Severity.Error);
+                    foreach (var file in duplicateFiles)
+                    {
+                        Snackbar.Add("Folder with the same name already exists for this station", Severity.Error);
+                    }
                 }
             }
             isUploading = false;
             progress = 0;
-            GetFolderFileList();
+            await GetFolderFileList();
         }
 
-        private void GetFolderFileList()
+        private async Task GetFolderFileList()
         {
             if (FileManagerService != null && DbContext != null)
             {
@@ -73,12 +76,11 @@ namespace Audionix.Components.Pages.FileManager
             }
         }
 
-
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
             if (FileManagerSvc != null && DbContext != null)
             {
-                await FileManagerSvc.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, GetFolderFileList);
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, () => GetFolderFileList());
             }
         }
 
