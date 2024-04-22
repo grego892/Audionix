@@ -22,7 +22,7 @@ public class AudioController : ControllerBase
     }
 
     [HttpGet("{station}/{foldername}/{filename}")]
-    public async Task<IActionResult> Get(string station, string foldername, string filename)
+    public IActionResult Get(string station, string foldername, string filename)
     {
         Log.Debug("--- AudioController -- Get() - BEGINS - station: {station}, foldername: {foldername}, filename: {filename}", station, foldername, filename);
 
@@ -35,13 +35,13 @@ public class AudioController : ControllerBase
             var path = Path.Combine(_appSettings.DataPath, "Stations", station, "Audio", foldername, filename);
             Log.Information("--- AudioController - Get() -- AudioController.Get: {path}", path);
 
-            var memory = new MemoryStream();
-            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite))
+            if (!System.IO.File.Exists(path))
             {
-                await stream.CopyToAsync(memory);
+                Log.Error("++++++ AudioController -- Get() - File does not exist: {path}", path);
+                return NotFound();
             }
-            memory.Position = 0;
-            return File(memory, GetContentType(path), Path.GetFileName(path));
+
+            return PhysicalFile(path, GetContentType(path), Path.GetFileName(path));
         }
         else
         {
