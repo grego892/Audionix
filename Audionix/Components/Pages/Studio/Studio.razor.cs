@@ -24,7 +24,7 @@ namespace Audionix.Components.Pages.Studio
             {
                 "SONG" => ($"background: {Colors.Indigo.Lighten1}; "),
                 "AUDIO" => ($"background: {Colors.Blue.Lighten1}; "),
-                "MACRO" => ($"background: {Colors.BlueGrey.Lighten1}; "),
+                "MACRO" => ($"background: {Colors.BlueGray.Lighten1}; "),
                 "SPOT" => ($"background: {Colors.Green.Lighten1}; "),
                 _ => "background-image: #000000)",
             };

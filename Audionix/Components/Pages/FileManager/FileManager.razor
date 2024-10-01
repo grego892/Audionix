@@ -26,15 +26,26 @@
             <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => GetFolderFileList()">Refresh</MudButton>
 
             <MudPaper Width="250px" Class="pl-1 pr-1">
+
+
                 <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
-                    <ButtonTemplate>
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload">
+                            Multiple Files
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+                    <ActivatorContent>
                         <MudButton HtmlTag="label"
                                    Variant="Variant.Outlined"
-                                   Color="Color.Primary"
-                                   for="@context.Id">
+                                   Color="Color.Primary">
                             Upload Files
                         </MudButton>
-                    </ButtonTemplate>
+                    </ActivatorContent>
                 </MudFileUpload>
             </MudPaper>
 

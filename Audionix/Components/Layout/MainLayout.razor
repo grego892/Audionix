@@ -12,6 +12,8 @@
 <MudThemeProvider @ref="@_mudThemeProvider" Theme="AudionixTheme" @bind-IsDarkMode="@_isDarkMode" />
 <MudSnackbarProvider />
 <MudDialogProvider />
+<MudPopoverProvider />
+
 
 <MudLayout>
     <MudAppBar>
@@ -104,7 +106,7 @@
 
     MudTheme AudionixTheme = new MudTheme()
         {
-            Palette = new PaletteLight()
+            PaletteLight = new PaletteLight()
             {
                 Primary = Colors.LightBlue.Default,
                 Secondary = Colors.Teal.Default,

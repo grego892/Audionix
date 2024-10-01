@@ -35,11 +35,19 @@ public class AudioController : ControllerBase
             var path = Path.Combine(_appSettings.DataPath, "Stations", station, "Audio", foldername, filename);
             Log.Information("--- AudioController - Get() -- AudioController.Get: {path}", path);
 
-            if (!System.IO.File.Exists(path))
+            Log.Debug("Start checking if file exists");
+            var fileExists = System.IO.File.Exists(path);
+            Log.Debug("Finished checking if file exists");
+
+            if (!fileExists)
             {
-                Log.Error("++++++ AudioController -- Get() - File does not exist: {path}", path);
+                Log.Error("File does not exist: {path}", path);
                 return NotFound();
             }
+
+            Log.Debug("Start reading file");
+            var fileContent = System.IO.File.ReadAllText(path);
+            Log.Debug("Finished reading file");
 
             return PhysicalFile(path, GetContentType(path), Path.GetFileName(path));
         }
