@@ -68,21 +68,23 @@ namespace Audionix.Components.Pages.FileManager
             await GetFolderFileList();
         }
 
-        private async Task GetFolderFileList()
+        private Task GetFolderFileList()
         {
             if (FileManagerService != null && DbContext != null)
             {
                 filesInDirectory = FileManagerService.GetFolderFileList(selectedStation, selectedFolder, stations, DbContext) ?? new List<AudioMetadata>();
             }
+            return Task.CompletedTask;
         }
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
             if (FileManagerSvc != null && DbContext != null)
             {
-                await FileManagerSvc.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, () => GetFolderFileList());
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, async () => await GetFolderFileList());
             }
         }
+
 
         public string SelectedStation
         {
