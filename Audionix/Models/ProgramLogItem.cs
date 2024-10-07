@@ -1,4 +1,6 @@
-﻿namespace Audionix.Data.StationLog
+﻿using Audionix.Models;
+
+namespace Audionix.Data.StationLog
 {
     public class ProgramLogItem
     {
@@ -20,7 +22,13 @@
         public int? sID { get; set; }
         public string? Estimated { get; set; }
         public double Progress { get; set; }
+
+        // Foreign key to Station
+        public int StationId { get; set; }
+        public Station? Station { get; set; }
     }
+
+    // Enums remain unchanged
     enum CategoryType
     {
         SONG,
@@ -42,11 +50,13 @@
         TimeImmediate,
         TimeNext
     }
+
     enum FromType
     {
         CLOCKS,
         TRAFFIC
     }
+
     enum StatesType
     {
         isReady

@@ -1,27 +1,43 @@
 ﻿@page "/studio"
 @rendermode InteractiveServer
 
-
 <PageTitle>Live Studio</PageTitle>
 
-<MudPaper >
-<MudToolBar Class="ma-1" Dense="false">
-    <MudButton Variant="Variant.Outlined" OnClick="LoadTodaysLog">Load Log</MudButton>
-</MudToolBar>
+<MudPaper>
+    <MudToolBar Class="ma-1" Dense="false">
+        <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDrawer">Insert</MudButton>
+        <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
+    </MudToolBar>
 </MudPaper>
 
 <MudPaper Class="pl-4">
-    <MudDataGrid 
-        Items="ProgramLog"
-        RowStyleFunc="@RowStyleFunc"
-        SortMode="SortMode.None"
-        FixedHeader="true"
-        Virtualize="true"
-        ShowMenuIcon="false"
-        Dense="true"
-        Height="90vh">
+    <MudDrawerContainer Class="mud-height-full">
+        <MudDrawer @bind-Open="@_open" Elevation="1" Variant="DrawerVariant.Temporary" OverlayAutoClose="true" Width="400px" Anchor="Anchor.Right" Color="Color.Primary">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">Add Audio</MudText>
+            </MudDrawerHeader>
+
+            <MudList T="string">
+                @foreach (var audioFile in AudioFiles)
+                {
+                    <MudListItem Class="ma-1" @onclick="() => SelectAudioFile(audioFile)">
+                        @audioFile.Title - @audioFile.Artist
+                    </MudListItem>
+                }
+            </MudList>
+        </MudDrawer>
+    </MudDrawerContainer>
+
+    <MudDataGrid Items="ProgramLog"
+                 RowStyleFunc="@RowStyleFunc"
+                 SortMode="SortMode.None"
+                 FixedHeader="true"
+                 Virtualize="true"
+                 ShowMenuIcon="false"
+                 Dense="true"
+                 Height="90vh">
         <Columns>
-            <PropertyColumn Property="x => x.Id" CellStyle="width: 5%;"/>
+            <PropertyColumn Property="x => x.Id" CellStyle="width: 5%;" />
             <PropertyColumn Property="x => x.Cue" CellStyle="width: 5%;" />
             <PropertyColumn Property="x => x.Description" CellStyle="width: 45%;" />
             <PropertyColumn Property="x => x.Scheduled" CellStyle="width: 10%;" />
@@ -29,10 +45,20 @@
             <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" />
             <TemplateColumn CellStyle="width: 10%;">
                 <CellTemplate>
-                    <MudProgressLinear Variant="Variant.Determinate" Color="Color.Success" Size="Size.Large" Value="@context.Item.Progress" />
+                    <MudProgressLinear Variant="Variant.Determinate" Color="Color.Success" Size="Size.Large" Value="50" />
                 </CellTemplate>
             </TemplateColumn>
             <PropertyColumn Property="x => x.Segue" CellStyle="width: 10%;" />
+            <TemplateColumn CellStyle="width: 5%;">
+                <CellTemplate Context="cellContext">
+                    <MudButton Variant="Variant.Outlined" Disabled="@(!IsAudioFileSelected)" OnClick="() => AddSelectedAudioToLog(cellContext.Item, ProgramLog.IndexOf(cellContext.Item))">Add</MudButton>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn CellStyle="width: 5%;">
+                <CellTemplate Context="cellContext">
+                    <MudButton Variant="Variant.Outlined" Disabled="@(!_delete)" OnClick="() => DeleteSelectedLogItem(cellContext.Item)">Delete</MudButton>
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
     </MudDataGrid>
 </MudPaper>

@@ -3,6 +3,7 @@ using System;
 using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(AudionixDbContext))]
-    partial class AudionixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241004205120_Log")]
+    partial class Log
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -132,9 +135,6 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("States")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("StationId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
@@ -143,33 +143,7 @@ namespace Audionix.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StationId");
-
                     b.ToTable("Log");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Actual = "10:58:04",
-                            Cart = "Default Cart",
-                            Category = "COMMENT",
-                            Cue = "AutoStart",
-                            Description = "This is a default log entry.",
-                            Device = 1,
-                            Estimated = "10:59:04",
-                            From = "SYSTEM",
-                            Length = "00:00:30",
-                            Name = "Default Log Entry",
-                            Passthrough = "None",
-                            Progress = 0.0,
-                            Scheduled = "10:58:04",
-                            Segue = "00:00:05",
-                            States = "isReady",
-                            StationId = 1,
-                            Status = "Initialized",
-                            sID = 1
-                        });
                 });
 
             modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
@@ -428,17 +402,6 @@ namespace Audionix.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Audionix.Data.StationLog.ProgramLogItem", b =>
-                {
-                    b.HasOne("Audionix.Models.Station", "Station")
-                        .WithMany("ProgramLogItems")
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Station");
-                });
-
             modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
                 {
                     b.HasOne("Audionix.Models.Station", "Station")
@@ -529,8 +492,6 @@ namespace Audionix.Data.Migrations
                     b.Navigation("AudioFiles");
 
                     b.Navigation("Folders");
-
-                    b.Navigation("ProgramLogItems");
                 });
 #pragma warning restore 612, 618
         }

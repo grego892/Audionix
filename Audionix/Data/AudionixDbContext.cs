@@ -1,19 +1,19 @@
+using Audionix.Data.StationLog;
 using Audionix.Data;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using static Audionix.Components.Pages.FileManager.FileManager;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Audionix.Models
 {
-    public class AudionixDbContext(DbContextOptions<AudionixDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+    public class AudionixDbContext : IdentityDbContext<ApplicationUser>
     {
+        public AudionixDbContext(DbContextOptions<AudionixDbContext> options) : base(options) { }
+
         public DbSet<Station> Stations { get; set; }
         public DbSet<MusicPattern> MusicPatterns { get; set; }
         public DbSet<AudioMetadata> AudioFiles { get; set; }
         public DbSet<Folder> Folders { get; set; }
-
+        public DbSet<ProgramLogItem> Log { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,7 +28,37 @@ namespace Audionix.Models
                 .HasOne(f => f.Station)
                 .WithMany(s => s.Folders)
                 .HasForeignKey(f => f.StationId);
-        }
 
+            modelBuilder.Entity<ProgramLogItem>()
+                .HasOne(pl => pl.Station)
+                .WithMany(s => s.ProgramLogItems)
+                .HasForeignKey(pl => pl.StationId);
+
+            // Seed data for ProgramLogItem
+            modelBuilder.Entity<ProgramLogItem>().HasData(
+                new ProgramLogItem
+                {
+                    Id = 1,
+                    Status = "Initialized",
+                    Cue = "AutoStart",
+                    Scheduled = DateTime.Now.ToString("HH:mm:ss"),
+                    Actual = DateTime.Now.ToString("HH:mm:ss"),
+                    Name = "Default Log Entry",
+                    Cart = "Default Cart",
+                    Length = "00:00:30",
+                    Segue = "00:00:05",
+                    Category = "COMMENT",
+                    From = "SYSTEM",
+                    Description = "This is a default log entry.",
+                    Passthrough = "None",
+                    States = "isReady",
+                    Device = 1,
+                    sID = 1,
+                    Estimated = DateTime.Now.AddMinutes(1).ToString("HH:mm:ss"),
+                    Progress = 0.0,
+                    StationId = 1 // Assuming a default station with ID 1 exists
+                }
+            );
+        }
     }
 }
