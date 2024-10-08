@@ -293,16 +293,6 @@ namespace Audionix.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Stations",
-                columns: new[] { "Id", "CallLetters", "Slogan" },
-                values: new object[] { 1, "Default Station", "Your Default Station" });
-
-            migrationBuilder.InsertData(
-                table: "Log",
-                columns: new[] { "Id", "Actual", "Artist", "Cart", "Category", "Cue", "Description", "Device", "Estimated", "From", "Length", "LogID", "Name", "Passthrough", "Progress", "Scheduled", "Segue", "States", "StationId", "Status", "Title", "sID" },
-                values: new object[] { 1, "15:06:32", null, "Default Cart", "COMMENT", "AutoStart", "This is a default log entry.", 1, "15:07:32", "SYSTEM", "00:00:30", 0, "Default Log Entry", "None", 0.0, "15:06:32", "00:00:05", "isReady", 1, "Initialized", null, 1 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",

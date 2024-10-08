@@ -75,22 +75,22 @@ namespace Audionix.Components.Pages.Studio
         }
 
 
-        public async Task UpdateProgramLogItemAsync(int id, string newStatus, string newDescription)
-        {
-            var programLogItem = await DbContext.Log.FindAsync(id);
+        //public async Task UpdateProgramLogItemAsync(int id, string newStatus, string newDescription)
+        //{
+        //    var programLogItem = await DbContext.Log.FindAsync(id);
 
-            if (programLogItem != null)
-            {
-                programLogItem.Status = newStatus;
-                programLogItem.Description = newDescription;
+        //    if (programLogItem != null)
+        //    {
+        //        programLogItem.Status = newStatus;
+        //        programLogItem.Description = newDescription;
 
-                await DbContext.SaveChangesAsync();
-            }
-            else
-            {
-                Log.Error($"ProgramLogItem with ID {id} not found.");
-            }
-        }
+        //        await DbContext.SaveChangesAsync();
+        //    }
+        //    else
+        //    {
+        //        Log.Error($"ProgramLogItem with ID {id} not found.");
+        //    }
+        //}
 
         private static Func<ProgramLogItem, int, string> RowStyleFunc => (x, i) =>
         {
@@ -125,7 +125,22 @@ namespace Audionix.Components.Pages.Studio
         {
             selectedAudioFile = audioFile;
             _open = false;
+
+            if (DbContext.Log.Count() == 0)
+            {
+                if (selectedLogItem == null)
+                {
+                    selectedLogItem = new ProgramLogItem
+                    {
+                        // Initialize with default values
+                        StationId = 1 // Assuming a default station with ID 1 exists
+                    };
+                }
+
+                AddSelectedAudioToLog(1, selectedLogItem);
+            }
         }
+
 
         private bool IsAudioFileSelected => selectedAudioFile != null;
 

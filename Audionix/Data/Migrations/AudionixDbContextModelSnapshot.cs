@@ -155,31 +155,6 @@ namespace Audionix.Data.Migrations
                     b.HasIndex("StationId");
 
                     b.ToTable("Log");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Actual = "15:06:32",
-                            Cart = "Default Cart",
-                            Category = "COMMENT",
-                            Cue = "AutoStart",
-                            Description = "This is a default log entry.",
-                            Device = 1,
-                            Estimated = "15:07:32",
-                            From = "SYSTEM",
-                            Length = "00:00:30",
-                            LogID = 0,
-                            Name = "Default Log Entry",
-                            Passthrough = "None",
-                            Progress = 0.0,
-                            Scheduled = "15:06:32",
-                            Segue = "00:00:05",
-                            States = "isReady",
-                            StationId = 1,
-                            Status = "Initialized",
-                            sID = 1
-                        });
                 });
 
             modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
@@ -308,14 +283,6 @@ namespace Audionix.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Stations");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CallLetters = "Default Station",
-                            Slogan = "Your Default Station"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
