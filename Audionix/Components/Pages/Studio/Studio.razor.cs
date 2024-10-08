@@ -6,6 +6,7 @@ using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components;
 using MudBlazor.Utilities;
+using static ATL.Logging.Log;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -15,27 +16,64 @@ namespace Audionix.Components.Pages.Studio
         private bool _delete = false;
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
+        private string? _selectedAudioFolder;
 
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
         public List<AudioMetadata> DraggedAudioFiles = new();
+        public List<Station> Stations = new();
+        public List<Folder> Folders = new();
+
+        private Station? selectedStation;
+        private Folder? selectedFolder;
 
         [Inject]
         public required AudionixDbContext DbContext { get; set; }
+
+        private async Task LoadStations()
+        {
+            Stations = await DbContext.Stations.ToListAsync();
+        }
+
+        private async Task LoadFolders()
+        {
+            if (selectedStation != null)
+            {
+                Folders = await DbContext.Folders.Where(f => f.StationId == selectedStation.Id).ToListAsync();
+            }
+        }
+
+        private async Task LoadAudioFiles()
+        {
+            if (selectedFolder != null)
+            {
+                AudioFiles = await DbContext.AudioFiles.Where(af => af.Folder == selectedFolder.Name).ToListAsync();
+            }
+        }
+
+        private async Task OnStationChanged(Station station)
+        {
+            selectedStation = station;
+            selectedFolder = null;
+            AudioFiles = new List<AudioMetadata>();
+            await LoadFolders();
+        }
+
+        private async Task OnFolderChanged(Folder folder)
+        {
+            selectedFolder = folder;
+            await LoadAudioFiles();
+        }
 
         private async Task LoadTodaysLog()
         {
             Log.Information("--- Studio - LoadTodaysLog() -- Loading Today's Log");
 
-            ProgramLog = await DbContext.Log.ToListAsync();
+            ProgramLog = await DbContext.Log
+                .OrderBy(li => li.LogID)
+                .ToListAsync();
         }
 
-        private async Task LoadAudioFiles()
-        {
-            Log.Information("--- Studio - LoadAudioFiles() -- Loading Audio Files");
-
-            AudioFiles = await DbContext.AudioFiles.ToListAsync();
-        }
 
         public async Task UpdateProgramLogItemAsync(int id, string newStatus, string newDescription)
         {
@@ -69,8 +107,8 @@ namespace Audionix.Components.Pages.Studio
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Studio - OnInitializedAsync() -- Initializing Studio Page");
+            await LoadStations();
             await LoadTodaysLog();
-            await LoadAudioFiles();
             StateHasChanged();
         }
 
@@ -91,40 +129,50 @@ namespace Audionix.Components.Pages.Studio
 
         private bool IsAudioFileSelected => selectedAudioFile != null;
 
-
         private void SelectLogItem(ProgramLogItem logItem)
         {
             selectedLogItem = logItem;
         }
 
-        public async Task AddSelectedAudioToLog(ProgramLogItem logItem, int index)
+        public async Task AddSelectedAudioToLog(int index, ProgramLogItem logItem)
         {
             if (selectedAudioFile != null)
             {
+                // Shift existing items' LogID
+                var itemsToShift = await DbContext.Log
+                    .Where(li => li.LogID >= index)
+                    .ToListAsync();
+
+                foreach (var item in itemsToShift)
+                {
+                    item.LogID++;
+                }
+
                 var newLogItem = new ProgramLogItem
                 {
-                    Name = selectedAudioFile.Title,
+                    Title = selectedAudioFile.Title,
+                    Artist = selectedAudioFile.Artist,
+                    Name = selectedAudioFile.Filename,
                     Description = selectedAudioFile.Artist,
                     Category = "AUDIO",
                     Progress = 0.0,
                     Scheduled = DateTime.Now.ToString("HH:mm:ss"),
                     Actual = DateTime.Now.ToString("HH:mm:ss"),
                     Status = "PLAYING",
-                    StationId = logItem.StationId
+                    StationId = logItem.StationId,
+                    LogID = index
                 };
-
-                // Insert the new log item at the specified index
-                ProgramLog.Insert(index, newLogItem);
 
                 await DbContext.Log.AddAsync(newLogItem);
                 await DbContext.SaveChangesAsync();
+
+                await LoadTodaysLog();
 
                 // Update the UI without reloading the entire log
                 StateHasChanged();
                 selectedAudioFile = null;
             }
         }
-
 
 
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)

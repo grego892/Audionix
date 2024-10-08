@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(AudionixDbContext))]
-    [Migration("20241006155804_AddStationIdToProgramLogItem")]
-    partial class AddStationIdToProgramLogItem
+    [Migration("20241008200632_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,6 +93,9 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("Actual")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Artist")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Cart")
                         .HasColumnType("TEXT");
 
@@ -116,6 +119,9 @@ namespace Audionix.Data.Migrations
 
                     b.Property<string>("Length")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("LogID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -141,6 +147,9 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("sID")
                         .HasColumnType("INTEGER");
 
@@ -154,19 +163,20 @@ namespace Audionix.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Actual = "10:58:04",
+                            Actual = "15:06:32",
                             Cart = "Default Cart",
                             Category = "COMMENT",
                             Cue = "AutoStart",
                             Description = "This is a default log entry.",
                             Device = 1,
-                            Estimated = "10:59:04",
+                            Estimated = "15:07:32",
                             From = "SYSTEM",
                             Length = "00:00:30",
+                            LogID = 0,
                             Name = "Default Log Entry",
                             Passthrough = "None",
                             Progress = 0.0,
-                            Scheduled = "10:58:04",
+                            Scheduled = "15:06:32",
                             Segue = "00:00:05",
                             States = "isReady",
                             StationId = 1,
@@ -301,6 +311,14 @@ namespace Audionix.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Stations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CallLetters = "Default Station",
+                            Slogan = "Your Default Station"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

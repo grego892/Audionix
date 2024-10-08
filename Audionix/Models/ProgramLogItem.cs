@@ -5,8 +5,11 @@ namespace Audionix.Data.StationLog
     public class ProgramLogItem
     {
         public int Id { get; set; }
+        public int LogID { get; set; }
         public string? Status { get; set; }
         public string? Cue { get; set; }
+        public string? Title { get; set; }
+        public string? Artist { get; set; }
         public string? Scheduled { get; set; }
         public string? Actual { get; set; }
         public string? Name { get; set; }

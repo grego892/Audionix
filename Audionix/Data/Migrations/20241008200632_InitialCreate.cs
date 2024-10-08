@@ -254,6 +254,55 @@ namespace Audionix.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Log",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LogID = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<string>(type: "TEXT", nullable: true),
+                    Cue = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Artist = table.Column<string>(type: "TEXT", nullable: true),
+                    Scheduled = table.Column<string>(type: "TEXT", nullable: true),
+                    Actual = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Cart = table.Column<string>(type: "TEXT", nullable: true),
+                    Length = table.Column<string>(type: "TEXT", nullable: true),
+                    Segue = table.Column<string>(type: "TEXT", nullable: true),
+                    Category = table.Column<string>(type: "TEXT", nullable: true),
+                    From = table.Column<string>(type: "TEXT", nullable: true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Passthrough = table.Column<string>(type: "TEXT", nullable: true),
+                    States = table.Column<string>(type: "TEXT", nullable: true),
+                    Device = table.Column<int>(type: "INTEGER", nullable: true),
+                    sID = table.Column<int>(type: "INTEGER", nullable: true),
+                    Estimated = table.Column<string>(type: "TEXT", nullable: true),
+                    Progress = table.Column<double>(type: "REAL", nullable: false),
+                    StationId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Log", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Log_Stations_StationId",
+                        column: x => x.StationId,
+                        principalTable: "Stations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Stations",
+                columns: new[] { "Id", "CallLetters", "Slogan" },
+                values: new object[] { 1, "Default Station", "Your Default Station" });
+
+            migrationBuilder.InsertData(
+                table: "Log",
+                columns: new[] { "Id", "Actual", "Artist", "Cart", "Category", "Cue", "Description", "Device", "Estimated", "From", "Length", "LogID", "Name", "Passthrough", "Progress", "Scheduled", "Segue", "States", "StationId", "Status", "Title", "sID" },
+                values: new object[] { 1, "15:06:32", null, "Default Cart", "COMMENT", "AutoStart", "This is a default log entry.", 1, "15:07:32", "SYSTEM", "00:00:30", 0, "Default Log Entry", "None", 0.0, "15:06:32", "00:00:05", "isReady", 1, "Initialized", null, 1 });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -302,6 +351,11 @@ namespace Audionix.Data.Migrations
                 column: "StationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Log_StationId",
+                table: "Log",
+                column: "StationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MusicPatternData_MusicPatternId",
                 table: "MusicPatternData",
                 column: "MusicPatternId");
@@ -330,6 +384,9 @@ namespace Audionix.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Folders");
+
+            migrationBuilder.DropTable(
+                name: "Log");
 
             migrationBuilder.DropTable(
                 name: "MusicPatternData");

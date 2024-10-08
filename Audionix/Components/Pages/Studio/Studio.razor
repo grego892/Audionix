@@ -4,57 +4,74 @@
 <PageTitle>Live Studio</PageTitle>
 
 <MudPaper>
-    <MudToolBar Class="ma-1" Dense="false">
+    <MudToolBar Class="ma-1" Dense="false" Variant="Variant.Outline">
         <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDrawer">Insert</MudButton>
         <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
     </MudToolBar>
 </MudPaper>
 
-<MudPaper Class="pl-4">
-    <MudDrawerContainer Class="mud-height-full">
-        <MudDrawer @bind-Open="@_open" Elevation="1" Variant="DrawerVariant.Temporary" OverlayAutoClose="true" Width="400px" Anchor="Anchor.Right" Color="Color.Primary">
-            <MudDrawerHeader>
-                <MudText Typo="Typo.h6">Add Audio</MudText>
-            </MudDrawerHeader>
+<MudPaper >
+    <MudDrawerContainer >
+        <MudDrawer @bind-Open="@_open" Variant="DrawerVariant.Temporary" OverlayAutoClose="true" Width="400px" Anchor="Anchor.Right" Color="Color.Default">
+            <MudPaper>
+                <MudDrawerHeader>
+                    <MudText Typo="Typo.h6">Add Audio</MudText>
+                </MudDrawerHeader>
 
-            <MudList T="string">
-                @foreach (var audioFile in AudioFiles)
-                {
-                    <MudListItem Class="ma-1" @onclick="() => SelectAudioFile(audioFile)">
-                        @audioFile.Title - @audioFile.Artist
-                    </MudListItem>
-                }
-            </MudList>
+                <MudSelect Class="pl-1 pr-1" Margin="Margin.Dense" T="Station" Label="Stations" Value="selectedStation" Variant="Variant.Outlined" ValueChanged="OnStationChanged">
+                    @foreach (var station in Stations)
+                    {
+                        <MudSelectItem Value="@station">@station.CallLetters</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect Class="pl-1 pr-1" Margin="Margin.Dense" T="Folder" Label="Folders" Value="selectedFolder" Variant="Variant.Outlined" ValueChanged="OnFolderChanged">
+                    @foreach (var folder in Folders)
+                    {
+                        <MudSelectItem Value="@folder">@folder.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudList T="string" Class="">
+                    @foreach (var audioFile in AudioFiles)
+                    {
+                        <MudListItem Class="" @onclick="() => SelectAudioFile(audioFile)">
+                            @audioFile.Title - @audioFile.Artist
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
         </MudDrawer>
     </MudDrawerContainer>
 
     <MudDataGrid Items="ProgramLog"
                  RowStyleFunc="@RowStyleFunc"
-                 SortMode="SortMode.None"
+                 SortMode="SortMode.Single"
                  FixedHeader="true"
                  Virtualize="true"
                  ShowMenuIcon="false"
                  Dense="true"
                  Height="90vh">
         <Columns>
-            <PropertyColumn Property="x => x.Id" CellStyle="width: 5%;" />
-            <PropertyColumn Property="x => x.Cue" CellStyle="width: 5%;" />
-            <PropertyColumn Property="x => x.Description" CellStyle="width: 45%;" />
-            <PropertyColumn Property="x => x.Scheduled" CellStyle="width: 10%;" />
-            <PropertyColumn Property="x => x.Name" CellStyle="width: 15%;" />
-            <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" />
-            <TemplateColumn CellStyle="width: 10%;">
+            <PropertyColumn Property="x => x.LogID" CellStyle="width: 5%;" SortBy="@(x => x.LogID)" />
+            <PropertyColumn Property="x => x.Cue" CellStyle="width: 5%;" Sortable="false" />
+            <PropertyColumn Property="x => x.Title" CellStyle="width: 15%;" Sortable="false" />
+            <PropertyColumn Property="x => x.Artist" CellStyle="width: 15%;" Sortable="false" />
+            <PropertyColumn Property="x => x.Name" CellStyle="width: 15%;" Sortable="false" />
+            <PropertyColumn Property="x => x.Scheduled" CellStyle="width: 10%;" Sortable="false" />
+            <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" Sortable="false" />
+            <TemplateColumn CellStyle="width: 10%;" Sortable="false" >
                 <CellTemplate>
                     <MudProgressLinear Variant="Variant.Determinate" Color="Color.Success" Size="Size.Large" Value="50" />
                 </CellTemplate>
             </TemplateColumn>
-            <PropertyColumn Property="x => x.Segue" CellStyle="width: 10%;" />
-            <TemplateColumn CellStyle="width: 5%;">
+            <PropertyColumn Property="x => x.Segue" CellStyle="width: 10%;" Sortable="false" />
+            <TemplateColumn CellStyle="width: 5%;" Sortable="false">
                 <CellTemplate Context="cellContext">
-                    <MudButton Variant="Variant.Outlined" Disabled="@(!IsAudioFileSelected)" OnClick="() => AddSelectedAudioToLog(cellContext.Item, ProgramLog.IndexOf(cellContext.Item))">Add</MudButton>
+                    <MudButton Variant="Variant.Outlined" Disabled="@(!IsAudioFileSelected)" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogID, cellContext.Item)">Add</MudButton>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn CellStyle="width: 5%;">
+            <TemplateColumn CellStyle="width: 5%;" Sortable="false">
                 <CellTemplate Context="cellContext">
                     <MudButton Variant="Variant.Outlined" Disabled="@(!_delete)" OnClick="() => DeleteSelectedLogItem(cellContext.Item)">Delete</MudButton>
                 </CellTemplate>

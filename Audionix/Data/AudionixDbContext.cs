@@ -34,6 +34,16 @@ namespace Audionix.Models
                 .WithMany(s => s.ProgramLogItems)
                 .HasForeignKey(pl => pl.StationId);
 
+            // Seed data for Station
+            modelBuilder.Entity<Station>().HasData(
+                new Station
+                {
+                    Id = 1,
+                    CallLetters = "Default Station",
+                    Slogan = "Your Default Station"
+                }
+            );
+
             // Seed data for ProgramLogItem
             modelBuilder.Entity<ProgramLogItem>().HasData(
                 new ProgramLogItem
