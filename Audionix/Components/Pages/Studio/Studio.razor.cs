@@ -30,6 +30,21 @@ namespace Audionix.Components.Pages.Studio
         [Inject]
         public required AudionixDbContext DbContext { get; set; }
 
+        protected override async Task OnInitializedAsync()
+        {
+            Log.Information("--- Studio - OnInitializedAsync() -- Initializing Studio Page");
+            await LoadStations();
+            await LoadTodaysLog();
+            StateHasChanged();
+        }
+        private void ToggleInsertDrawer()
+        {
+            _open = !_open;
+        }
+        private void ToggleDelete()
+        {
+            _delete = !_delete;
+        }
         private async Task LoadStations()
         {
             Stations = await DbContext.Stations.ToListAsync();
@@ -57,6 +72,7 @@ namespace Audionix.Components.Pages.Studio
             selectedFolder = null;
             AudioFiles = new List<AudioMetadata>();
             await LoadFolders();
+            await LoadTodaysLog(); // Reload the log for the selected station
         }
 
         private async Task OnFolderChanged(Folder folder)
@@ -69,28 +85,18 @@ namespace Audionix.Components.Pages.Studio
         {
             Log.Information("--- Studio - LoadTodaysLog() -- Loading Today's Log");
 
-            ProgramLog = await DbContext.Log
-                .OrderBy(li => li.LogID)
-                .ToListAsync();
+            if (selectedStation != null)
+            {
+                ProgramLog = await DbContext.Log
+                    .Where(li => li.StationId == selectedStation.Id)
+                    .OrderBy(li => li.LogID)
+                    .ToListAsync();
+            }
+            else
+            {
+                ProgramLog = new List<ProgramLogItem>();
+            }
         }
-
-
-        //public async Task UpdateProgramLogItemAsync(int id, string newStatus, string newDescription)
-        //{
-        //    var programLogItem = await DbContext.Log.FindAsync(id);
-
-        //    if (programLogItem != null)
-        //    {
-        //        programLogItem.Status = newStatus;
-        //        programLogItem.Description = newDescription;
-
-        //        await DbContext.SaveChangesAsync();
-        //    }
-        //    else
-        //    {
-        //        Log.Error($"ProgramLogItem with ID {id} not found.");
-        //    }
-        //}
 
         private static Func<ProgramLogItem, int, string> RowStyleFunc => (x, i) =>
         {
@@ -104,42 +110,31 @@ namespace Audionix.Components.Pages.Studio
             };
         };
 
-        protected override async Task OnInitializedAsync()
-        {
-            Log.Information("--- Studio - OnInitializedAsync() -- Initializing Studio Page");
-            await LoadStations();
-            await LoadTodaysLog();
-            StateHasChanged();
-        }
-
-        private void ToggleDrawer()
-        {
-            _open = !_open;
-        }
-        private void ToggleDelete()
-        {
-            _delete = !_delete;
-        }
-
-        private void SelectAudioFile(AudioMetadata audioFile)
+        private async Task SelectAudioFile(AudioMetadata audioFile)
         {
             selectedAudioFile = audioFile;
             _open = false;
 
-            if (DbContext.Log.Count() == 0)
+            if (selectedStation != null)
             {
-                if (selectedLogItem == null)
-                {
-                    selectedLogItem = new ProgramLogItem
-                    {
-                        // Initialize with default values
-                        StationId = 1 // Assuming a default station with ID 1 exists
-                    };
-                }
+                bool hasLogEntries = await DbContext.Log.AnyAsync(li => li.StationId == selectedStation.Id);
 
-                AddSelectedAudioToLog(1, selectedLogItem);
+                if (!hasLogEntries)
+                {
+                    if (selectedLogItem == null)
+                    {
+                        selectedLogItem = new ProgramLogItem
+                        {
+                            // Initialize with default values
+                            StationId = selectedStation.Id,
+                        };
+                    }
+
+                    await AddSelectedAudioToLog(1, selectedLogItem);
+                }
             }
         }
+
 
 
         private bool IsAudioFileSelected => selectedAudioFile != null;

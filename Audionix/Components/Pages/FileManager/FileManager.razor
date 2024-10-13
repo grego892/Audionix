@@ -23,11 +23,11 @@
                 }
             </MudSelect>
 
-            <MudPaper Width="150px">   @* Class="pl-1 pr-1" *@
+            <MudPaper Width="150px" Class="pt-2">
                 <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => GetFolderFileList()">Refresh</MudButton>
             </MudPaper>
 
-            <MudPaper Width="250px"> @* Class="pl-1 pr-1" *@
+            <MudPaper Width="250px" Class="pt-2">
                 <MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept=".wav" FilesChanged="UploadFiles" MaximumFileCount="100">
                     <ActivatorContent>
                         <MudButton HtmlTag="label"
@@ -54,8 +54,11 @@
                     </div>
                 }
             </MudPaper>
-
-        </MudStack>
+            <MudSpacer />
+            <MudPaper Width="250px" Class="pt-1 pt-2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="SongdataPressed">Song Data</MudButton>
+                </MudPaper>
+            </MudStack>
     </MudPaper>
 
     @if (!string.IsNullOrEmpty(SelectedStation) && filesInDirectory.Any())
@@ -79,33 +82,50 @@
                             <MudText>@TimeSpan.FromSeconds(context.Item.Duration).ToString(@"mm\:ss")</MudText>
                         </CellTemplate>
                     </TemplateColumn>
-                    <PropertyColumn Property="x => x.Filename" />
-                    <TemplateColumn>
-                        <HeaderTemplate>
-                            <MudText>Intro</MudText>
-                        </HeaderTemplate>
-                        <CellTemplate>
-                            <MudText>@(((double)context.Item.Intro / 1000).ToString("F1"))</MudText>
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <TemplateColumn>
-                        <HeaderTemplate>
-                            <MudText>Segue</MudText>
-                        </HeaderTemplate>
-                        <CellTemplate>
-                            <MudText>@(((double)context.Item.Segue / 1000).ToString("F1"))</MudText>
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <TemplateColumn>
-                        <CellTemplate>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => EditAudio(context.Item)">Edit</MudButton>
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <TemplateColumn>
-                        <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteAudioAsync(context.Item)" />
-                        </CellTemplate>
-                    </TemplateColumn>
+                    @if (isSongdataEnabled)
+                    {
+                        <PropertyColumn Property="x => x.Filename" />
+                        <TemplateColumn>
+                            <HeaderTemplate>
+                                <MudText>Intro</MudText>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudText>@(((double)context.Item.Intro / 1000).ToString("F1"))</MudText>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn>
+                            <HeaderTemplate>
+                                <MudText>Segue</MudText>
+                            </HeaderTemplate>
+                            <CellTemplate>
+                                <MudText>@(((double)context.Item.Segue / 1000).ToString("F1"))</MudText>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn>
+                            <CellTemplate>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => EditAudio(context.Item)">Edit</MudButton>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn>
+                            <CellTemplate>
+                                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteAudioAsync(context.Item)" />
+                            </CellTemplate>
+                        </TemplateColumn>
+                    }
+                    else
+                    {
+                        <TemplateColumn>
+                            <CellTemplate>
+                                <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="context.Item.SelectedCategory" ValueChanged="@(async (e) => await SongCategoryChanged(context.Item, e))" Variant="Variant.Outlined">
+                                    @foreach (var category in categories ?? Enumerable.Empty<MusicCategory>())
+                                    {
+                                        <MudSelectItem Value="@category.Category" />
+                                    }
+                                </MudSelect>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                    }
                 </Columns>
             </MudDataGrid>
         </MudPaper>

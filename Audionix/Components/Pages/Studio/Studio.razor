@@ -4,9 +4,19 @@
 <PageTitle>Live Studio</PageTitle>
 
 <MudPaper>
-    <MudToolBar Class="ma-1" Dense="false" Variant="Variant.Outline">
-        <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDrawer">Insert</MudButton>
-        <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
+    <MudToolBar Dense="false" Variant="Variant.Outline">
+        <MudPaper Width="200px">
+            <MudSelect Margin="Margin.Dense" T="Station" Label="Station" Value="selectedStation" Variant="Variant.Outlined" ValueChanged="OnStationChanged">
+                @foreach (var station in Stations)
+                {
+                    <MudSelectItem Value="@station">@station.CallLetters</MudSelectItem>
+                }
+            </MudSelect>
+        </MudPaper>
+        <MudPaper Class="mx-auto">
+            <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
+            <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
+        </MudPaper>
     </MudToolBar>
 </MudPaper>
 
@@ -17,13 +27,6 @@
                 <MudDrawerHeader>
                     <MudText Typo="Typo.h6">Add Audio</MudText>
                 </MudDrawerHeader>
-
-                <MudSelect Class="pl-1 pr-1" Margin="Margin.Dense" T="Station" Label="Stations" Value="selectedStation" Variant="Variant.Outlined" ValueChanged="OnStationChanged">
-                    @foreach (var station in Stations)
-                    {
-                        <MudSelectItem Value="@station">@station.CallLetters</MudSelectItem>
-                    }
-                </MudSelect>
 
                 <MudSelect Class="pl-1 pr-1" Margin="Margin.Dense" T="Folder" Label="Folders" Value="selectedFolder" Variant="Variant.Outlined" ValueChanged="OnFolderChanged">
                     @foreach (var folder in Folders)
@@ -60,7 +63,7 @@
             <PropertyColumn Property="x => x.Name" CellStyle="width: 15%;" Sortable="false" />
             <PropertyColumn Property="x => x.Scheduled" CellStyle="width: 10%;" Sortable="false" />
             <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" Sortable="false" />
-            <TemplateColumn CellStyle="width: 10%;" Sortable="false" >
+            <TemplateColumn CellStyle="width: 10%;" Sortable="false">
                 <CellTemplate>
                     <MudProgressLinear Variant="Variant.Determinate" Color="Color.Success" Size="Size.Large" Value="50" />
                 </CellTemplate>

@@ -3,6 +3,7 @@ using System;
 using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(AudionixDbContext))]
-    partial class AudionixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241010040816_MusicCategories")]
+    partial class MusicCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -197,9 +200,6 @@ namespace Audionix.Data.Migrations
 
                     b.Property<double>("SegueSeconds")
                         .HasColumnType("REAL");
-
-                    b.Property<string>("SelectedCategory")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("StartDate")
                         .HasColumnType("INTEGER");

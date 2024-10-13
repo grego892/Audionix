@@ -14,6 +14,7 @@ namespace Audionix.Components.Pages.FileManager
     {
         private string selectedStation = string.Empty;
         private string selectedFolder = string.Empty;
+        private string selectedCategory = string.Empty;
         private bool isUploading;
         private int progress;
         private WavesurferPlayer? wavePlayer;
@@ -21,6 +22,8 @@ namespace Audionix.Components.Pages.FileManager
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
         private List<string>? folders;
+        private List<MusicCategory>? categories;
+        private bool isSongdataEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
         [Inject] public AppSettings? AppSettings { get; set; }
@@ -44,7 +47,6 @@ namespace Audionix.Components.Pages.FileManager
                 stations = await DbContext.Stations.AsNoTracking().ToListAsync();
                 filesInDirectory = await DbContext.AudioFiles.AsNoTracking().ToListAsync();
             }
-            //GetFolderFileList();
         }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
@@ -140,9 +142,27 @@ namespace Audionix.Components.Pages.FileManager
                 if (station != null && FileManagerSvc != null)
                 {
                     folders = await FileManagerSvc.GetFoldersForStation(station.Id.ToString());
+                    categories = await DbContext.MusicCategories
+                                                .Where(c => c.Station == station.Id)
+                                                .AsNoTracking()
+                                                .ToListAsync();
                 }
             }
         }
+
+        private void SongdataPressed()
+        {
+            isSongdataEnabled = !isSongdataEnabled;
+        }
+
+        private async Task SongCategoryChanged(AudioMetadata audioMetadata, string newCategory)
+        {
+            audioMetadata.SelectedCategory = newCategory;
+            DbContext?.AudioFiles.Update(audioMetadata);
+            await DbContext?.SaveChangesAsync();
+            Snackbar?.Add("Category updated successfully", Severity.Success);
+        }
+
         public string SelectedFolder
         {
             get => selectedFolder;
