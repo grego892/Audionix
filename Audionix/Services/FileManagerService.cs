@@ -11,10 +11,10 @@ namespace Audionix.Services
     {
         private const int BufferSize = 81920; // 80 KB chunks
         long maxFileSize = 2L * 1024 * 1024 * 1024; // 2 GB
-        private readonly AudionixDbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
         private readonly AppSettings? _appSettings;
 
-        public FileManagerService(AudionixDbContext dbContext, AppSettings? appSettings)
+        public FileManagerService(ApplicationDbContext dbContext, AppSettings? appSettings)
         {
             _dbContext = dbContext;
             _appSettings = appSettings;
@@ -88,7 +88,7 @@ namespace Audionix.Services
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
 
-        public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, AudionixDbContext dbContext, Action getFolderFileList)
+        public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, ApplicationDbContext dbContext, Action getFolderFileList)
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
@@ -106,12 +106,12 @@ namespace Audionix.Services
             getFolderFileList();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
-        public async Task AddFolder(Folder newFolder, Station selectedStation, AudionixDbContext dbContext, ISnackbar snackbar)
+        public async Task AddFolder(Folder newFolder, Station selectedStation, ApplicationDbContext dbContext, ISnackbar snackbar)
         {
             try
             {
                 var existingFolder = await dbContext.Folders
-                    .FirstOrDefaultAsync(f => f.Name == newFolder.Name && f.StationId == selectedStation.Id);
+                    .FirstOrDefaultAsync(f => f.Name == newFolder.Name && f.StationId == selectedStation.StationId);
 
                 if (existingFolder != null)
                 {
@@ -125,7 +125,7 @@ namespace Audionix.Services
 
                     if (newFolder != null && selectedStation != null)
                     {
-                        newFolder.StationId = selectedStation.Id;
+                        newFolder.StationId = selectedStation.StationId;
                         dbContext.Folders.Add(newFolder);
                         await dbContext.SaveChangesAsync();
                     }
@@ -143,7 +143,7 @@ namespace Audionix.Services
             try
             {
                 // Get the station associated with the folder
-                var station = await _dbContext.Stations.FirstOrDefaultAsync(s => s.Id == folder.StationId);
+                var station = await _dbContext.Stations.FirstOrDefaultAsync(s => s.StationId == folder.StationId);
 
                 if (station != null)
                 {
@@ -177,12 +177,18 @@ namespace Audionix.Services
 
         public async Task<List<string>> GetFoldersForStation(string stationId)
         {
+            if (!Guid.TryParse(stationId, out var stationGuid))
+            {
+                throw new ArgumentException("Invalid station ID format", nameof(stationId));
+            }
+
             return await _dbContext.Folders
-                .Where(f => f.StationId == int.Parse(stationId))
+                .Where(f => f.StationId == stationGuid)
                 .Select(f => f.Name)
                 .ToListAsync();
         }
-        public List<AudioMetadata> GetFolderFileList(string selectedStation, string selectedFolder, List<Station>? stations, AudionixDbContext dbContext)
+
+        public List<AudioMetadata> GetFolderFileList(string selectedStation, string selectedFolder, List<Station>? stations, ApplicationDbContext dbContext)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
             var filesInDirectory = new List<AudioMetadata>();
@@ -194,7 +200,7 @@ namespace Audionix.Services
                 {
                     filesInDirectory = dbContext.AudioFiles
                         .AsNoTracking()
-                        .Where(am => am.StationId == station.Id && am.Folder == selectedFolder)
+                        .Where(am => am.StationId == station.StationId && am.Folder == selectedFolder)
                         .ToList();
                 }
             }

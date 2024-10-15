@@ -10,15 +10,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Audionix.Data.Migrations
 {
-    [DbContext(typeof(AudionixDbContext))]
-    [Migration("20241008204259_InitialCreate")]
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20241015195232_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
             modelBuilder.Entity("Audionix.Data.ApplicationUser", b =>
                 {
@@ -84,7 +84,105 @@ namespace Audionix.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Audionix.Data.StationLog.ProgramLogItem", b =>
+            modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Artist")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Duration")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("EndDate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Folder")
+                        .HasColumnType("TEXT");
+
+                    b.Property<short>("Intro")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("IntroSeconds")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool>("NoFade")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ProtectNextIntro")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<short>("Segue")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("SegueSeconds")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("SelectedCategory")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StartDate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StationId");
+
+                    b.ToTable("AudioFiles");
+                });
+
+            modelBuilder.Entity("Audionix.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Audionix.Models.Folder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StationId");
+
+                    b.ToTable("Folders");
+                });
+
+            modelBuilder.Entity("Audionix.Models.ProgramLogItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -141,8 +239,8 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("States")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("StationId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
                         .HasColumnType("TEXT");
@@ -160,122 +258,11 @@ namespace Audionix.Data.Migrations
                     b.ToTable("Log");
                 });
 
-            modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Artist")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Duration")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("EndDate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Filename")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Folder")
-                        .HasColumnType("TEXT");
-
-                    b.Property<short>("Intro")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("IntroSeconds")
-                        .HasColumnType("REAL");
-
-                    b.Property<bool>("NoFade")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ProtectNextIntro")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<short>("Segue")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("SegueSeconds")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("StartDate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("StationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StationId");
-
-                    b.ToTable("AudioFiles");
-                });
-
-            modelBuilder.Entity("Audionix.Models.Folder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StationId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StationId");
-
-                    b.ToTable("Folders");
-                });
-
-            modelBuilder.Entity("Audionix.Models.MusicPattern", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MusicPatterns");
-                });
-
-            modelBuilder.Entity("Audionix.Models.MusicPatternData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Category")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("MusicPatternId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MusicPatternId");
-
-                    b.ToTable("MusicPatternData");
-                });
-
             modelBuilder.Entity("Audionix.Models.Station", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("StationId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CallLetters")
                         .HasColumnType("TEXT");
@@ -283,7 +270,10 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("Slogan")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<int>("StationSortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("StationId");
 
                     b.ToTable("Stations");
                 });
@@ -416,17 +406,6 @@ namespace Audionix.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Audionix.Data.StationLog.ProgramLogItem", b =>
-                {
-                    b.HasOne("Audionix.Models.Station", "Station")
-                        .WithMany("ProgramLogItems")
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Station");
-                });
-
             modelBuilder.Entity("Audionix.Models.AudioMetadata", b =>
                 {
                     b.HasOne("Audionix.Models.Station", "Station")
@@ -449,11 +428,15 @@ namespace Audionix.Data.Migrations
                     b.Navigation("Station");
                 });
 
-            modelBuilder.Entity("Audionix.Models.MusicPatternData", b =>
+            modelBuilder.Entity("Audionix.Models.ProgramLogItem", b =>
                 {
-                    b.HasOne("Audionix.Models.MusicPattern", null)
-                        .WithMany("MusicPatternData")
-                        .HasForeignKey("MusicPatternId");
+                    b.HasOne("Audionix.Models.Station", "Station")
+                        .WithMany("ProgramLogItems")
+                        .HasForeignKey("StationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Station");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -505,11 +488,6 @@ namespace Audionix.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Audionix.Models.MusicPattern", b =>
-                {
-                    b.Navigation("MusicPatternData");
                 });
 
             modelBuilder.Entity("Audionix.Models.Station", b =>

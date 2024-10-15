@@ -101,7 +101,7 @@ void ConfigureAuthentication(WebApplicationBuilder builder)
 void ConfigureIdentity(WebApplicationBuilder builder)
 {
     builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<AudionixDbContext>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 }
@@ -118,7 +118,7 @@ void ConfigureDatabase(WebApplicationBuilder builder)
     }
     Directory.CreateDirectory(databaseDirectory);
     var connectionString = $"Data Source={databasePath}";
-    builder.Services.AddDbContext<AudionixDbContext>(options => options.UseSqlite(connectionString));
+    builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 }
 
 void ConfigureLogger(WebApplicationBuilder builder)
@@ -174,7 +174,7 @@ void MigrateDatabase(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<AudionixDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         try
         {
             dbContext.Database.Migrate();

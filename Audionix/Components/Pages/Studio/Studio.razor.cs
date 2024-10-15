@@ -1,5 +1,4 @@
-﻿using Audionix.Data.StationLog;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using MudBlazor;
 using Serilog;
 using Audionix.Models;
@@ -28,7 +27,7 @@ namespace Audionix.Components.Pages.Studio
         private Folder? selectedFolder;
 
         [Inject]
-        public required AudionixDbContext DbContext { get; set; }
+        public required ApplicationDbContext DbContext { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -54,7 +53,7 @@ namespace Audionix.Components.Pages.Studio
         {
             if (selectedStation != null)
             {
-                Folders = await DbContext.Folders.Where(f => f.StationId == selectedStation.Id).ToListAsync();
+                Folders = await DbContext.Folders.Where(f => f.StationId == selectedStation.StationId).ToListAsync();
             }
         }
 
@@ -88,7 +87,7 @@ namespace Audionix.Components.Pages.Studio
             if (selectedStation != null)
             {
                 ProgramLog = await DbContext.Log
-                    .Where(li => li.StationId == selectedStation.Id)
+                    .Where(li => li.StationId == selectedStation.StationId)
                     .OrderBy(li => li.LogID)
                     .ToListAsync();
             }
@@ -117,7 +116,7 @@ namespace Audionix.Components.Pages.Studio
 
             if (selectedStation != null)
             {
-                bool hasLogEntries = await DbContext.Log.AnyAsync(li => li.StationId == selectedStation.Id);
+                bool hasLogEntries = await DbContext.Log.AnyAsync(li => li.StationId == selectedStation.StationId);
 
                 if (!hasLogEntries)
                 {
@@ -126,7 +125,7 @@ namespace Audionix.Components.Pages.Studio
                         selectedLogItem = new ProgramLogItem
                         {
                             // Initialize with default values
-                            StationId = selectedStation.Id,
+                            StationId = selectedStation.StationId,
                         };
                     }
 

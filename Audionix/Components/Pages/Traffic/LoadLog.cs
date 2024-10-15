@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Audionix.Models;
+using Serilog;
 using System.Xml.Linq;
 
 namespace Audionix.Data.StationLog
