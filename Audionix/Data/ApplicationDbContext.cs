@@ -1,0 +1,45 @@
+using Audionix.Data;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+
+namespace Audionix.Models
+{
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+        public DbSet<Station> Stations { get; set; }
+        public DbSet<AudioMetadata> AudioFiles { get; set; }
+        public DbSet<Folder> Folders { get; set; }
+        public DbSet<ProgramLogItem> Log { get; set; }
+        public DbSet<Category> Categories { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure relationships if necessary
+            modelBuilder.Entity<AudioMetadata>()
+                .HasOne(am => am.Station)
+                .WithMany(s => s.AudioFiles)
+                .HasForeignKey(am => am.StationId);
+
+            modelBuilder.Entity<Folder>()
+                .HasOne(f => f.Station)
+                .WithMany(s => s.Folders)
+                .HasForeignKey(f => f.StationId);
+
+            modelBuilder.Entity<ProgramLogItem>()
+                .HasOne(pl => pl.Station)
+                .WithMany(s => s.ProgramLogItems)
+                .HasForeignKey(pl => pl.StationId);
+
+            modelBuilder.Entity<AudioMetadata>()
+                .HasOne(pl => pl.Station)
+                .WithMany(s => s.AudioFiles)
+                .HasForeignKey(pl => pl.StationId);
+        }
+    }
+}
+

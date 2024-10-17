@@ -7,8 +7,8 @@ namespace Audionix.Services
 {
     public class AudioMetadataService
     {
-        private readonly AudionixDbContext _dbContext;
-        public AudioMetadataService(AudionixDbContext dbContext)
+        private readonly ApplicationDbContext _dbContext;
+        public AudioMetadataService(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -83,7 +83,7 @@ namespace Audionix.Services
             var station = _dbContext.Stations.AsNoTracking().FirstOrDefault(s => s.CallLetters == selectedStation);
             if (station != null)
             {
-                audioMetadataForDb.StationId = station.Id;
+                audioMetadataForDb.StationId = station.StationId;
             }
             else
             {

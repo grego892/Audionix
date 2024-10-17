@@ -117,9 +117,9 @@
                         <TemplateColumn>
                             <CellTemplate>
                                 <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="context.Item.SelectedCategory" ValueChanged="@(async (e) => await SongCategoryChanged(context.Item, e))" Variant="Variant.Outlined">
-                                    @foreach (var category in categories ?? Enumerable.Empty<MusicCategory>())
+                                    @foreach (var category in categories ?? Enumerable.Empty<Category>())
                                     {
-                                        <MudSelectItem Value="@category.Category" />
+                                        <MudSelectItem Value="@category.CategoryName" />
                                     }
                                 </MudSelect>
                             </CellTemplate>

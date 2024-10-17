@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using WavesurferBlazorWrapper;
-using System.Threading.Tasks;
 using MudBlazor;
 
 namespace Audionix.Components.Pages.FileManager
@@ -22,14 +21,14 @@ namespace Audionix.Components.Pages.FileManager
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
         private List<string>? folders;
-        private List<MusicCategory>? categories;
+        private List<Category>? categories;
         private bool isSongdataEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
         [Inject] public AppSettings? AppSettings { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
-        [Inject] public AudionixDbContext? DbContext { get; set; }
+        [Inject] public ApplicationDbContext? DbContext { get; set; }
         [Inject] FileManagerService? FileManagerService { get; set; }
         [Inject] ISnackbar? Snackbar { get; set; }
 
@@ -141,9 +140,9 @@ namespace Audionix.Components.Pages.FileManager
                 var station = stations?.FirstOrDefault(s => s.CallLetters == value);
                 if (station != null && FileManagerSvc != null)
                 {
-                    folders = await FileManagerSvc.GetFoldersForStation(station.Id.ToString());
-                    categories = await DbContext.MusicCategories
-                                                .Where(c => c.Station == station.Id)
+                    folders = await FileManagerSvc.GetFoldersForStation(station.StationId.ToString());
+                    categories = await DbContext.Categories
+                                                .Where(c => c.StationId == station.StationId)
                                                 .AsNoTracking()
                                                 .ToListAsync();
                 }

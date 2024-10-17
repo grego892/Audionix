@@ -16,7 +16,7 @@
         public double SegueSeconds { get; set; } = 0;
         public double Duration { get; set; } = 0;
 
-        public int StationId { get; set; }
+        public Guid StationId { get; set; }
         public Station? Station { get; set; }
         public string? Folder { get; set; }
 

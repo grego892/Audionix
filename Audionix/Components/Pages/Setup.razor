@@ -3,7 +3,7 @@
 @using System.Net.Http.Json
 @using Audionix.Data
 @using Audionix.Models
-@inject AudionixDbContext DbContext
+@inject ApplicationDbContext DbContext
 @inject ISnackbar snackbar
 @inject NavigationManager NavigationManager
 @inject AppSettings? AppSettings
@@ -34,8 +34,7 @@
     <MudCard Outlined="true" Class="ma-8" Elevation="25">
         <MudCardContent>
             <MudText>Stations</MudText>
-            <MudTable 
-                Items="@DbContext.Stations"
+            <MudTable Items="@DbContext.Stations.OrderBy(s => s.StationSortOrder)"
                 ReadOnly=false
                 Dense=true
                 Bordered=true
@@ -48,12 +47,14 @@
                     <MudTh/>
                 </HeaderContent>
                 <RowTemplate>
-                    @if (context.Id == StationEditing)
+                    @if (context.StationId == StationEditing)
                     {
-                    <MudTd DataLabel="Id">
-                        <MudTextField @bind-Value="@context.Id" Label="Id" Variant="Variant.Outlined" Margin="Margin.Dense" ></MudTextField>
+                    <MudTd>
+                        <MudStack Row="true">
+                            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationUp(@context))">Up</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationDown(@context))">Down</MudButton>
+                        </MudStack>
                     </MudTd>
-
                     <MudTd DataLabel="CallLetters">
                         <MudTextField @bind-Value="@context.CallLetters" Label="Call Letters" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                     </MudTd>
@@ -73,9 +74,9 @@
                         <MudButton Variant="Variant.Outlined" Disabled="true">Delete</MudButton>
                     </MudTd>
                     }
-                    else if (StationEditing != -1)
+                    else if (StationEditing != Guid.Empty)
                     {
-                        <MudTd DataLabel="Id">@context.Id</MudTd>
+                        <MudTd DataLabel="Id">@context.StationSortOrder</MudTd>
                         <MudTd DataLabel="CallLetters">@context.CallLetters</MudTd>
                         <MudTd DataLabel="Slogan">@context.Slogan</MudTd>                        
                         <MudTd>
@@ -87,7 +88,7 @@
                         </MudTd>
                     } else 
                     {
-                        <MudTd DataLabel="Id">@context.Id</MudTd>
+                        <MudTd DataLabel="Id">@context.StationSortOrder</MudTd>
                         <MudTd DataLabel="CallLetters">@context.CallLetters</MudTd>
                         <MudTd DataLabel="Slogan">@context.Slogan</MudTd>
                         <MudTd>
@@ -102,7 +103,6 @@
         </MudCardContent>
 
         <MudCardActions>
-            <MudTextField @bind-Value="@newStation.Id" Label="Station Number" Variant="Variant.Outlined"></MudTextField>
             <MudTextField @bind-Value="@newStation.CallLetters" Label="Call Letters" Variant="Variant.Outlined"></MudTextField>
             <MudTextField @bind-Value="@newStation.Slogan" Label="Slogan" Variant="Variant.Outlined"></MudTextField>
             <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddStation">Add Station</MudButton>
