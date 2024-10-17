@@ -1,6 +1,4 @@
-﻿using Audionix.Models;
-
-namespace Audionix.Data.StationLog
+﻿namespace Audionix.Models
 {
     public class ProgramLogItem
     {
@@ -27,7 +25,7 @@ namespace Audionix.Data.StationLog
         public double Progress { get; set; }
 
         // Foreign key to Station
-        public int StationId { get; set; }
+        public Guid StationId { get; set; }
         public Station? Station { get; set; }
     }
 

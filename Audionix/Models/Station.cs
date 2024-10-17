@@ -1,25 +1,30 @@
-﻿using Audionix.Data.StationLog;
-
-namespace Audionix.Models
+﻿namespace Audionix.Models
 {
     public class Station
     {
-        public int Id { get; set; }
+        public Guid StationId { get; set; } // Immutable Identifier
+        public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
         public ICollection<AudioMetadata>? AudioFiles { get; set; }
         public ICollection<Folder>? Folders { get; set; }
         public ICollection<ProgramLogItem>? ProgramLogItems { get; set; } // Navigation property
+        public Station()
+        {
+            StationId = Guid.NewGuid(); // Automatically generate a new GUID
+        }
 
         public Station DeepCopy()
         {
             return new Station
             {
-                Id = this.Id,
+                StationId = this.StationId,
+                StationSortOrder = this.StationSortOrder,
                 CallLetters = this.CallLetters,
                 Slogan = this.Slogan,
                 AudioFiles = this.AudioFiles?.Select(af => new AudioMetadata
                 {
+                    StationId = af.StationId,
                     Id = af.Id,
                     Filename = af.Filename,
                     Title = af.Title,
@@ -33,19 +38,19 @@ namespace Audionix.Models
                     IntroSeconds = af.IntroSeconds,
                     SegueSeconds = af.SegueSeconds,
                     Duration = af.Duration,
-                    StationId = af.StationId,
                     Station = af.Station,
                     Folder = af.Folder
                 }).ToList(),
                 Folders = this.Folders?.Select(f => new Folder
                 {
+                    StationId = f.StationId,
                     Id = f.Id,
                     Name = f.Name,
-                    StationId = f.StationId,
                     Station = f.Station
                 }).ToList(),
                 ProgramLogItems = this.ProgramLogItems?.Select(pl => new ProgramLogItem
                 {
+                    StationId = pl.StationId,
                     Id = pl.Id,
                     Status = pl.Status,
                     Cue = pl.Cue,
@@ -64,7 +69,6 @@ namespace Audionix.Models
                     sID = pl.sID,
                     Estimated = pl.Estimated,
                     Progress = pl.Progress,
-                    StationId = pl.StationId,
                     Station = pl.Station
                 }).ToList()
             };
