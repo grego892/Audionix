@@ -51,6 +51,23 @@ namespace Audionix.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+<<<<<<<< HEAD:Audionix/Data/Migrations/20241017025345_InitialCreate.cs
+========
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CategoryName = table.Column<string>(type: "TEXT", nullable: true),
+                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+>>>>>>>> a7d6ade3e70096fa164a63474e6011ee77791e26:Audionix/Data/Migrations/20241015195232_InitialCreate.cs
                 name: "Stations",
                 columns: table => new
                 {
@@ -62,6 +79,7 @@ namespace Audionix.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Stations", x => x.StationId);
+<<<<<<<< HEAD:Audionix/Data/Migrations/20241017025345_InitialCreate.cs
                 });
 
             migrationBuilder.CreateTable(
@@ -76,6 +94,8 @@ namespace Audionix.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Template", x => x.Id);
+========
+>>>>>>>> a7d6ade3e70096fa164a63474e6011ee77791e26:Audionix/Data/Migrations/20241015195232_InitialCreate.cs
                 });
 
             migrationBuilder.CreateTable(
@@ -391,9 +411,12 @@ namespace Audionix.Data.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
+<<<<<<<< HEAD:Audionix/Data/Migrations/20241017025345_InitialCreate.cs
                 name: "Template");
 
             migrationBuilder.DropTable(
+========
+>>>>>>>> a7d6ade3e70096fa164a63474e6011ee77791e26:Audionix/Data/Migrations/20241015195232_InitialCreate.cs
                 name: "Stations");
         }
     }

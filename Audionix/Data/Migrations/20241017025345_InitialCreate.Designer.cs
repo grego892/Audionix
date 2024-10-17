@@ -11,7 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
+<<<<<<<< HEAD:Audionix/Data/Migrations/20241017025345_InitialCreate.Designer.cs
     [Migration("20241017025345_InitialCreate")]
+========
+    [Migration("20241015195232_InitialCreate")]
+>>>>>>>> a7d6ade3e70096fa164a63474e6011ee77791e26:Audionix/Data/Migrations/20241015195232_InitialCreate.Designer.cs
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -157,6 +161,7 @@ namespace Audionix.Data.Migrations
                     b.Property<Guid>("StationId")
                         .HasColumnType("TEXT");
 
+<<<<<<<< HEAD:Audionix/Data/Migrations/20241017025345_InitialCreate.Designer.cs
                     b.Property<int?>("TemplateId")
                         .HasColumnType("INTEGER");
 
@@ -164,6 +169,10 @@ namespace Audionix.Data.Migrations
 
                     b.HasIndex("TemplateId");
 
+========
+                    b.HasKey("Id");
+
+>>>>>>>> a7d6ade3e70096fa164a63474e6011ee77791e26:Audionix/Data/Migrations/20241015195232_InitialCreate.Designer.cs
                     b.ToTable("Categories");
                 });
 
