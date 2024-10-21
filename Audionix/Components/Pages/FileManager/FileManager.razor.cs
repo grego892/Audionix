@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using WavesurferBlazorWrapper;
 using MudBlazor;
+using Audionix.Models.MusicSchedule;
 
 namespace Audionix.Components.Pages.FileManager
 {

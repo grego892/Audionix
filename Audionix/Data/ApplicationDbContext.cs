@@ -1,7 +1,7 @@
 using Audionix.Data;
+using Audionix.Models.MusicSchedule;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Audionix.Models
 {
@@ -14,6 +14,8 @@ namespace Audionix.Models
         public DbSet<Folder> Folders { get; set; }
         public DbSet<ProgramLogItem> Log { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Template> Templates { get; set; }
+        public DbSet<Grid> Grids { get; set; } // Add this line
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,7 +41,10 @@ namespace Audionix.Models
                 .HasOne(pl => pl.Station)
                 .WithMany(s => s.AudioFiles)
                 .HasForeignKey(pl => pl.StationId);
+
+            // Configure Grid entity if necessary
+            modelBuilder.Entity<Grid>()
+                .HasKey(g => g.Id); // Assuming Grid has an Id property
         }
     }
 }
-

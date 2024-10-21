@@ -1,0 +1,63 @@
+using Audionix.Data.StationLog;
+using Audionix.Models;
+using Audionix.Models.MusicSchedule;
+using Microsoft.EntityFrameworkCore;
+
+namespace Audionix.Components.Pages.MusicSchedule
+{
+    public partial class Categories
+    {
+        private List<Category> categories = new();
+        private List<Category> filteredCategories = new();
+        private List<Station> stations = new();
+        private string newCategoryName;
+        private Guid selectedStationId;
+
+        protected override async Task OnInitializedAsync()
+        {
+            stations = await DbContext.Stations.ToListAsync();
+            categories = await DbContext.Categories.ToListAsync();
+            if (stations.Any())
+            {
+                selectedStationId = stations.First().StationId;
+                FilterCategories();
+            }
+        }
+
+        private void FilterCategories()
+        {
+            filteredCategories = categories.Where(c => c.StationId == selectedStationId).ToList();
+        }
+
+        private async Task OnStationChanged(Guid stationId)
+        {
+            selectedStationId = stationId;
+            FilterCategories();
+        }
+
+        private async Task AddCategory()
+        {
+            //if (!string.IsNullOrWhiteSpace(newCategoryName))
+            //{
+                var category = new Category { CategoryName = newCategoryName, StationId = selectedStationId };
+                DbContext.Categories.Add(category);
+                await DbContext.SaveChangesAsync();
+                categories.Add(category);
+                FilterCategories();
+                newCategoryName = string.Empty;
+            //}
+        }
+
+        private async Task DeleteCategory(int categoryId)
+        {
+            var category = await DbContext.Categories.FindAsync(categoryId);
+            if (category != null)
+            {
+                DbContext.Categories.Remove(category);
+                await DbContext.SaveChangesAsync();
+                categories.Remove(category);
+                FilterCategories();
+            }
+        }
+    }
+}
