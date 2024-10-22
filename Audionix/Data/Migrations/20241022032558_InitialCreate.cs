@@ -51,6 +51,32 @@ namespace Audionix.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Grids",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Grids", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MusicPatterns",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MusicPatterns", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Stations",
                 columns: table => new
                 {
@@ -62,20 +88,6 @@ namespace Audionix.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Stations", x => x.StationId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Template",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Template", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,6 +197,26 @@ namespace Audionix.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CategoryName = table.Column<string>(type: "TEXT", nullable: true),
+                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    TemplateId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Categories_MusicPatterns_TemplateId",
+                        column: x => x.TemplateId,
+                        principalTable: "MusicPatterns",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AudioFiles",
                 columns: table => new
                 {
@@ -276,26 +308,6 @@ namespace Audionix.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    CategoryName = table.Column<string>(type: "TEXT", nullable: true),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TemplateId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Categories_Template_TemplateId",
-                        column: x => x.TemplateId,
-                        principalTable: "Template",
-                        principalColumn: "Id");
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -382,6 +394,9 @@ namespace Audionix.Data.Migrations
                 name: "Folders");
 
             migrationBuilder.DropTable(
+                name: "Grids");
+
+            migrationBuilder.DropTable(
                 name: "Log");
 
             migrationBuilder.DropTable(
@@ -391,7 +406,7 @@ namespace Audionix.Data.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Template");
+                name: "MusicPatterns");
 
             migrationBuilder.DropTable(
                 name: "Stations");

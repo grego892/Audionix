@@ -8,6 +8,6 @@
 
         // Foreign key to Template
         public int? TemplateId { get; set; }
-        public Template? Template { get; set; }
+        public MusicPattern? Template { get; set; }
     }
 }

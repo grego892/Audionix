@@ -14,8 +14,8 @@ namespace Audionix.Models
         public DbSet<Folder> Folders { get; set; }
         public DbSet<ProgramLogItem> Log { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Template> Templates { get; set; }
-        public DbSet<Grid> Grids { get; set; } // Add this line
+        public DbSet<MusicPattern> MusicPatterns { get; set; }
+        public DbSet<Grid> Grids { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

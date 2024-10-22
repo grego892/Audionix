@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241018040824_TemplatesGrids")]
-    partial class TemplatesGrids
+    [Migration("20241022032558_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -198,7 +198,7 @@ namespace Audionix.Data.Migrations
                     b.ToTable("Grids");
                 });
 
-            modelBuilder.Entity("Audionix.Models.MusicSchedule.Template", b =>
+            modelBuilder.Entity("Audionix.Models.MusicSchedule.MusicPattern", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -213,7 +213,7 @@ namespace Audionix.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Templates");
+                    b.ToTable("MusicPatterns");
                 });
 
             modelBuilder.Entity("Audionix.Models.ProgramLogItem", b =>
@@ -464,8 +464,8 @@ namespace Audionix.Data.Migrations
 
             modelBuilder.Entity("Audionix.Models.MusicSchedule.Category", b =>
                 {
-                    b.HasOne("Audionix.Models.MusicSchedule.Template", "Template")
-                        .WithMany("TemplateCategories")
+                    b.HasOne("Audionix.Models.MusicSchedule.MusicPattern", "Template")
+                        .WithMany("PatternCategories")
                         .HasForeignKey("TemplateId");
 
                     b.Navigation("Template");
@@ -533,9 +533,9 @@ namespace Audionix.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Audionix.Models.MusicSchedule.Template", b =>
+            modelBuilder.Entity("Audionix.Models.MusicSchedule.MusicPattern", b =>
                 {
-                    b.Navigation("TemplateCategories");
+                    b.Navigation("PatternCategories");
                 });
 
             modelBuilder.Entity("Audionix.Models.Station", b =>

@@ -7,10 +7,10 @@ namespace Audionix.Models.MusicSchedule
         public int Id { get; set; }
 
         [NotMapped]
-        public Template[,] Schedule { get; set; } = new Template[7, 24];
+        public MusicPattern[,] Schedule { get; set; } = new MusicPattern[7, 24];
 
         // Optional: Method to assign a template to a specific day and hour
-        public void AssignTemplate(int day, int hour, Template template)
+        public void AssignTemplate(int day, int hour, MusicPattern template)
         {
             if (day < 0 || day > 6)
                 throw new ArgumentOutOfRangeException(nameof(day), "Day must be between 0 (Sunday) and 6 (Saturday).");
