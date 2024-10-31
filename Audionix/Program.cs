@@ -10,7 +10,8 @@ using MudBlazor.Services;
 using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Builder;
+using Serilog.Settings.Configuration;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddInteractiveServerComponents();
 
     builder.Services.AddCascadingAuthenticationState()
+    .AddScoped<FileManagerService>()
     .AddScoped<IdentityUserAccessor>()
     .AddScoped<IdentityRedirectManager>()
     .AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()
@@ -99,7 +101,7 @@ void ConfigureAuthentication(WebApplicationBuilder builder)
 void ConfigureIdentity(WebApplicationBuilder builder)
 {
     builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<AudionixDbContext>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 }
@@ -116,13 +118,16 @@ void ConfigureDatabase(WebApplicationBuilder builder)
     }
     Directory.CreateDirectory(databaseDirectory);
     var connectionString = $"Data Source={databasePath}";
-    builder.Services.AddDbContext<AudionixDbContext>(options => options.UseSqlite(connectionString));
+    builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 }
 
 void ConfigureLogger(WebApplicationBuilder builder)
 {
     string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "Audionix.log");
+    var configuration = builder.Configuration;
+    var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
     Log.Logger = new LoggerConfiguration()
+        .ReadFrom.Configuration(configuration, options)
         .WriteTo.File(Path.Combine(_logPath), rollingInterval: RollingInterval.Day)
         .WriteTo.Console()
         .CreateLogger();
@@ -153,10 +158,6 @@ void ConfigureHost(WebApplicationBuilder builder)
         });
     }
 
-
-
-
-
     if (!builder.Environment.IsDevelopment())
     {
         builder.WebHost.UseUrls("http://*:80", "https://*:443");
@@ -173,7 +174,7 @@ void MigrateDatabase(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<AudionixDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         try
         {
             dbContext.Database.Migrate();

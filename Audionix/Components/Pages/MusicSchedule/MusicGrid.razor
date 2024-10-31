@@ -1,7 +1,52 @@
 ﻿@page "/musicgrid"
+@using Audionix.Models
+@using Audionix.Models.MusicSchedule
+@using MudBlazor
+@using MudBlazor.Components
+@inject ILogger<Categories> Logger
+@inject ApplicationDbContext DbContext
+@inject NavigationManager _nav
+@inject IDialogService DialogService
 
 <PageTitle>Music Grid</PageTitle>
 
 <MudPaper>
-    <h2 Class="ptb-2 ml-2">Music Grid</h2>
+    <h2 class="ptb-2 ml-2">Music Grid</h2>
+</MudPaper>
+
+<MudStack Row="true">
+    <MudPaper class="ma-1" Elevation="8">
+        <MudStack Row="true">
+            <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Station" Value="selectedStationId" ValueChanged="OnStationChanged" Placeholder="Select Station" Margin="Margin.Dense" Variant="Variant.Outlined">
+                @foreach (var station in stations)
+                {
+                    <MudSelectItem Value="@(station.StationId as Guid?)">@station.CallLetters</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Music Pattern" Value="selectedMusicPatternId" ValueChanged="OnMusicPatternChanged" Placeholder="Select Music Pattern" Margin="Margin.Dense" Variant="Variant.Outlined">
+                @foreach (var pattern in musicPatterns)
+                {
+                    <MudSelectItem Value="@(pattern.PatternId as Guid?)">@pattern.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </MudPaper>
+</MudStack>
+
+<MudPaper Style="min-height:calc(100vh - 157px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
+    <MudPaper Class="ma-1" Elevation="8">
+        <MudDataGrid T="MusicGridItem" Items="musicGridItems" Bordered="true" Class="" Dense="true">
+            <Columns>
+                <PropertyColumn Property="x => x.Hour" Title="Hour" CellStyle="padding:1px;border:mud-border-primary" />
+                <PropertyColumn Property="x => x.Sunday" Title="Sunday" />
+                <PropertyColumn Property="x => x.Monday" Title="Monday" />
+                <PropertyColumn Property="x => x.Tuesday" Title="Tuesday" />
+                <PropertyColumn Property="x => x.Wednesday" Title="Wednesday" />
+                <PropertyColumn Property="x => x.Thursday" Title="Thursday" />
+                <PropertyColumn Property="x => x.Friday" Title="Friday" />
+                <PropertyColumn Property="x => x.Saturday" Title="Saturday" />
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
 </MudPaper>

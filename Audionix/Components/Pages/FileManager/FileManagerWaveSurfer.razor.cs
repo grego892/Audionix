@@ -13,9 +13,11 @@ namespace Audionix.Components.Pages.FileManager
         {
             progress = percent;
 
+            Log.Debug($"--- FileManagerWaveSurfer - WaveLoading() -- Wave load progress.  Percent: {percent}");
+
             if (percent == 100)
             {
-                Log.Information("--- FileManagerWaveSurfer - WaveLoading() -- Wave load progress complete.  Percent: " + percent);
+                Log.Information($"--- FileManagerWaveSurfer - WaveLoading() -- Wave load progress complete.  Percent: {percent}");
                 isUploading = false;
             }
         }
@@ -52,79 +54,53 @@ namespace Audionix.Components.Pages.FileManager
                 WavePlayerCurrentPosition = TimeSpan.FromSeconds(currentTimeInSeconds);
             }
         }
-        public async Task SetIntro()
+
+        private async Task UpdateRegion(string regionId, float? currentTime, Action<WavesurferRegion, float?> updateFunc)
         {
             if (wavePlayer != null)
             {
-                var currentTime = await wavePlayer.GetCurrentTime();
-                float? duration = await wavePlayer.GetDuration();
-
-                IEnumerable<WavesurferRegion>? regions = await wavePlayer.RegionList();
+                var regions = await wavePlayer.RegionList();
 
                 if (regions != null)
                 {
-                    var segueRegion = regions.FirstOrDefault(r => r.Id == "Intro");
+                    var region = regions.FirstOrDefault(r => r.Id == regionId);
 
-                    if (segueRegion != null)
+                    if (region != null)
                     {
-                        segueRegion.End = (float)currentTime;
+                        updateFunc(region, currentTime);
                         await wavePlayer.RegionListUpdate(regions);
                     }
                     else
                     {
-                        // Add a new "Segue" region to the wavePlayer
+                        // Add a new region to the wavePlayer
                         await wavePlayer.RegionAddRegion(
                             new WavesurferRegion()
                             {
                                 Start = 0,
-                                End = (float)currentTime,
+                                End = currentTime ?? 0,
                                 Resize = true,
-                                Color = "rgba(10,200,25,0.3)",
+                                Color = regionId == "Intro" ? "rgba(10,200,25,0.3)" : "rgba(200,10,25,0.3)",
                                 Drag = true,
-                                Id = "Intro"
+                                Id = regionId
                             }
                         );
                     }
                 }
             }
+        }
+
+        public async Task SetIntro()
+        {
+            var currentTime = wavePlayer != null ? await wavePlayer.GetCurrentTime() : null;
+            await UpdateRegion("Intro", currentTime, (region, time) => region.End = time ?? 0);
         }
 
         public async Task SetSegue()
         {
-            if (wavePlayer != null)
-            {
-                float? currentTime = await wavePlayer.GetCurrentTime();
-                float? duration = await wavePlayer.GetDuration();
-
-                IEnumerable<WavesurferRegion>? regions = await wavePlayer.RegionList();
-
-                if (regions != null)
-                {
-                    var segueRegion = regions.FirstOrDefault(r => r.Id == "Segue");
-
-                    if (segueRegion != null)
-                    {
-                        segueRegion.Start = (float)currentTime;
-                        await wavePlayer.RegionListUpdate(regions);
-                    }
-                    else
-                    {
-                        // Add a new "Segue" region to the wavePlayer
-                        await wavePlayer.RegionAddRegion(
-                            new WavesurferRegion()
-                            {
-                                Start = (float)currentTime,
-                                End = (float)duration,
-                                Resize = true,
-                                Color = "rgba(200,10,25,0.3)",
-                                Drag = true,
-                                Id = "Segue"
-                            }
-                        );
-                    }
-                }
-            }
+            var currentTime = wavePlayer != null ? await wavePlayer.GetCurrentTime() : null;
+            await UpdateRegion("Segue", currentTime, (region, time) => region.Start = time ?? 0);
         }
+
 
         public async Task GotoBeginning()
         {
@@ -134,9 +110,7 @@ namespace Audionix.Components.Pages.FileManager
             }
         }
 
-
         private double WavePlayerZoom = 0;
-        //public TimeSpan? WavePlayerCurrentPosition { get; private set; } = TimeSpan.Zero;
 
         public async Task SetWavePlayerZoom(double value)
         {

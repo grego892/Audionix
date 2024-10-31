@@ -11,9 +11,10 @@
 
 .progress-text {
     position: absolute;
-    top: 50%;
+    top: 0; /* Adjust as needed */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0);
+    color: white;
 }
 
 .wavesurfer-bottom-button-row {

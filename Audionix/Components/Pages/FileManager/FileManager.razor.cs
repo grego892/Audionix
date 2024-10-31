@@ -2,313 +2,91 @@
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 using Serilog;
-using System.Configuration;
-using System.Linq;
 using WavesurferBlazorWrapper;
-
+using MudBlazor;
+using Audionix.Models.MusicSchedule;
 
 namespace Audionix.Components.Pages.FileManager
 {
     partial class FileManager
     {
         private string selectedStation = string.Empty;
-        private int progress = 0;
+        private string selectedFolder = string.Empty;
+        private string selectedCategory = string.Empty;
         private bool isUploading;
+        private int progress;
         private WavesurferPlayer? wavePlayer;
-        readonly IList<IBrowserFile> filesToUpload = new List<IBrowserFile>();
+        readonly List<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<Station>? stations;
+        private List<string>? folders;
+        private List<Category>? categories;
+        private bool isSongdataEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
         [Inject] public AppSettings? AppSettings { get; set; }
-        [Inject] public IConfiguration? Configuration { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
+        [Inject] public FileManagerService? FileManagerSvc { get; set; }
+        [Inject] public ApplicationDbContext? DbContext { get; set; }
+        [Inject] FileManagerService? FileManagerService { get; set; }
+        [Inject] ISnackbar? Snackbar { get; set; }
+
+
         public string EditorTitle = string.Empty;
         public string EditorArtist = string.Empty;
         public double EditorIntro { get; set; } = 0;
         public double EditorSegue { get; set; } = 0;
         public double EditorDuration { get; set; } = 0;
-        //public double WavePlayerCurrentPosition { get; set; } = 0;
-        //public double WavePlayerZoom { get; set; } = 0;
-
 
         protected override async Task OnInitializedAsync()
         {
-            stations = await DbContext.Stations.ToListAsync();
-
-            // Fetch data from the database
-            filesInDirectory = await DbContext.AudioMetadatas.ToListAsync();
-
+            if (DbContext != null)
+            {
+                stations = await DbContext.Stations.AsNoTracking().ToListAsync();
+                filesInDirectory = await DbContext.AudioFiles.AsNoTracking().ToListAsync();
+            }
         }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
         {
-            Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
-            filesToUpload.Clear();
-            foreach (var file in selectedFiles)
-            {
-                // Check if a file with the same name already exists
-                if (filesInDirectory.Any(f => f.Filename == file.Name))
-                {
-                    Log.Information("--- FileManager - UploadFiles() -- Duplicate file found: {Filename}", file.Name);
-                    Snackbar.Add("Duplicate file: " + file.Name, Severity.Error);
-                    // If a duplicate file is found, skip the current iteration
-                    continue;
-                }
-
-                filesToUpload.Add(file);
-            }
-            await LoadFiles(new List<IBrowserFile>(filesToUpload)); // Clone the list
-            GetFolderFileList();
-            //StateHasChanged();
-        }
-
-        private List<IBrowserFile> loadedFiles = new();
-        private long maxFileSize = 1024 * 1024 * 1024;
-
-        private async Task LoadFiles(IList<IBrowserFile> selectedFiles)
-        {
             isUploading = true;
-            Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
-            loadedFiles.Clear();
-
-            foreach (var file in selectedFiles)
+            progress = 0;
+            if (FileManagerService != null)
             {
-                try
+                var duplicateFiles = await FileManagerService.UploadFiles(selectedFiles, selectedStation, selectedFolder, filesToUpload, filesInDirectory, updateProgress);
+
+                if (Snackbar != null)
                 {
-                    var path = Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", file.Name);
-
-                    // Use a using statement to ensure the FileStream is disposed of
-                    await using (var fs = new FileStream(path, FileMode.Create))
+                    foreach (var file in duplicateFiles)
                     {
-                        isUploading = true;
-                        var stream = file.OpenReadStream(maxFileSize);
-
-                        var buffer = new byte[81920]; // 80 KB chunks
-                        int bytesRead;
-                        long totalRead = 0;
-
-                        var lastUpdate = DateTime.Now;
-                        while ((bytesRead = await stream.ReadAsync(buffer)) != 0)
-                        {
-                            await fs.WriteAsync(buffer.AsMemory(0, bytesRead));
-                            totalRead += bytesRead;
-
-                            // Update progress
-                            if ((DateTime.Now - lastUpdate).TotalSeconds >= .25)
-                            {
-                                progress = (int)(totalRead * 100 / file.Size);
-                                StateHasChanged();
-                                lastUpdate = DateTime.Now;
-                            }
-                        }
-
-                        await fs.FlushAsync();
+                        Snackbar.Add("Folder with the same name already exists for this station", Severity.Error);
                     }
-
-                    loadedFiles.Add(file);
-                    await Task.Delay(1000);
-                    isUploading = false;
-                    progress = 0;
-                    Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
-
-                    var audioMetadata = new AudioMetadataList().GetMetadata(path);
-
-                    // Create a new AudioMetadata instance and set its properties
-                    var audioMetadataForDb = new AudioMetadata
-                    {
-                        Filename = file.Name,
-                        Title = audioMetadata.Title,
-                        Artist = audioMetadata.Artist,
-                        Duration = audioMetadata.Duration,
-                        Intro = audioMetadata.Intro,
-                        Segue = audioMetadata.Segue
-                    };
-
-                    // Find the station with the selected call letters and assign its ID to StationId
-                    var station = DbContext.Stations.FirstOrDefault(s => s.CallLetters == selectedStation);
-                    if (station != null)
-                    {
-                        audioMetadataForDb.StationId = station.Id;
-                    }
-                    else
-                    {
-                        Log.Error("Station with call letters {CallLetters} not found", selectedStation);
-                    }
-
-                    // Add the new audio metadata to the database
-                    await DbContext.AudioMetadatas.AddAsync(audioMetadataForDb);
                 }
-                catch (Exception ex)
-                {
-                    Log.Error("++++++ FileManager - LoadFiles() -- File: {Filename} Error: {Error}",
-                        file.Name, ex.Message);
-                }
-
-                isUploading = false;
             }
-
-            await DbContext.SaveChangesAsync();
-            GetFolderFileList();
-            Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
+            isUploading = false;
+            progress = 0;
+            await GetFolderFileList();
         }
 
-        private void GetFolderFileList()
+        private Task GetFolderFileList()
         {
-            Log.Information("--- FileManager - LoadFiles() -- Start - GetFolderFileList: {Station}", selectedStation);
-            if (!string.IsNullOrEmpty(selectedStation) && stations != null)
+            if (FileManagerService != null && DbContext != null)
             {
-                var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
-                if (station != null)
-                {
-                    filesInDirectory = DbContext.AudioMetadatas
-                        .Where(am => am.StationId == station.Id)
-                        .ToList();
-                }
+                filesInDirectory = FileManagerService.GetFolderFileList(selectedStation, selectedFolder, stations, DbContext) ?? new List<AudioMetadata>();
             }
-            Log.Information("--- FileManager - GetFolderFileList() -- End - GetFolderFileList: {Station}", selectedStation);
+            return Task.CompletedTask;
         }
-
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
-            Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
-            File.Delete(Path.Combine(AppSettings?.DataPath ?? string.Empty, "Stations", selectedStation.ToString(), "Audio", audioMetadata.Filename));
-            DbContext.AudioMetadatas.Remove(audioMetadata);
-            await DbContext.SaveChangesAsync();
-            GetFolderFileList();
-            //StateHasChanged();
-            Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
-        }
-
-        private async Task EditAudio(AudioMetadata audioMetadata)
-        {
-            isUploading = true;
-            progress = 0;
-            Log.Information("--- FileManager - EditAudio() -- EditAudio() START** -aidofile: " + audioMetadata.Filename);
-
-            if (wavePlayer != null)
+            if (FileManagerSvc != null && DbContext != null)
             {
-                await wavePlayer.Stop();
-                await wavePlayer.Empty();
-                await wavePlayer.RegionClearRegions();
-
-                //-----------  Begin Requesting File from API -------------
-                var request = HttpContextAccessor?.HttpContext?.Request;
-                if (request != null)
-                {
-                    var host = request.Host.ToUriComponent();
-                    var scheme = request.Scheme;
-
-                    string encodedFilename = System.Net.WebUtility.UrlEncode(audioMetadata.Filename);
-                    string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFilename}";
-                    Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
-
-                    try
-                    {
-                        var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(url);
-                        Log.Information("--- FileManager - EditAudio() -- EditAudio response: " + response.StatusCode);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var contentStream = await response.Content.ReadAsStreamAsync();
-                            wavePlayer?.Load(url);
-
-                            //audioMetadata = new AudioMetadataList().GetMetadata(audioMetadata.Filename);
-                            audioMetadata = DbContext.AudioMetadatas.FirstOrDefault(am => am.Filename == audioMetadata.Filename);
-
-
-
-
-                            if (wavePlayer != null)
-                            {
-                                IEnumerable<WavesurferRegion>? regions = await wavePlayer.RegionList();
-
-                                if (regions != null)
-                                {
-                                    var introRegion = regions.FirstOrDefault(r => r.Id == "Intro");
-
-                                    if (introRegion == null)
-                                    {
-                                        await wavePlayer.RegionAddRegion(
-                                            new WavesurferRegion()
-                                            {
-                                                Start = 0,
-                                                End = ((float)audioMetadata.Intro) / 1000,
-                                                Resize = true,
-                                                Color = "rgba(10,200,25,0.3)",
-                                                Drag = true,
-                                                Id = "Intro"
-                                            });
-                                    }
-                                    else
-                                    {
-                                        introRegion.Start = 0;
-                                        introRegion.End = (float)audioMetadata.IntroSeconds;
-                                    }
-                                    await wavePlayer.RegionListUpdate(regions);
-
-                                    float? duration = await wavePlayer.GetDuration();
-
-                                    var segueRegion = regions.FirstOrDefault(r => r.Id == "Segue");
-                                    if (segueRegion == null)
-                                    {
-                                        await wavePlayer.RegionAddRegion(
-                                            new WavesurferRegion()
-                                            {
-                                                Start = (float)audioMetadata.Duration - ((audioMetadata.Segue) / 1000),
-                                                End = duration.HasValue ? (float)audioMetadata.Duration : 0,
-                                                Resize = true,
-                                                Color = "rgba(200,10,25,0.3)",
-                                                Drag = true,
-                                                Id = "Segue"
-                                            });
-                                    }
-                                    else
-                                    {
-                                        segueRegion.Start = (float)(duration.HasValue ? ((audioMetadata.Duration - audioMetadata.Segue)) : 0);
-                                        segueRegion.End = duration.HasValue ? (float)(audioMetadata.Duration) : 0;
-                                    }
-                                    await wavePlayer.RegionListUpdate(regions);
-                                }
-                            }
-                            else
-                            {
-                                Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
-                            }
-
-                            EditorTitle = audioMetadata?.Title ?? string.Empty;
-                            EditorArtist = audioMetadata?.Artist ?? string.Empty;
-                            EditorIntro = audioMetadata.Intro;
-                            EditorSegue = audioMetadata.Segue;
-                            StateHasChanged();
-
-                        }
-                        else
-                        {
-                            Log.Error("++++++ FileManager - EditAudio() -- Error making HTTP request");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "++++++ FileManager - EditAudio() - FileManager - EditAudio() - Error making HTTP request");
-                    }
-                }
-                else
-                {
-                    Log.Error("--- FileManager - EditAudio() -- No HttpContextAccessor.HttpContext?.Request found");
-                }
-            }
-            else
-            {
-                Log.Error("++++++ FileManager - EditAudio() -- No wavePlayer found");
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, selectedStation, AppSettings?.DataPath ?? string.Empty, DbContext, async () => await GetFolderFileList());
             }
         }
+
 
         public string SelectedStation
         {
@@ -318,20 +96,11 @@ namespace Audionix.Components.Pages.FileManager
                 if (selectedStation != value)
                 {
                     selectedStation = value;
-                    OnSelectedValueChanged(value);
+                    OnSelectedStationValueChanged(value);
                 }
             }
         }
 
-        private void OnSelectedValueChanged(string value)
-        {
-            if (!string.IsNullOrEmpty(value))
-            {
-                Log.Information("--- FileManager - OnSelectedValuesChanged() -- SelectedStation: {Station}", value);
-                SelectedStation = value;
-                GetFolderFileList();
-            }
-        }
         public double RoundedEditorIntro
         {
             get
@@ -352,6 +121,59 @@ namespace Audionix.Components.Pages.FileManager
             set
             {
                 EditorSegue = value * 1000;
+            }
+        }
+
+        private void updateProgress(int value)
+        {
+            progress = value;
+            StateHasChanged();
+        }
+
+        private async void OnSelectedStationValueChanged(string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                Log.Information($"--- FileManager -  OnSelectedStationValueChanged() -- SelectedStation: {value}", value);
+                filesInDirectory.Clear();
+                selectedFolder = string.Empty;
+                SelectedStation = value;
+                var station = stations?.FirstOrDefault(s => s.CallLetters == value);
+                if (station != null && FileManagerSvc != null)
+                {
+                    folders = await FileManagerSvc.GetFoldersForStation(station.StationId.ToString());
+                    categories = await DbContext.Categories
+                                                .Where(c => c.StationId == station.StationId)
+                                                .AsNoTracking()
+                                                .ToListAsync();
+                }
+            }
+        }
+
+        private void SongdataPressed()
+        {
+            isSongdataEnabled = !isSongdataEnabled;
+        }
+
+        private async Task SongCategoryChanged(AudioMetadata audioMetadata, string newCategory)
+        {
+            audioMetadata.SelectedCategory = newCategory;
+            DbContext?.AudioFiles.Update(audioMetadata);
+            await DbContext?.SaveChangesAsync();
+            Snackbar?.Add("Category updated successfully", Severity.Success);
+        }
+
+        public string SelectedFolder
+        {
+            get => selectedFolder;
+            set
+            {
+                if (selectedFolder != value)
+                {
+                    selectedFolder = value;
+                    filesInDirectory.Clear();
+                    StateHasChanged();
+                }
             }
         }
     }

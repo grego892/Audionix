@@ -1,0 +1,46 @@
+﻿@page "/debug"
+@using System.IO
+@using System
+
+<h3>Debug</h3>
+
+<MudPaper Class="pa-1 ma-12 border-solid border-2 mud-border-primary" Elevation="3">
+    @if (logFiles == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        foreach (var logFile in logFiles)
+        {
+            <p @onclick="() => LoadLogFile(logFile)">@Path.GetFileName(logFile)</p>
+        }
+    }
+</MudPaper>
+
+<MudPaper Class="pa-1 ma-1 border-solid border-2 mud-border-primary" Elevation="3">
+    @if (!string.IsNullOrEmpty(logFileContent))
+    {
+        <pre>@logFileContent</pre>
+    }
+</MudPaper>
+
+@code {
+    private string[] logFiles;
+    private string logFileContent;
+
+    protected override void OnInitialized()
+    {
+        var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging");
+        logFiles = Directory.GetFiles(logDirectory, "*.log");
+    }
+
+    private void LoadLogFile(string logFile)
+    {
+        using (var stream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        using (var reader = new StreamReader(stream))
+        {
+            logFileContent = reader.ReadToEnd();
+        }
+    }
+}

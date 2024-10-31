@@ -4,13 +4,16 @@ using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using Audionix.Models;
 
-
 [Route("api/[controller]")]
 [ApiController]
 public class AudioController : ControllerBase
 {
     private readonly IWebHostEnvironment _env;
     private readonly AppSettings _appSettings;
+    private static readonly Dictionary<string, string> MimeTypes = new Dictionary<string, string>
+    {
+        {".wav", "audio/wav"},
+    };
 
     public AudioController(IWebHostEnvironment env, AppSettings appSettings)
     {
@@ -18,49 +21,48 @@ public class AudioController : ControllerBase
         _appSettings = appSettings;
     }
 
-    
-    [HttpGet("{station}/{filename}")]
-    public IActionResult Get(string station, string filename)
+    [HttpGet("{station}/{foldername}/{filename}")]
+    public IActionResult Get(string station, string foldername, string filename)
     {
+        Log.Debug("--- AudioController -- Get() - BEGINS - station: {station}, foldername: {foldername}, filename: {filename}", station, foldername, filename);
+
         filename = System.Net.WebUtility.UrlDecode(filename);
 
         Log.Information("--- AudioController - Get() -- UrlDecoded filename:  {filename}", filename);
 
         if (_appSettings.DataPath != null)
         {
-            var path = Path.Combine(_appSettings.DataPath, "Stations", station, "Audio", filename);
-            Log.Information("AudioController.Get: {path}", path);
-            var memory = new MemoryStream();
-            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite))
+            var path = Path.Combine(_appSettings.DataPath, "Stations", station, "Audio", foldername, filename);
+            Log.Information("--- AudioController - Get() -- AudioController.Get: {path}", path);
+
+            Log.Debug("Start checking if file exists");
+            var fileExists = System.IO.File.Exists(path);
+            Log.Debug("Finished checking if file exists");
+
+            if (!fileExists)
             {
-                stream.CopyTo(memory);
+                Log.Error("File does not exist: {path}", path);
+                return NotFound();
             }
-            memory.Position = 0;
-            return File(memory, GetContentType(path), Path.GetFileName(path));
+
+            Log.Debug("Start reading file");
+            var fileContent = System.IO.File.ReadAllText(path);
+            Log.Debug("Finished reading file");
+
+            return PhysicalFile(path, GetContentType(path), Path.GetFileName(path));
         }
         else
         {
             Log.Error("++++++ AudioController -- Get() - AudioController.Get: DataPath is null");
             return NotFound();
         }
-
     }
 
     private string GetContentType(string path)
     {
-        var types = GetMimeTypes();
+        Log.Debug("--- AudioController -- GetContentType() -  path: {path}", path);
         var ext = Path.GetExtension(path).ToLowerInvariant();
-        Log.Debug("GetExtension: {ext}", ext);
-        return types[ext];
-    }
-
-    private Dictionary<string, string> GetMimeTypes()
-    {
-        return new Dictionary<string, string>
-        {
-            //{".mp3", "audio/mpeg"},
-            {".wav", "audio/wav"},
-            // Add more if needed
-        };
+        Log.Debug("--- AudioController -- GetContentType() -  GetExtension: {ext}", ext);
+        return MimeTypes[ext];
     }
 }

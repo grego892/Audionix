@@ -1,117 +1,75 @@
 ﻿@page "/patterns"
-@rendermode InteractiveServer
-@inject AudionixDbContext DbContext
 @using Audionix.Models
-@using Microsoft.EntityFrameworkCore
+@using Audionix.Models.MusicSchedule
+@using MudBlazor
+@using MudBlazor.Components
+@inject ILogger<Categories> Logger
+@inject ApplicationDbContext DbContext
+@inject NavigationManager _nav
 @inject IDialogService DialogService
 
-
-<PageTitle>Music Patterns</PageTitle>
+<PageTitle>Patterns</PageTitle>
 
 <MudPaper>
-    <h2 Class="ptb-2 ml-2">Music Patterns</h2>
+    <h2 class="ptb-2 ml-2">Patterns</h2>
 </MudPaper>
 
 <MudStack Row="true">
-<MudPaper Width="500px" Class="ma-1" Elevation="8">
-    <MudStack Row="true">
-        <MudSelect T="string" Label="Select Template" @bind-Value="selectedMusicPatternName" Margin="Margin.Dense" Variant="Variant.Outlined">
-            @foreach (var musicPatternName in MusicPatternNames)
-            {
-                <MudSelectItem Value="musicPatternName">@musicPatternName</MudSelectItem>
-            }
-        </MudSelect>
-        <MudButton OnClick="OpenDialogRemoveMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Remove Selected Pattern</MudButton>
-    </MudStack>
-</MudPaper>
+    <MudPaper class="ma-1" Elevation="8">
+        <MudStack Row="true">
+            <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Station" Value="selectedStationId" ValueChanged="OnStationChanged" Placeholder="Select Station" Margin="Margin.Dense" Variant="Variant.Outlined">
+                @foreach (var station in stations)
+                {
+                    <MudSelectItem Value="@(station.StationId as Guid?)">@station.CallLetters</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect Style="min-width: 200px;" T="string" Label="Select Template" Value="selectedMusicPatternName" ValueChanged="OnPatternChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                @foreach (var musicPatternName in filteredMusicPatternNames)
+                {
+                    <MudSelectItem Value="musicPatternName.Name">@musicPatternName.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton OnClick="OpenDialogRemoveMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Remove Selected Pattern</MudButton>
+        </MudStack>
+    </MudPaper>
 
-<MudPaper Width="500px" Class="ma-1" Elevation="8">
-    <MudStack Row="true">
-        <MudTextField @bind-Value="newMusicPatternName" Label="New Music Pattern Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-        <MudButton OnClick="AddMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Add New Pattern</MudButton>
-    </MudStack>
-</MudPaper>
+    <MudPaper Width="500px" Class="ma-1" Elevation="8">
+        <MudStack Row="true">
+            <MudTextField Class="ml-1 mt-1 mb-1" @bind-Value="newMusicPatternName" Label="New Music Pattern Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            <MudButton OnClick="AddMusicPattern" Class="mr-1 mt-1 mb-1" Variant="Variant.Outlined" Color="Color.Primary">Add New Pattern</MudButton>
+        </MudStack>
+    </MudPaper>
 </MudStack>
 
-@if (MusicPatternDataList != null)
+@if (selectedMusicPatternName != null)
 {
-    <MudPaper Class="border-solid border-2 mud-border-primary ma-1">
-        <MudDataGrid Items="MusicPatternDataList"
-                     Bordered="true"
-                     SortMode="SortMode.None"
-                     FixedHeader="true"
-                     Virtualize="true"
-                     Dense="true"
-                     Height="80vh">
-            <Columns>
- 
-            </Columns>
-        </MudDataGrid>
+    <MudPaper Style="min-height:calc(100vh - 157px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
+        <MudPaper Class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
+            <MudStack Row="true">
+                <MudSelect Class="ma-1" T="Guid?" Label="Category" Value="selectedCategoryId" ValueChanged="OnCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                    @foreach (var category in filteredCategories)
+                    {
+                        <MudSelectItem Value="@(category.CategoryId as Guid?)">@category.CategoryName</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddCategoryToPattern" Size="Size.Small">Add Category</MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
+            <MudTable Items="selectedPatternCategories" ReadOnly="false" Dense="true">
+                <HeaderContent>
+                    <MudTh>Category Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Category Name">@context.CategoryName</MudTd>
+                    <MudTd>
+                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveCategoryUp(@context))" />
+                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveCategoryDown(@context))" />
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveCategoryFromPattern(@context))">Delete</MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
     </MudPaper>
-}
-
-
-@code
-{
-    private string? selectedMusicPatternName;
-    private string newMusicPatternName = string.Empty;
-    private List<string> MusicPatternNames = new List<string>();
-    private List<MusicPatternData> MusicPatternDataList = new List<MusicPatternData>();
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        MusicPatternNames = await DbContext.MusicPatterns.Select(mp => mp.Name!).ToListAsync();
-        SelectDefaultItem();
-        if (selectedMusicPatternName != null)
-        {
-            var selectedMusicPattern = await DbContext.MusicPatterns.Include(mp => mp.MusicPatternData).FirstOrDefaultAsync(mp => mp.Name == selectedMusicPatternName);
-            if (selectedMusicPattern != null)
-            {
-                MusicPatternDataList = selectedMusicPattern.MusicPatternData.ToList();
-            }
-        }
-    }
-
-    private async Task AddMusicPattern()
-    {
-        var newMusicPattern = new MusicPattern { Name = newMusicPatternName };
-        DbContext.MusicPatterns.Add(newMusicPattern);
-        await DbContext.SaveChangesAsync();
-        MusicPatternNames.Add(newMusicPatternName);
-        newMusicPatternName = string.Empty;
-        SelectDefaultItem();
-        StateHasChanged();
-    }
-
-    private async Task RemoveMusicPattern()
-    {
-        var musicPatternToRemove = await DbContext.MusicPatterns.FirstOrDefaultAsync(mp => mp.Name == selectedMusicPatternName);
-        if (musicPatternToRemove != null)
-        {
-            DbContext.MusicPatterns.Remove(musicPatternToRemove);
-            await DbContext.SaveChangesAsync();
-            MusicPatternNames.Remove(selectedMusicPatternName!);
-            SelectDefaultItem();
-        }
-        StateHasChanged();
-    }
-
-
-    private void OpenDialogRemoveMusicPattern()
-    {
-        var parameters = new DialogParameters();
-        parameters.Add("OnConfirm", new Action(async () => await RemoveMusicPattern()));
-
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<TemplateDeleteDialog>("Are you sure you want to delete this pattern?", parameters, options);
-    }
-
-    private void SelectDefaultItem()
-    {
-        if (selectedMusicPatternName != null)
-        {
-            selectedMusicPatternName = MusicPatternNames.FirstOrDefault();
-        }
-    }
 }

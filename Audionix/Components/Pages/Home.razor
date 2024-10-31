@@ -4,9 +4,8 @@
 @using Audionix.Services
 @using Microsoft.EntityFrameworkCore
 @inject AppSettings AppSettings
-@inject AudionixDbContext DbContext
+@inject ApplicationDbContext DbContext
 @inject MudBlazor.ISnackbar Snackbar
-
 
 <PageTitle>Audionix</PageTitle>
 
@@ -16,7 +15,7 @@
         <h2 Class="ptb-2 ml-2">Dashboard</h2>
     </MudPaper>
 
-    <MudGrid >
+    <MudGrid>
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
                 <MudIcon Icon="@Icons.Material.Filled.CellTower" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
@@ -92,7 +91,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td><MudChip Label="true" Color="@report.Severity" Size="Size.Small" Class="ml-auto mud-elevation-25">@report.SeverityTitle</MudChip></td>
+                                    <td><MudChip T="string" Label="true" Color="@report.Severity" Size="Size.Small" Class="ml-auto mud-elevation-25">@report.SeverityTitle</MudChip></td>
                                     <td><MudText>@report.Salary</MudText></td>
                                 </tr>
                             }
@@ -109,8 +108,8 @@
                     </CardHeaderContent>
                 </MudCardHeader>
                 <MudCardContent Class="px-0">
-                    <MudList Clickable="true">
-                        <MudListItem>
+                    <MudList T="string" Clickable="true">
+                        <MudListItem T="string">
                             <div class="d-flex flex-row">
                                 <MudAvatar Class="mud-elevation-25">
                                     <MudIcon Icon="@Icons.Custom.Brands.GitHub" Class="mx-4" />
@@ -119,10 +118,10 @@
                                     <MudText Typo="Typo.subtitle2">Issues rising</MudText>
                                     <MudText Typo="Typo.body2">Issues is almost reaching 100</MudText>
                                 </div>
-                                <MudChip Label="true" Color="Color.Error" Size="Size.Small" Class="ml-auto mud-elevation-25">Danger</MudChip>
+                                <MudChip T="string" Label="true" Color="Color.Error" Size="Size.Small" Class="ml-auto mud-elevation-25">Danger</MudChip>
                             </div>
                         </MudListItem>
-                        <MudListItem>
+                        <MudListItem T="string">
                             <div class="d-flex flex-row">
                                 <MudAvatar Class="mud-elevation-25">
                                     <MudIcon Icon="@Icons.Custom.Uncategorized.Radioactive" Class="mx-4" />
@@ -131,10 +130,10 @@
                                     <MudText Typo="Typo.subtitle2">Incident in plant number 4</MudText>
                                     <MudText Typo="Typo.body2">Fire in reactor core</MudText>
                                 </div>
-                                <MudChip Label="true" Color="Color.Info" Size="Size.Small" Class="ml-auto mud-elevation-25">Minor</MudChip>
+                                <MudChip T="string" Label="true" Color="Color.Info" Size="Size.Small" Class="ml-auto mud-elevation-25">Minor</MudChip>
                             </div>
                         </MudListItem>
-                        <MudListItem>
+                        <MudListItem T="string">
                             <div class="d-flex flex-row">
                                 <MudAvatar Class="mud-elevation-25">
                                     <MudIcon Icon="@Icons.Material.Filled.Person" Class="mx-4" />
@@ -143,7 +142,7 @@
                                     <MudText Typo="Typo.subtitle2">Occupational injury</MudText>
                                     <MudText Typo="Typo.body2">Employee broke a finger while writing some code</MudText>
                                 </div>
-                                <MudChip Label="true" Color="Color.Success" Size="Size.Small" Class="ml-auto mud-elevation-25">Dismissed</MudChip>
+                                <MudChip T="string" Label="true" Color="Color.Success" Size="Size.Small" Class="ml-auto mud-elevation-25">Dismissed</MudChip>
                             </div>
                         </MudListItem>
                     </MudList>
@@ -151,20 +150,17 @@
             </MudCard>
         </MudItem>
     </MudGrid>
-
-
 }
 else
 {
     <MudGrid>
-
-            <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
+        <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
             <MudIcon Icon="@Icons.Material.Filled.Settings" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
-                <div>
-                    <MudText Typo="Typo.h5">Welcome to Audionix !!</MudText>
-                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Press "Initial Setup" to the left to get started.</MudText>
-                </div>
-            </MudPaper>
+            <div>
+                <MudText Typo="Typo.h5">Welcome to Audionix !!</MudText>
+                <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Press "Initial Setup" to the left to get started.</MudText>
+            </div>
+        </MudPaper>
     </MudGrid>
 }
 
