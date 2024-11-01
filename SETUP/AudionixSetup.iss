@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Audionix"
-#define MyAppVersion "0.0.2"
+#define MyAppVersion "0.0.3"
 #define MyAppPublisher "Greg Davis"
 #define MyAppExeName "Audionix.exe"
 
@@ -18,9 +18,9 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=K:\CURRENT PROJECTS\Audionix\SETUP\
+OutputDir=C:\Users\gdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\SETUP
 OutputBaseFilename=AudionixSetup
-SetupIconFile=K:\CURRENT PROJECTS\Audionix\Audionix\Audionix.ico
+SetupIconFile=C:\Users\gdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\Audionix.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -31,12 +31,13 @@ CreateUninstallRegKey=no
 UpdateUninstallLogAppName=no
 
 
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "K:\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net8.0\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "K:\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net8.0\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\gdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net8.0\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\gdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net8.0\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

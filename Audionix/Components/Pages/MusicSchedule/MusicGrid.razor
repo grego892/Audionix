@@ -34,19 +34,34 @@
     </MudPaper>
 </MudStack>
 
-<MudPaper Style="min-height:calc(100vh - 157px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
-    <MudPaper Class="ma-1" Elevation="8">
-        <MudDataGrid T="MusicGridItem" Items="musicGridItems" Bordered="true" Class="" Dense="true">
-            <Columns>
-                <PropertyColumn Property="x => x.Hour" Title="Hour" CellStyle="padding:1px;border:mud-border-primary" />
-                <PropertyColumn Property="x => x.Sunday" Title="Sunday" />
-                <PropertyColumn Property="x => x.Monday" Title="Monday" />
-                <PropertyColumn Property="x => x.Tuesday" Title="Tuesday" />
-                <PropertyColumn Property="x => x.Wednesday" Title="Wednesday" />
-                <PropertyColumn Property="x => x.Thursday" Title="Thursday" />
-                <PropertyColumn Property="x => x.Friday" Title="Friday" />
-                <PropertyColumn Property="x => x.Saturday" Title="Saturday" />
-            </Columns>
-        </MudDataGrid>
-    </MudPaper>
+<MudPaper Style="display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
+    <table class="mud-table" style="border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #ddd;">Hour</th>
+                <th style="border: 1px solid #ddd;">Sunday</th>
+                <th style="border: 1px solid #ddd;">Monday</th>
+                <th style="border: 1px solid #ddd;">Tuesday</th>
+                <th style="border: 1px solid #ddd;">Wednesday</th>
+                <th style="border: 1px solid #ddd;">Thursday</th>
+                <th style="border: 1px solid #ddd;">Friday</th>
+                <th style="border: 1px solid #ddd;">Saturday</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int hour = 0; hour < 24; hour++)
+            {
+                <tr>
+                    <td style="border: 1px solid #ddd;">@($"{hour}:00")</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Sunday, hour)">@GetPatternNameForCell((int)DayOfWeek.Sunday, hour)</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Monday, hour)">@GetPatternNameForCell((int)DayOfWeek.Monday, hour)</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Tuesday, hour)">@GetPatternNameForCell((int)DayOfWeek.Tuesday, hour)</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Wednesday, hour)">@GetPatternNameForCell((int)DayOfWeek.Wednesday, hour)</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Thursday, hour)">@GetPatternNameForCell((int)DayOfWeek.Thursday, hour)</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Friday, hour)">@GetPatternNameForCell((int)DayOfWeek.Friday, hour)</td>
+                    <td style="border: 1px solid #ddd;" @onclick="() => OnCellClick(DayOfWeek.Saturday, hour)">@GetPatternNameForCell((int)DayOfWeek.Saturday, hour)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </MudPaper>

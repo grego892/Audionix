@@ -57,7 +57,11 @@ namespace Audionix.Models
 
             // Configure Grid entity if necessary
             modelBuilder.Entity<Grid>()
-                .HasKey(g => g.Id); // Assuming Grid has an Id property
+                .HasKey(g => g.Id);
+
+            // Configure MusicGridItem entity
+            modelBuilder.Entity<MusicGridItem>()
+                .HasKey(mgi => mgi.Id);
         }
     }
 }

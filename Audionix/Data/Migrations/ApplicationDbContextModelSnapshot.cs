@@ -198,6 +198,49 @@ namespace Audionix.Data.Migrations
                     b.ToTable("Grids");
                 });
 
+            modelBuilder.Entity("Audionix.Models.MusicSchedule.MusicGridItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Friday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Hour")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Monday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Saturday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sunday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Thursday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tuesday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Wednesday")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MusicGridItems");
+                });
+
             modelBuilder.Entity("Audionix.Models.MusicSchedule.MusicPattern", b =>
                 {
                     b.Property<Guid>("PatternId")

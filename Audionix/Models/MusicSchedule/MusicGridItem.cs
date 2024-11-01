@@ -2,6 +2,7 @@
 {
     public class MusicGridItem
     {
+        public int Id { get; set; }
         public string Hour { get; set; }
         public string Sunday { get; set; }
         public string Monday { get; set; }
