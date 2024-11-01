@@ -1,0 +1,24 @@
+﻿@page "/traffic"
+@using Audionix.Models
+@inject ILogger<Home> Logger
+@inject IHostEnvironment Environment
+@inject ApplicationDbContext DbContext
+
+<PageTitle>Traffic</PageTitle>
+
+<MudPaper>
+    <h2 Class="ptb-2 ml-2">Traffic</h2>
+</MudPaper>
+
+<MudPaper Width="500px" Class="ma-1">
+    <MudStack Row="true" >
+        <MudSelect Class="ma-1" Margin="Margin.Dense" T="Guid" Label="Station" Value="selectedStationId" ValueChanged="OnStationChanged" Variant="Variant.Outlined">
+            @foreach (var station in stations)
+            {
+                <MudSelectItem Value="@(station.StationId)">@station.CallLetters</MudSelectItem>
+            }
+        </MudSelect>
+        <MudDatePicker @bind-Date="trafficDate" Label="Date to Merge" Margin="Margin.Dense" Variant="Variant.Outlined" />
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary">Merge</MudButton>
+    </MudStack>
+</MudPaper>

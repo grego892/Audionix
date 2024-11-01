@@ -208,6 +208,9 @@ namespace Audionix.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("FridayPatternId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Hour")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -216,24 +219,42 @@ namespace Audionix.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("MondayPatternId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Saturday")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SaturdayPatternId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Sunday")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("SundayPatternId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Thursday")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ThursdayPatternId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Tuesday")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("TuesdayPatternId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Wednesday")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("WednesdayPatternId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

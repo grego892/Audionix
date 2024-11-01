@@ -23,26 +23,34 @@ namespace Audionix.Components.Pages.MusicSchedule
         private async Task LoadDataAsync()
         {
             stations = await DbContext.Stations.ToListAsync();
-            selectedStationId = null;
+            musicPatterns = await DbContext.MusicPatterns.ToListAsync();
         }
 
-        private void InitializeGridData()
+        private async Task InitializeGridData()
         {
-            for (int i = 0; i < 24; i++)
+            musicGridItems = await DbContext.MusicGridItems.ToListAsync();
+            if (musicGridItems.Count == 0)
             {
-                musicGridItems.Add(new MusicGridItem
+                for (int i = 0; i < 24; i++)
                 {
-                    Hour = $"{i}:00",
-                    Sunday = string.Empty,
-                    Monday = string.Empty,
-                    Tuesday = string.Empty,
-                    Wednesday = string.Empty,
-                    Thursday = string.Empty,
-                    Friday = string.Empty,
-                    Saturday = string.Empty
-                });
+                    var newItem = new MusicGridItem
+                    {
+                        Hour = $"{i}:00",
+                        Sunday = string.Empty,
+                        Monday = string.Empty,
+                        Tuesday = string.Empty,
+                        Wednesday = string.Empty,
+                        Thursday = string.Empty,
+                        Friday = string.Empty,
+                        Saturday = string.Empty
+                    };
+                    DbContext.MusicGridItems.Add(newItem);
+                }
+                await DbContext.SaveChangesAsync();
+                musicGridItems = await DbContext.MusicGridItems.ToListAsync();
             }
         }
+
 
         private async Task OnStationChanged(Guid? stationId)
         {
@@ -66,41 +74,44 @@ namespace Audionix.Components.Pages.MusicSchedule
             selectedMusicPatternId = null;
         }
 
-        private async Task OnMusicPatternChanged(Guid? patternId)
+        private Task OnMusicPatternChanged(Guid? patternId)
         {
             selectedMusicPatternId = patternId;
+            return Task.CompletedTask;
         }
 
-        private async Task FilterPatterns()
+        private Task FilterPatterns()
         {
             // Implement pattern filtering logic here
+            return Task.CompletedTask;
         }
 
-        private async Task AddMusicPattern()
+        private Task AddMusicPattern()
         {
             // Implement add music pattern logic here
+            return Task.CompletedTask;
         }
 
-        private async Task RemoveMusicPattern()
+        private Task RemoveMusicPattern()
         {
             // Implement remove music pattern logic here
+            return Task.CompletedTask;
         }
 
         private async Task OnGridButtonClick(DayOfWeek day, int hour)
         {
             if (selectedStationId.HasValue && selectedMusicPatternId.HasValue)
             {
-                // Update the database with the selectedStationId and selectedMusicPatternId for the specific day and hour
                 var musicGridItem = new MusicGridItem
                 {
                     Hour = $"{hour}:00",
-                    Sunday = day == DayOfWeek.Sunday ? selectedMusicPatternId.ToString() : string.Empty,
-                    Monday = day == DayOfWeek.Monday ? selectedMusicPatternId.ToString() : string.Empty,
-                    Tuesday = day == DayOfWeek.Tuesday ? selectedMusicPatternId.ToString() : string.Empty,
-                    Wednesday = day == DayOfWeek.Wednesday ? selectedMusicPatternId.ToString() : string.Empty,
-                    Thursday = day == DayOfWeek.Thursday ? selectedMusicPatternId.ToString() : string.Empty,
-                    Friday = day == DayOfWeek.Friday ? selectedMusicPatternId.ToString() : string.Empty,
-                    Saturday = day == DayOfWeek.Saturday ? selectedMusicPatternId.ToString() : string.Empty
+                    Sunday = day == DayOfWeek.Sunday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
+                    Monday = day == DayOfWeek.Monday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
+                    Tuesday = day == DayOfWeek.Tuesday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
+                    Wednesday = day == DayOfWeek.Wednesday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
+                    Thursday = day == DayOfWeek.Thursday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
+                    Friday = day == DayOfWeek.Friday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
+                    Saturday = day == DayOfWeek.Saturday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty
                 };
 
                 DbContext.MusicGridItems.Add(musicGridItem);
@@ -111,6 +122,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
+
         private string GetPatternNameForCell(int day, int hour)
         {
             var dayOfWeek = (DayOfWeek)day;
@@ -119,22 +131,61 @@ namespace Audionix.Components.Pages.MusicSchedule
             {
                 return dayOfWeek switch
                 {
-                    DayOfWeek.Sunday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Sunday)?.Name ?? string.Empty,
-                    DayOfWeek.Monday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Monday)?.Name ?? string.Empty,
-                    DayOfWeek.Tuesday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Tuesday)?.Name ?? string.Empty,
-                    DayOfWeek.Wednesday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Wednesday)?.Name ?? string.Empty,
-                    DayOfWeek.Thursday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Thursday)?.Name ?? string.Empty,
-                    DayOfWeek.Friday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Friday)?.Name ?? string.Empty,
-                    DayOfWeek.Saturday => musicPatterns.FirstOrDefault(mp => mp.PatternId.ToString() == musicGridItem.Saturday)?.Name ?? string.Empty,
+                    DayOfWeek.Sunday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.SundayPatternId)?.Name ?? string.Empty,
+                    DayOfWeek.Monday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.MondayPatternId)?.Name ?? string.Empty,
+                    DayOfWeek.Tuesday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.TuesdayPatternId)?.Name ?? string.Empty,
+                    DayOfWeek.Wednesday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.WednesdayPatternId)?.Name ?? string.Empty,
+                    DayOfWeek.Thursday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.ThursdayPatternId)?.Name ?? string.Empty,
+                    DayOfWeek.Friday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.FridayPatternId)?.Name ?? string.Empty,
+                    DayOfWeek.Saturday => musicPatterns.FirstOrDefault(mp => mp.PatternId == musicGridItem.SaturdayPatternId)?.Name ?? string.Empty,
                     _ => string.Empty
                 };
             }
             return string.Empty;
         }
-        private void OnCellClick(DayOfWeek day, int hour)
+
+        private async Task OnCellClick(DayOfWeek day, int hour)
         {
-            // Handle the cell click event here
-            Logger.LogInformation($"Cell clicked: {day} at {hour}:00");
+            if (selectedStationId.HasValue && selectedMusicPatternId.HasValue)
+            {
+                // Find the existing MusicGridItem for the specified hour
+                var musicGridItem = await DbContext.MusicGridItems
+                    .FirstOrDefaultAsync(mgi => mgi.Hour == $"{hour}:00");
+
+                if (musicGridItem != null)
+                {
+                    // Update the appropriate day with the selected PatternId
+                    switch (day)
+                    {
+                        case DayOfWeek.Sunday:
+                            musicGridItem.SundayPatternId = selectedMusicPatternId;
+                            break;
+                        case DayOfWeek.Monday:
+                            musicGridItem.MondayPatternId = selectedMusicPatternId;
+                            break;
+                        case DayOfWeek.Tuesday:
+                            musicGridItem.TuesdayPatternId = selectedMusicPatternId;
+                            break;
+                        case DayOfWeek.Wednesday:
+                            musicGridItem.WednesdayPatternId = selectedMusicPatternId;
+                            break;
+                        case DayOfWeek.Thursday:
+                            musicGridItem.ThursdayPatternId = selectedMusicPatternId;
+                            break;
+                        case DayOfWeek.Friday:
+                            musicGridItem.FridayPatternId = selectedMusicPatternId;
+                            break;
+                        case DayOfWeek.Saturday:
+                            musicGridItem.SaturdayPatternId = selectedMusicPatternId;
+                            break;
+                    }
+
+                    await DbContext.SaveChangesAsync();
+
+                    // Update the UI
+                    StateHasChanged();
+                }
+            }
         }
     }
 }

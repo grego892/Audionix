@@ -7,6 +7,7 @@
 @inject ApplicationDbContext DbContext
 @inject MudBlazor.ISnackbar Snackbar
 
+
 <PageTitle>Audionix</PageTitle>
 
 @if (AppSettings.IsDatapathSetup)
@@ -53,8 +54,14 @@
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="8">
-            <MudPaper Class="pa-4" Style="height:300px;">
-                Currently Playing:
+            <MudPaper Class="pa-4" Style="height:300px; overflow-y: auto;">
+                <MudText Typo="Typo.h6">Release notes:</MudText>
+                <MudText Typo="Typo.body2">
+
+                    - 0.0.2.32 -- 11.1.2024 - Added ability to add Patterns to MusicGrid.
+
+
+                </MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="4">
@@ -177,10 +184,9 @@ else
         }
     }
 
-
     EarningReport[] earningReports = new EarningReport[]
     {
-        new EarningReport { Name = "Dave tucker", Title = "Overnight Jock", Avatar = "https://avatars2.githubusercontent.com/u/71094850?s=460&u=66c16f5bb7d27dc751f6759a82a3a070c8c7fe4b&v=4", Salary = "3/5/2024", Severity = Color.Success, SeverityTitle = "Programming"},
+        new EarningReport { Name = "Robert Tucker", Title = "Overnight Jock", Avatar = "https://avatars2.githubusercontent.com/u/71094850?s=460&u=66c16f5bb7d27dc751f6759a82a3a070c8c7fe4b&v=4", Salary = "3/5/2024", Severity = Color.Success, SeverityTitle = "Programming"},
         new EarningReport { Name = "Bobby Smith", Title = "Production", Avatar = "https://avatars.githubusercontent.com/u/16208742?s=120&v=4", Salary = "3/1/2024", Severity = Color.Secondary, SeverityTitle = "Market Admin"},
         new EarningReport { Name = "Greg Davis", Title = "Developer", Avatar = "https://avatars2.githubusercontent.com/u/10367109?s=460&amp;u=2abf95f9e01132e8e2915def42895ffe99c5d2c6&amp;v=4", Salary = "2/28/2024", Severity = Color.Error, SeverityTitle = "Administrator"},
     };
