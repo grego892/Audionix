@@ -1,6 +1,8 @@
 using Audionix.Data.StationLog;
 using Audionix.Models;
 using Audionix.Models.MusicSchedule;
+using Audionix.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audionix.Components.Pages.MusicSchedule
@@ -12,6 +14,8 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<Station> stations = new();
         private string newCategoryName;
         private Guid selectedStationId;
+        [Inject]
+        private AppStateService appStateService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -28,10 +32,9 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             filteredCategories = categories.Where(c => c.StationId == selectedStationId).ToList();
         }
-
         private async Task OnStationChanged(Guid stationId)
         {
-            selectedStationId = stationId;
+            appStateService.station = stations.FirstOrDefault(s => s.StationId == stationId);
             FilterCategories();
         }
 

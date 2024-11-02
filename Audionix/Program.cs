@@ -11,6 +11,7 @@ using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
+using System.Net.NetworkInformation;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,8 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>()
     .AddHostedService<AudionixService>()
     .AddControllers();
+
+    builder.Services.AddSingleton<AppStateService>();
 }
 
 async Task ConfigureSettings(WebApplicationBuilder builder)

@@ -2,6 +2,7 @@
 @using Audionix.Models
 @inject ILogger<Categories> Logger
 @inject ApplicationDbContext DbContext
+@inject AppStateService AppStateService
 @inject NavigationManager _nav
 
 <PageTitle>Categories</PageTitle>
@@ -10,19 +11,19 @@
     <h2 Class="ptb-2 ml-2">Categories</h2>
 </MudPaper>
 
-<MudStack Class="ma-2" Row="true">
-    <MudPaper MaxWidth="500px">
-        <MudStack Row="true">
-            <MudSelect Class="ma-1" Margin="Margin.Dense" T="Guid" Label="Station" Value="selectedStationId" ValueChanged="OnStationChanged" Variant="Variant.Outlined">
-                @foreach (var station in stations)
+<MudPaper Width="500px" Class="ma-1">
+    <MudStack Row="true">
+        <MudSelect Class="ma-1" Margin="Margin.Dense" T="Guid" Label="Station" Value="AppStateService.station?.StationId ?? Guid.Empty" ValueChanged="OnStationChanged" Variant="Variant.Outlined">
+            @foreach (var station in stations)
 
-                {
-                    <MudSelectItem Value="@(station.StationId)">@station.CallLetters</MudSelectItem>
-                }
-            </MudSelect>
-        </MudStack>
-    </MudPaper>
-</MudStack>
+
+
+            {
+                <MudSelectItem Value="@(station.StationId)">@station.CallLetters</MudSelectItem>
+            }
+        </MudSelect>
+    </MudStack>
+</MudPaper>
 
 <MudPaper Class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="1000px">
 
