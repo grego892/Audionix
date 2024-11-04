@@ -72,7 +72,7 @@ namespace Audionix.Components.Pages.FileManager
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFilename: " + encodedFilename);
                 string encodedFoldername = System.Net.WebUtility.UrlEncode(audioMetadata.Folder);
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFoldername: " + encodedFoldername);
-                string url = $"{scheme}://{host}/api/audio/{selectedStation}/{encodedFoldername}/{encodedFilename}";
+                string url = $"{scheme}://{host}/api/audio/{selectedStationCallLetters}/{encodedFoldername}/{encodedFilename}";
 
                 Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
 
@@ -104,6 +104,7 @@ namespace Audionix.Components.Pages.FileManager
 
             return string.Empty;
         }
+
 
         private async Task LoadFileIntoWavePlayer(string url, AudioMetadata audioMetadata)
         {

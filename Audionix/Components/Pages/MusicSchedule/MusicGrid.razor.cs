@@ -1,5 +1,7 @@
 using Audionix.Models;
 using Audionix.Models.MusicSchedule;
+using Audionix.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using static MudBlazor.CategoryTypes;
@@ -8,11 +10,11 @@ namespace Audionix.Components.Pages.MusicSchedule
 {
     public partial class MusicGrid
     {
-        private List<Station> stations = new();
-        private Guid? selectedStationId;
         private List<MusicGridItem> musicGridItems = new();
         private List<MusicPattern> musicPatterns = new();
         private Guid? selectedMusicPatternId;
+        [Inject]
+        private AppStateService appStateService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -22,7 +24,6 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task LoadDataAsync()
         {
-            stations = await DbContext.Stations.ToListAsync();
             musicPatterns = await DbContext.MusicPatterns.ToListAsync();
         }
 
@@ -51,20 +52,12 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-
-        private async Task OnStationChanged(Guid? stationId)
+private async Task LoadMusicPatterns()
         {
-            selectedStationId = stationId;
-            await LoadMusicPatterns();
-            await FilterPatterns();
-        }
-
-        private async Task LoadMusicPatterns()
-        {
-            if (selectedStationId.HasValue)
+            if (AppStateService.station != null)
             {
                 musicPatterns = await DbContext.MusicPatterns
-                    .Where(mp => mp.StationId == selectedStationId.Value)
+                    .Where(mp => mp.StationId == AppStateService.station.StationId)
                     .ToListAsync();
             }
             else
@@ -73,6 +66,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
             selectedMusicPatternId = null;
         }
+
 
         private Task OnMusicPatternChanged(Guid? patternId)
         {
@@ -100,7 +94,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task OnGridButtonClick(DayOfWeek day, int hour)
         {
-            if (selectedStationId.HasValue && selectedMusicPatternId.HasValue)
+            if (AppStateService.station != null && selectedMusicPatternId.HasValue)
             {
                 var musicGridItem = new MusicGridItem
                 {
@@ -121,6 +115,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 StateHasChanged();
             }
         }
+
 
 
         private string GetPatternNameForCell(int day, int hour)
@@ -146,7 +141,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task OnCellClick(DayOfWeek day, int hour)
         {
-            if (selectedStationId.HasValue && selectedMusicPatternId.HasValue)
+            if (AppStateService.station != null && selectedMusicPatternId.HasValue)
             {
                 // Find the existing MusicGridItem for the specified hour
                 var musicGridItem = await DbContext.MusicGridItems
@@ -187,5 +182,6 @@ namespace Audionix.Components.Pages.MusicSchedule
                 }
             }
         }
+
     }
 }

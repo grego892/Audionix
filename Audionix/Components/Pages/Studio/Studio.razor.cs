@@ -5,7 +5,7 @@ using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components;
 using MudBlazor.Utilities;
-using static ATL.Logging.Log;
+using Audionix.Services;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -20,20 +20,18 @@ namespace Audionix.Components.Pages.Studio
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
         public List<AudioMetadata> DraggedAudioFiles = new();
-        public List<Station> Stations = new();
         public List<Folder> Folders = new();
+        private Folder? selectedFolder = null;
 
-        private Station? selectedStation;
-        private Folder? selectedFolder;
+        [Inject] private ApplicationDbContext DbContext { get; set; }
+        [Inject] private AppStateService AppStateService { get; set; }
 
-        [Inject]
-        public required ApplicationDbContext DbContext { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Studio - OnInitializedAsync() -- Initializing Studio Page");
-            await LoadStations();
             await LoadTodaysLog();
+            await LoadFolders();
             StateHasChanged();
         }
         private void ToggleInsertDrawer()
@@ -44,17 +42,10 @@ namespace Audionix.Components.Pages.Studio
         {
             _delete = !_delete;
         }
-        private async Task LoadStations()
-        {
-            Stations = await DbContext.Stations.ToListAsync();
-        }
 
         private async Task LoadFolders()
         {
-            if (selectedStation != null)
-            {
-                Folders = await DbContext.Folders.Where(f => f.StationId == selectedStation.StationId).ToListAsync();
-            }
+            Folders = await DbContext.Folders.Where(f => f.StationId == AppStateService.station.StationId).ToListAsync();
         }
 
         private async Task LoadAudioFiles()
@@ -63,15 +54,6 @@ namespace Audionix.Components.Pages.Studio
             {
                 AudioFiles = await DbContext.AudioFiles.Where(af => af.Folder == selectedFolder.Name).ToListAsync();
             }
-        }
-
-        private async Task OnStationChanged(Station station)
-        {
-            selectedStation = station;
-            selectedFolder = null;
-            AudioFiles = new List<AudioMetadata>();
-            await LoadFolders();
-            await LoadTodaysLog(); // Reload the log for the selected station
         }
 
         private async Task OnFolderChanged(Folder folder)
@@ -84,10 +66,10 @@ namespace Audionix.Components.Pages.Studio
         {
             Log.Information("--- Studio - LoadTodaysLog() -- Loading Today's Log");
 
-            if (selectedStation != null)
+            if (AppStateService.station != null)
             {
                 ProgramLog = await DbContext.Log
-                    .Where(li => li.StationId == selectedStation.StationId)
+                    .Where(li => li.StationId == AppStateService.station.StationId)
                     .OrderBy(li => li.LogID)
                     .ToListAsync();
             }
@@ -114,9 +96,9 @@ namespace Audionix.Components.Pages.Studio
             selectedAudioFile = audioFile;
             _open = false;
 
-            if (selectedStation != null)
+            if (AppStateService.station != null)
             {
-                bool hasLogEntries = await DbContext.Log.AnyAsync(li => li.StationId == selectedStation.StationId);
+                bool hasLogEntries = await DbContext.Log.AnyAsync(li => li.StationId == AppStateService.station.StationId);
 
                 if (!hasLogEntries)
                 {
@@ -125,7 +107,7 @@ namespace Audionix.Components.Pages.Studio
                         selectedLogItem = new ProgramLogItem
                         {
                             // Initialize with default values
-                            StationId = selectedStation.StationId,
+                            StationId = AppStateService.station.StationId,
                         };
                     }
 
@@ -133,8 +115,6 @@ namespace Audionix.Components.Pages.Studio
                 }
             }
         }
-
-
 
         private bool IsAudioFileSelected => selectedAudioFile != null;
 

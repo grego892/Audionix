@@ -15,12 +15,6 @@
     <MudStack Row="true" >
         <MudPaper Width="500px">
                 <MudStack Row="true" >
-                    <MudSelect Class="mtbl-4" Margin="Margin.Dense" T="string" Label="Station" Variant="Variant.Outlined" FullWidth="false" >
-                        @foreach (var cnt in DbContext.Stations)
-                        {
-                            <MudSelectItem Value="@(cnt.CallLetters)" />
-                        }
-                    </MudSelect>
                     <MudDatePicker @bind-Date="musicLogDate" Label="Date to Schedule"  Margin="Margin.Dense" Variant="Variant.Outlined" />
                     <MudButton Variant="Variant.Outlined" Color="Color.Primary">Schedule</MudButton>
                 </MudStack>
@@ -29,9 +23,9 @@
 </MudPaper>
 <MudPaper Style="min-height:calc(100vh - 160px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
     <MudPaper>
-        <MudPaper Class="ml-1 mr-1 mb-1">
+@*         <MudPaper Class="ml-1 mr-1 mb-1">
             <h2 Class="ptb-2 ml-2">CHANGE THIS</h2>
-        </MudPaper>
+        </MudPaper> *@
         <MudStack Row="true">
 
         </MudStack>

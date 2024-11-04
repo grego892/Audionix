@@ -208,7 +208,6 @@ void ConfigureMiddleware(WebApplication app)
 void ConfigureEndpoints(WebApplication app)
 {
     app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-    app.UseMiddleware<LocalhostRestrictionMiddleware>();
     app.MapAdditionalIdentityEndpoints();
     app.MapControllers();
 }

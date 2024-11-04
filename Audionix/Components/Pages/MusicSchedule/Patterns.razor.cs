@@ -1,6 +1,8 @@
 using Audionix.Data.StationLog;
 using Audionix.Models;
 using Audionix.Models.MusicSchedule;
+using Audionix.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
@@ -13,12 +15,11 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<MusicPattern> filteredMusicPatternNames = new();
         private List<string> MusicPatternNames = new List<string>();
         private List<Category> MusicPatternDataList = new List<Category>();
-        private List<Station> stations = new();
-        private Guid? selectedStationId;
         private List<Category> selectedPatternCategories = new();
         private Guid? selectedCategoryId;
         private List<Category> filteredCategories = new();
         private List<Category> categories = new();
+        [Inject] private AppStateService AppStateService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -27,26 +28,16 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task LoadDataAsync()
         {
-            stations = await DbContext.Stations.ToListAsync();
             MusicPatternNames = await DbContext.MusicPatterns.Select(mp => mp.Name!).ToListAsync();
             categories = await DbContext.Categories.ToListAsync();
-            selectedStationId = null;
-        }
-
-        private async Task OnStationChanged(Guid? stationId)
-        {
-            selectedStationId = stationId;
-            await FilterPatterns();
-            selectedMusicPatternName = null;
-            FilterCategories();
         }
 
         private async Task FilterPatterns()
         {
-            if (selectedStationId.HasValue)
+            if (AppStateService.station != null)
             {
                 filteredMusicPatternNames = await DbContext.MusicPatterns
-                    .Where(c => c.StationId == selectedStationId.Value)
+                    .Where(c => c.StationId == AppStateService.station.StationId)
                     .ToListAsync();
             }
             else
@@ -57,9 +48,14 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task AddMusicPattern()
         {
-            if (selectedStationId.HasValue)
+            if (AppStateService.station != null)
             {
-                var newMusicPattern = new MusicPattern { Name = newMusicPatternName, StationId = selectedStationId.Value, PatternId = Guid.NewGuid() };
+                var newMusicPattern = new MusicPattern
+                {
+                    Name = newMusicPatternName,
+                    StationId = AppStateService.station.StationId,
+                    PatternId = Guid.NewGuid()
+                };
                 DbContext.MusicPatterns.Add(newMusicPattern);
                 await DbContext.SaveChangesAsync();
                 newMusicPatternName = string.Empty;
@@ -103,12 +99,12 @@ namespace Audionix.Components.Pages.MusicSchedule
         private async Task OnPatternChanged(string? patternName)
         {
             selectedMusicPatternName = patternName;
-            if (!string.IsNullOrEmpty(selectedMusicPatternName))
+            if (!string.IsNullOrEmpty(selectedMusicPatternName) && AppStateService.station != null)
             {
                 var selectedPattern = await DbContext.MusicPatterns
                     .Include(mp => mp.PatternCategories)
                     .ThenInclude(pc => pc.Category)
-                    .FirstOrDefaultAsync(mp => mp.Name == selectedMusicPatternName && mp.StationId == selectedStationId);
+                    .FirstOrDefaultAsync(mp => mp.Name == selectedMusicPatternName && mp.StationId == AppStateService.station.StationId);
 
                 if (selectedPattern != null)
                 {
@@ -130,12 +126,12 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task AddCategoryToPattern()
         {
-            if (selectedStationId.HasValue && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedCategoryId.HasValue)
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedCategoryId.HasValue)
             {
                 var musicPattern = await DbContext.MusicPatterns
                     .Include(mp => mp.PatternCategories)
                     .ThenInclude(pc => pc.Category)
-                    .FirstOrDefaultAsync(mp => mp.StationId == selectedStationId.Value && mp.Name == selectedMusicPatternName);
+                    .FirstOrDefaultAsync(mp => mp.StationId == AppStateService.station.StationId && mp.Name == selectedMusicPatternName);
 
                 if (musicPattern != null)
                 {
@@ -153,7 +149,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                             CategoryId = category.CategoryId,
                             CategoryName = category.CategoryName!,
                             MusicPatternSortOrder = maxSortOrder + 1,
-                            StationId = selectedStationId.Value // Ensure StationId is set
+                            StationId = AppStateService.station.StationId // Ensure StationId is set
                         };
 
                         musicPattern.PatternCategories.Add(patternCategory);
@@ -169,10 +165,12 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-
         private void FilterCategories()
         {
-            filteredCategories = categories.Where(c => c.StationId == selectedStationId).ToList();
+            if (AppStateService.station != null)
+            {
+                filteredCategories = categories.Where(c => c.StationId == AppStateService.station.StationId).ToList();
+            }
         }
 
         private void OnCategoryChanged(Guid? categoryId)

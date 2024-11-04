@@ -7,6 +7,7 @@
 @inject ApplicationDbContext DbContext
 @inject NavigationManager _nav
 @inject IDialogService DialogService
+@inject AppStateService AppStateService
 
 <PageTitle>Music Grid</PageTitle>
 
@@ -14,25 +15,16 @@
     <h2 class="ptb-2 ml-2">Music Grid</h2>
 </MudPaper>
 
-<MudStack Row="true">
-    <MudPaper class="ma-1" Elevation="8">
-        <MudStack Row="true">
-            <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Station" Value="selectedStationId" ValueChanged="OnStationChanged" Placeholder="Select Station" Margin="Margin.Dense" Variant="Variant.Outlined">
-                @foreach (var station in stations)
-                {
-                    <MudSelectItem Value="@(station.StationId as Guid?)">@station.CallLetters</MudSelectItem>
-                }
-            </MudSelect>
-
-            <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Music Pattern" Value="selectedMusicPatternId" ValueChanged="OnMusicPatternChanged" Placeholder="Select Music Pattern" Margin="Margin.Dense" Variant="Variant.Outlined">
-                @foreach (var pattern in musicPatterns)
-                {
-                    <MudSelectItem Value="@(pattern.PatternId as Guid?)">@pattern.Name</MudSelectItem>
-                }
-            </MudSelect>
-        </MudStack>
-    </MudPaper>
-</MudStack>
+<MudPaper Width="500px" Class="ma-1">
+    <MudStack Row="true">
+        <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Music Pattern" Value="selectedMusicPatternId" ValueChanged="OnMusicPatternChanged" Placeholder="Select Music Pattern" Margin="Margin.Dense" Variant="Variant.Outlined">
+            @foreach (var pattern in musicPatterns)
+            {
+                <MudSelectItem Value="@(pattern.PatternId as Guid?)">@pattern.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudStack>
+</MudPaper>
 
 <MudPaper Style="display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
     <table class="mud-table" style="border-collapse: collapse;">

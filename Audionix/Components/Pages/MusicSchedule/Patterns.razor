@@ -17,12 +17,6 @@
 <MudStack Row="true">
     <MudPaper class="ma-1" Elevation="8">
         <MudStack Row="true">
-            <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Station" Value="selectedStationId" ValueChanged="OnStationChanged" Placeholder="Select Station" Margin="Margin.Dense" Variant="Variant.Outlined">
-                @foreach (var station in stations)
-                {
-                    <MudSelectItem Value="@(station.StationId as Guid?)">@station.CallLetters</MudSelectItem>
-                }
-            </MudSelect>
             <MudSelect Style="min-width: 200px;" T="string" Label="Select Template" Value="selectedMusicPatternName" ValueChanged="OnPatternChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
                 @foreach (var musicPatternName in filteredMusicPatternNames)
                 {

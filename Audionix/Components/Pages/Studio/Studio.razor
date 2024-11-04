@@ -5,14 +5,6 @@
 
 <MudPaper>
     <MudToolBar Dense="false" Variant="Variant.Outline">
-        <MudPaper Width="200px">
-            <MudSelect Margin="Margin.Dense" T="Station" Label="Station" Value="selectedStation" Variant="Variant.Outlined" ValueChanged="OnStationChanged">
-                @foreach (var station in Stations)
-                {
-                    <MudSelectItem Value="@station">@station.CallLetters</MudSelectItem>
-                }
-            </MudSelect>
-        </MudPaper>
         <MudPaper Class="mx-auto">
             <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
             <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>

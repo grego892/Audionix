@@ -65,7 +65,7 @@ namespace Audionix.Services
             }
         }
 
-        public async Task SaveAudioMetadata(AudioMetadata audioMetadata, string fileName, string selectedStation)
+        public async Task SaveAudioMetadata(AudioMetadata audioMetadata, string fileName, Guid selectedStation)
         {
             // Create a new AudioMetadata instance and set its properties
             var audioMetadataForDb = new AudioMetadata
@@ -80,7 +80,7 @@ namespace Audionix.Services
             };
 
             // Find the station with the selected call letters and assign its ID to StationId
-            var station = _dbContext.Stations.AsNoTracking().FirstOrDefault(s => s.CallLetters == selectedStation);
+            var station = _dbContext.Stations.AsNoTracking().FirstOrDefault(s => s.StationId == selectedStation);
             if (station != null)
             {
                 audioMetadataForDb.StationId = station.StationId;
@@ -94,5 +94,4 @@ namespace Audionix.Services
             await _dbContext.SaveChangesAsync();
         }
     }
-
 }

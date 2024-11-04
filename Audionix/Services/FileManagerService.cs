@@ -20,7 +20,7 @@ namespace Audionix.Services
             _appSettings = appSettings;
         }
 
-        public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
+        public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
         {
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
@@ -36,13 +36,22 @@ namespace Audionix.Services
             return existingFiles;
         }
 
-        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, string selectedStation, string selectedFolder, Action<int> updateProgress)
+        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, Action<int> updateProgress)
         {
             Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
 
+            // Fetch the CallLetters for the selectedStation
+            var station = await _dbContext.Stations.AsNoTracking().FirstOrDefaultAsync(s => s.StationId == selectedStation);
+            if (station == null)
+            {
+                Log.Error("Station not found for StationId: {StationId}", selectedStation);
+                return;
+            }
+            var selectedStationCallLetters = station.CallLetters;
+
             foreach (var file in selectedFiles)
             {
-                var path = Path.Combine(_appSettings?.DataPath ?? string.Empty, "Stations", selectedStation, "Audio", selectedFolder, file.Name);
+                var path = Path.Combine(_appSettings?.DataPath ?? string.Empty, "Stations", selectedStationCallLetters, "Audio", selectedFolder, file.Name);
 
                 try
                 {
@@ -87,6 +96,7 @@ namespace Audionix.Services
             await _dbContext.SaveChangesAsync();
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
+
 
         public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, ApplicationDbContext dbContext, Action getFolderFileList)
         {
@@ -188,14 +198,14 @@ namespace Audionix.Services
                 .ToListAsync();
         }
 
-        public List<AudioMetadata> GetFolderFileList(string selectedStation, string selectedFolder, List<Station>? stations, ApplicationDbContext dbContext)
+        public List<AudioMetadata> GetFolderFileList(Guid selectedStation, string selectedFolder, List<Station>? stations, ApplicationDbContext dbContext)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
             var filesInDirectory = new List<AudioMetadata>();
 
-            if (!string.IsNullOrEmpty(selectedStation) && stations != null)
+            if (selectedStation != Guid.Empty && stations != null)
             {
-                var station = stations.FirstOrDefault(s => s.CallLetters == selectedStation);
+                var station = stations.FirstOrDefault(s => s.StationId == selectedStation);
                 if (station != null)
                 {
                     filesInDirectory = dbContext.AudioFiles
