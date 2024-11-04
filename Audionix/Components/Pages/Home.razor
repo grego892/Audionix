@@ -5,6 +5,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject AppSettings AppSettings
 @inject ApplicationDbContext DbContext
+@inject AppStateService AppStateService
 @inject MudBlazor.ISnackbar Snackbar
 
 
@@ -21,8 +22,7 @@
             <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
                 <MudIcon Icon="@Icons.Material.Filled.CellTower" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
                 <div>
-                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Total Stations</MudText>
-                    <MudText Typo="Typo.h5">@stationCount</MudText>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">@(AppStateService.station?.CallLetters ?? "No Station Selected")</MudText>
                 </div>
             </MudPaper>
         </MudItem>
@@ -30,7 +30,7 @@
             <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
                 <MudIcon Icon="@Icons.Material.Filled.DirectionsRun" Color="Color.Secondary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
                 <div>
-                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Total Stations Running</MudText>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Total Stations</MudText>
                     <MudText Typo="Typo.h5">@stationCount</MudText>
                 </div>
             </MudPaper>
