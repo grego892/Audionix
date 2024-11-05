@@ -2,7 +2,7 @@
 {
     public class Station
     {
-        public Guid StationId { get; set; } // Immutable Identifier
+        public Guid StationId { get; set; } = Guid.Empty;
         public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }

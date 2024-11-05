@@ -9,7 +9,7 @@ using Audionix.Services;
 
 namespace Audionix.Components.Pages.Studio
 {
-    public partial class Studio
+    public partial class Studio : IDisposable
     {
         private bool _open = false;
         private bool _delete = false;
@@ -26,18 +26,27 @@ namespace Audionix.Components.Pages.Studio
         [Inject] private ApplicationDbContext DbContext { get; set; }
         [Inject] private AppStateService AppStateService { get; set; }
 
-
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Studio - OnInitializedAsync() -- Initializing Studio Page");
+            AppStateService.OnStationChanged += HandleStationChanged;
             await LoadTodaysLog();
             await LoadFolders();
             StateHasChanged();
         }
+
+        private async void HandleStationChanged(object? sender, EventArgs e)
+        {
+            await LoadFolders();
+            await LoadTodaysLog();
+            StateHasChanged();
+        }
+
         private void ToggleInsertDrawer()
         {
             _open = !_open;
         }
+
         private void ToggleDelete()
         {
             _delete = !_delete;
@@ -45,7 +54,14 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task LoadFolders()
         {
-            Folders = await DbContext.Folders.Where(f => f.StationId == AppStateService.station.StationId).ToListAsync();
+            if (AppStateService.station != null)
+            {
+                Folders = await DbContext.Folders.Where(f => f.StationId == AppStateService.station.StationId).ToListAsync();
+            }
+            else
+            {
+                Folders = new List<Folder>();
+            }
         }
 
         private async Task LoadAudioFiles()
@@ -163,7 +179,6 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
-
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)
         {
             ProgramLog.Remove(logItem);
@@ -171,6 +186,11 @@ namespace Audionix.Components.Pages.Studio
             await DbContext.SaveChangesAsync();
             StateHasChanged();
             _delete = false;
+        }
+
+        public void Dispose()
+        {
+            AppStateService.OnStationChanged -= HandleStationChanged;
         }
     }
 }

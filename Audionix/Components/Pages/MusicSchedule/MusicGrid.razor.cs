@@ -1,10 +1,10 @@
+using Audionix.Data.Migrations;
 using Audionix.Models;
 using Audionix.Models.MusicSchedule;
-using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using static MudBlazor.CategoryTypes;
+
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -13,13 +13,23 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<MusicGridItem> musicGridItems = new();
         private List<MusicPattern> musicPatterns = new();
         private Guid? selectedMusicPatternId;
-        [Inject]
-        private AppStateService appStateService { get; set; }
+        [Inject] private ApplicationDbContext? DbContext { get; set; }
+        [Inject] private AppStateService? AppStateService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadDataAsync();
-            InitializeGridData();
+            await LoadMusicPatterns();
+            await InitializeGridData();
+            AppStateService.OnStationChanged += HandleStationChanged;
+        }
+
+        private async void HandleStationChanged(object? sender, EventArgs e)
+        {
+            musicGridItems.Clear();
+            musicPatterns.Clear();
+            await LoadMusicPatterns();
+            await InitializeGridData();
+            StateHasChanged();
         }
 
         private async Task LoadDataAsync()
@@ -29,35 +39,46 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task InitializeGridData()
         {
-            musicGridItems = await DbContext.MusicGridItems.ToListAsync();
-            if (musicGridItems.Count == 0)
+            if (AppStateService.station != null)
             {
-                for (int i = 0; i < 24; i++)
+                var stationId = AppStateService.station.StationId;
+                musicGridItems = await DbContext.MusicGridItems
+                    .Where(mgi => mgi.StationId == stationId)
+                    .ToListAsync();
+
+                if (musicGridItems.Count == 0)
                 {
-                    var newItem = new MusicGridItem
+                    for (int i = 0; i < 24; i++)
                     {
-                        Hour = $"{i}:00",
-                        Sunday = string.Empty,
-                        Monday = string.Empty,
-                        Tuesday = string.Empty,
-                        Wednesday = string.Empty,
-                        Thursday = string.Empty,
-                        Friday = string.Empty,
-                        Saturday = string.Empty
-                    };
-                    DbContext.MusicGridItems.Add(newItem);
+                        var newItem = new MusicGridItem
+                        {
+                            Hour = $"{i}:00",
+                            StationId = stationId,
+                            Sunday = string.Empty,
+                            Monday = string.Empty,
+                            Tuesday = string.Empty,
+                            Wednesday = string.Empty,
+                            Thursday = string.Empty,
+                            Friday = string.Empty,
+                            Saturday = string.Empty
+                        };
+                        DbContext.MusicGridItems.Add(newItem);
+                    }
+                    await DbContext.SaveChangesAsync();
+                    musicGridItems = await DbContext.MusicGridItems
+                        .Where(mgi => mgi.StationId == stationId)
+                        .ToListAsync();
                 }
-                await DbContext.SaveChangesAsync();
-                musicGridItems = await DbContext.MusicGridItems.ToListAsync();
             }
         }
 
-private async Task LoadMusicPatterns()
+        private async Task LoadMusicPatterns()
         {
             if (AppStateService.station != null)
             {
+                var stationId = AppStateService.station.StationId;
                 musicPatterns = await DbContext.MusicPatterns
-                    .Where(mp => mp.StationId == AppStateService.station.StationId)
+                    .Where(mp => mp.StationId == stationId)
                     .ToListAsync();
             }
             else
@@ -67,28 +88,9 @@ private async Task LoadMusicPatterns()
             selectedMusicPatternId = null;
         }
 
-
         private Task OnMusicPatternChanged(Guid? patternId)
         {
             selectedMusicPatternId = patternId;
-            return Task.CompletedTask;
-        }
-
-        private Task FilterPatterns()
-        {
-            // Implement pattern filtering logic here
-            return Task.CompletedTask;
-        }
-
-        private Task AddMusicPattern()
-        {
-            // Implement add music pattern logic here
-            return Task.CompletedTask;
-        }
-
-        private Task RemoveMusicPattern()
-        {
-            // Implement remove music pattern logic here
             return Task.CompletedTask;
         }
 
@@ -116,8 +118,6 @@ private async Task LoadMusicPatterns()
             }
         }
 
-
-
         private string GetPatternNameForCell(int day, int hour)
         {
             var dayOfWeek = (DayOfWeek)day;
@@ -143,13 +143,12 @@ private async Task LoadMusicPatterns()
         {
             if (AppStateService.station != null && selectedMusicPatternId.HasValue)
             {
-                // Find the existing MusicGridItem for the specified hour
+                var stationId = AppStateService.station.StationId;
                 var musicGridItem = await DbContext.MusicGridItems
-                    .FirstOrDefaultAsync(mgi => mgi.Hour == $"{hour}:00");
+                    .FirstOrDefaultAsync(mgi => mgi.Hour == $"{hour}:00" && mgi.StationId == stationId);
 
                 if (musicGridItem != null)
                 {
-                    // Update the appropriate day with the selected PatternId
                     switch (day)
                     {
                         case DayOfWeek.Sunday:
@@ -176,12 +175,9 @@ private async Task LoadMusicPatterns()
                     }
 
                     await DbContext.SaveChangesAsync();
-
-                    // Update the UI
                     StateHasChanged();
                 }
             }
         }
-
     }
 }

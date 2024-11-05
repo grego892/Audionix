@@ -72,7 +72,7 @@ namespace Audionix.Components.Pages.FileManager
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFilename: " + encodedFilename);
                 string encodedFoldername = System.Net.WebUtility.UrlEncode(audioMetadata.Folder);
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFoldername: " + encodedFoldername);
-                string url = $"{scheme}://{host}/api/audio/{selectedStationCallLetters}/{encodedFoldername}/{encodedFilename}";
+                string url = $"{scheme}://{host}/api/audio/{AppStateService.station.CallLetters}/{encodedFoldername}/{encodedFilename}";
 
                 Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
 

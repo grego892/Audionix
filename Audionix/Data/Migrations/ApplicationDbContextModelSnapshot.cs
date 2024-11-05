@@ -229,6 +229,9 @@ namespace Audionix.Data.Migrations
                     b.Property<Guid?>("SaturdayPatternId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Sunday")
                         .IsRequired()
                         .HasColumnType("TEXT");

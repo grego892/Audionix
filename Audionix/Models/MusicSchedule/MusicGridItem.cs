@@ -20,6 +20,7 @@
         public Guid? ThursdayPatternId { get; set; }
         public Guid? FridayPatternId { get; set; }
         public Guid? SaturdayPatternId { get; set; }
-    }
 
+        public Guid StationId { get; set; }
+    }
 }

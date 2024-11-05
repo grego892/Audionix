@@ -24,6 +24,20 @@ namespace Audionix.Components.Pages.MusicSchedule
         protected override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
+            await FilterPatterns();
+            await FilterCategories();
+            AppStateService.OnStationChanged += HandleStationChanged;
+        }
+
+        private async void HandleStationChanged(object? sender, EventArgs e)
+        {
+            selectedMusicPatternName = null;
+            MusicPatternNames.Clear();
+            selectedCategoryId = null;
+            await LoadDataAsync();
+            await FilterPatterns();
+            await FilterCategories();
+            StateHasChanged();
         }
 
         private async Task LoadDataAsync()
@@ -165,7 +179,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-        private void FilterCategories()
+        private async Task FilterCategories()
         {
             if (AppStateService.station != null)
             {
@@ -178,32 +192,27 @@ namespace Audionix.Components.Pages.MusicSchedule
             selectedCategoryId = categoryId;
         }
 
-        public void Dispose()
+        public async Task RemoveCategoryFromPattern(Category category)
         {
-            DbContext?.Dispose();
-        }
-
-        public void RemoveCategoryFromPattern(Category category)
-        {
-            var patternCategory = DbContext.PatternCategories.FirstOrDefault(pc => pc.CategoryId == category.CategoryId);
+            var patternCategory = await DbContext.PatternCategories.FirstOrDefaultAsync(pc => pc.CategoryId == category.CategoryId);
             if (patternCategory != null)
             {
                 DbContext.PatternCategories.Remove(patternCategory);
-                DbContext.SaveChanges();
+                await DbContext.SaveChangesAsync();
                 selectedPatternCategories.Remove(category);
                 StateHasChanged();
             }
         }
 
-        public void MoveCategoryUp(Category category)
+        public async Task MoveCategoryUp(Category category)
         {
-            var currentPatternCategory = DbContext.PatternCategories
-                .FirstOrDefault(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == selectedPatternCategories.First().PatternCategories.First().MusicPatternId);
+            var currentPatternCategory = await DbContext.PatternCategories
+                .FirstOrDefaultAsync(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == selectedPatternCategories.First().PatternCategories.First().MusicPatternId);
 
             if (currentPatternCategory != null && currentPatternCategory.MusicPatternSortOrder > 1)
             {
-                var previousPatternCategory = DbContext.PatternCategories
-                    .FirstOrDefault(pc => pc.MusicPatternId == currentPatternCategory.MusicPatternId && pc.MusicPatternSortOrder == currentPatternCategory.MusicPatternSortOrder - 1);
+                var previousPatternCategory = await DbContext.PatternCategories
+                    .FirstOrDefaultAsync(pc => pc.MusicPatternId == currentPatternCategory.MusicPatternId && pc.MusicPatternSortOrder == currentPatternCategory.MusicPatternSortOrder - 1);
 
                 if (previousPatternCategory != null)
                 {
@@ -212,29 +221,29 @@ namespace Audionix.Components.Pages.MusicSchedule
                     currentPatternCategory.MusicPatternSortOrder = previousPatternCategory.MusicPatternSortOrder;
                     previousPatternCategory.MusicPatternSortOrder = tempOrder;
 
-                    DbContext.SaveChanges();
+                    await DbContext.SaveChangesAsync();
 
                     // Refresh the list
-                    selectedPatternCategories = DbContext.PatternCategories
+                    selectedPatternCategories = await DbContext.PatternCategories
                         .Where(pc => pc.MusicPatternId == currentPatternCategory.MusicPatternId)
                         .OrderBy(pc => pc.MusicPatternSortOrder)
                         .Select(pc => pc.Category)
-                        .ToList();
+                        .ToListAsync();
 
                     StateHasChanged();
                 }
             }
         }
 
-        public void MoveCategoryDown(Category category)
+        public async Task MoveCategoryDown(Category category)
         {
-            var currentPatternCategory = DbContext.PatternCategories
-                .FirstOrDefault(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == selectedPatternCategories.First().PatternCategories.First().MusicPatternId);
+            var currentPatternCategory = await DbContext.PatternCategories
+                .FirstOrDefaultAsync(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == selectedPatternCategories.First().PatternCategories.First().MusicPatternId);
 
             if (currentPatternCategory != null)
             {
-                var nextPatternCategory = DbContext.PatternCategories
-                    .FirstOrDefault(pc => pc.MusicPatternId == currentPatternCategory.MusicPatternId && pc.MusicPatternSortOrder == currentPatternCategory.MusicPatternSortOrder + 1);
+                var nextPatternCategory = await DbContext.PatternCategories
+                    .FirstOrDefaultAsync(pc => pc.MusicPatternId == currentPatternCategory.MusicPatternId && pc.MusicPatternSortOrder == currentPatternCategory.MusicPatternSortOrder + 1);
 
                 if (nextPatternCategory != null)
                 {
@@ -243,18 +252,24 @@ namespace Audionix.Components.Pages.MusicSchedule
                     currentPatternCategory.MusicPatternSortOrder = nextPatternCategory.MusicPatternSortOrder;
                     nextPatternCategory.MusicPatternSortOrder = tempOrder;
 
-                    DbContext.SaveChanges();
+                    await DbContext.SaveChangesAsync();
 
                     // Refresh the list
-                    selectedPatternCategories = DbContext.PatternCategories
+                    selectedPatternCategories = await DbContext.PatternCategories
                         .Where(pc => pc.MusicPatternId == currentPatternCategory.MusicPatternId)
                         .OrderBy(pc => pc.MusicPatternSortOrder)
                         .Select(pc => pc.Category)
-                        .ToList();
+                        .ToListAsync();
 
                     StateHasChanged();
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            DbContext?.Dispose();
+            AppStateService.OnStationChanged -= HandleStationChanged;
         }
     }
 }

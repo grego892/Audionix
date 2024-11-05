@@ -198,22 +198,16 @@ namespace Audionix.Services
                 .ToListAsync();
         }
 
-        public List<AudioMetadata> GetFolderFileList(Guid selectedStation, string selectedFolder, List<Station>? stations, ApplicationDbContext dbContext)
+        public List<AudioMetadata> GetFolderFileList(Guid selectedStation, string selectedFolder, ApplicationDbContext dbContext)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
             var filesInDirectory = new List<AudioMetadata>();
 
-            if (selectedStation != Guid.Empty && stations != null)
-            {
-                var station = stations.FirstOrDefault(s => s.StationId == selectedStation);
-                if (station != null)
-                {
-                    filesInDirectory = dbContext.AudioFiles
-                        .AsNoTracking()
-                        .Where(am => am.StationId == station.StationId && am.Folder == selectedFolder)
-                        .ToList();
-                }
-            }
+            filesInDirectory = dbContext.AudioFiles
+                .AsNoTracking()
+                .Where(am => am.StationId == selectedStation && am.Folder == selectedFolder)
+                .ToList();
+
 
             Log.Information("--- StationService - GetFolderFileList() -- End - filesInDirectory: {Count}", filesInDirectory.Count);
             return filesInDirectory;

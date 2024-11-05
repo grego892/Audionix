@@ -4,6 +4,7 @@ using Audionix.Models.MusicSchedule;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Charts;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -11,36 +12,29 @@ namespace Audionix.Components.Pages.MusicSchedule
     {
         private List<Category> categories = new();
         private List<Category> filteredCategories = new();
-        private List<Station> stations = new();
-        private string newCategoryName;
-        private Guid selectedStationId;
-        [Inject]
-        private AppStateService appStateService { get; set; }
+        private string? newCategoryName;
 
         protected override async Task OnInitializedAsync()
         {
-            stations = await DbContext.Stations.ToListAsync();
             categories = await DbContext.Categories.ToListAsync();
-            if (stations.Any())
-            {
-                selectedStationId = stations.First().StationId;
-                FilterCategories();
-            }
+            FilterCategories();
+            AppStateService.OnStationChanged += HandleStationChanged;
+        }
+
+        private async void HandleStationChanged(object? sender, EventArgs e)
+        {
+            FilterCategories();
+            StateHasChanged();
         }
 
         private void FilterCategories()
         {
-            filteredCategories = categories.Where(c => c.StationId == selectedStationId).ToList();
-        }
-        private async Task OnStationChanged(Guid stationId)
-        {
-            appStateService.station = stations.FirstOrDefault(s => s.StationId == stationId);
-            FilterCategories();
+            filteredCategories = categories.Where(c => c.StationId == AppStateService.station.StationId).ToList();
         }
 
         private async Task AddCategory()
         {
-            var category = new Category { CategoryName = newCategoryName, StationId = selectedStationId, CategoryId = Guid.NewGuid() };
+            var category = new Category { CategoryName = newCategoryName, StationId = AppStateService.station.StationId, CategoryId = Guid.NewGuid() };
             DbContext.Categories.Add(category);
             await DbContext.SaveChangesAsync();
             categories.Add(category);
@@ -58,6 +52,10 @@ namespace Audionix.Components.Pages.MusicSchedule
                 categories.Remove(category);
                 FilterCategories();
             }
+        }
+        public void Dispose()
+        {
+            AppStateService.OnStationChanged -= HandleStationChanged;
         }
     }
 }
