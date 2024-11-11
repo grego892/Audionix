@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
-using MudBlazor;
+﻿using MudBlazor;
 using Serilog;
 using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components;
-using MudBlazor.Utilities;
-using Audionix.Services;
+
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -161,8 +159,8 @@ namespace Audionix.Components.Pages.Studio
                     Description = selectedAudioFile.Artist,
                     Category = "AUDIO",
                     Progress = 0.0,
-                    Scheduled = DateTime.Now.ToString("HH:mm:ss"),
-                    Actual = DateTime.Now.ToString("HH:mm:ss"),
+                    TimeScheduled = TimeOnly.FromDateTime(DateTime.Now),
+                    TimePlayed = TimeOnly.FromDateTime(DateTime.Now),
                     Status = "PLAYING",
                     StationId = logItem.StationId,
                     LogID = index

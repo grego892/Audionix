@@ -8,8 +8,10 @@
         public string? Cue { get; set; }
         public string? Title { get; set; }
         public string? Artist { get; set; }
-        public string? Scheduled { get; set; }
-        public string? Actual { get; set; }
+        public DateOnly? Date { get; set; }
+        public TimeOnly TimeScheduled { get; set; }
+        public TimeOnly TimeEstimated { get; set; }
+        public TimeOnly TimePlayed { get; set; }
         public string? Name { get; set; }
         public string? Cart { get; set; }
         public string? Length { get; set; }
@@ -21,7 +23,6 @@
         public string? States { get; set; }
         public int? Device { get; set; }
         public int? sID { get; set; }
-        public string? Estimated { get; set; }
         public double Progress { get; set; }
 
         // Foreign key to Station
@@ -29,7 +30,6 @@
         public Station? Station { get; set; }
     }
 
-    // Enums remain unchanged
     enum CategoryType
     {
         SONG,

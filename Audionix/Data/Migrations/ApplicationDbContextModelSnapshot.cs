@@ -320,9 +320,6 @@ namespace Audionix.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Actual")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Artist")
                         .HasColumnType("TEXT");
 
@@ -335,14 +332,14 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("Cue")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("Device")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Estimated")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("From")
                         .HasColumnType("TEXT");
@@ -362,9 +359,6 @@ namespace Audionix.Data.Migrations
                     b.Property<double>("Progress")
                         .HasColumnType("REAL");
 
-                    b.Property<string>("Scheduled")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Segue")
                         .HasColumnType("TEXT");
 
@@ -375,6 +369,15 @@ namespace Audionix.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("TimeEstimated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("TimePlayed")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("TimeScheduled")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")

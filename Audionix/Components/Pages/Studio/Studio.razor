@@ -1,6 +1,9 @@
 ﻿@page "/studio"
 @rendermode InteractiveServer
 
+@using MudBlazor
+@using MudBlazor.Components
+
 <PageTitle>Live Studio</PageTitle>
 
 <MudPaper>
@@ -12,8 +15,8 @@
     </MudToolBar>
 </MudPaper>
 
-<MudPaper >
-    <MudDrawerContainer >
+<MudPaper>
+    <MudDrawerContainer>
         <MudDrawer @bind-Open="@_open" Variant="DrawerVariant.Temporary" OverlayAutoClose="true" Width="400px" Anchor="Anchor.Right" Color="Color.Default">
             <MudPaper>
                 <MudDrawerHeader>
@@ -53,7 +56,7 @@
             <PropertyColumn Property="x => x.Title" CellStyle="width: 15%;" Sortable="false" />
             <PropertyColumn Property="x => x.Artist" CellStyle="width: 15%;" Sortable="false" />
             <PropertyColumn Property="x => x.Name" CellStyle="width: 15%;" Sortable="false" />
-            <PropertyColumn Property="x => x.Scheduled" CellStyle="width: 10%;" Sortable="false" />
+            <PropertyColumn Property="x => x.TimeScheduled" CellStyle="width: 10%;" Sortable="false" />
             <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" Sortable="false" />
             <TemplateColumn CellStyle="width: 10%;" Sortable="false">
                 <CellTemplate>

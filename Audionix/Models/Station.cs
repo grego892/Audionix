@@ -54,8 +54,8 @@
                     Id = pl.Id,
                     Status = pl.Status,
                     Cue = pl.Cue,
-                    Scheduled = pl.Scheduled,
-                    Actual = pl.Actual,
+                    //Scheduled = pl.Scheduled,
+                    //Actual = pl.Actual,
                     Name = pl.Name,
                     Cart = pl.Cart,
                     Length = pl.Length,
@@ -67,7 +67,7 @@
                     States = pl.States,
                     Device = pl.Device,
                     sID = pl.sID,
-                    Estimated = pl.Estimated,
+                    TimeEstimated = pl.TimeEstimated,
                     Progress = pl.Progress,
                     Station = pl.Station
                 }).ToList()
