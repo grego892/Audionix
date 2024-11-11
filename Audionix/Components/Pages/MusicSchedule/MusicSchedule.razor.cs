@@ -27,7 +27,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 categoryList = await GetCategoriesForPatternsAsync(musicPatterns);
                 scheduledSongs = await GetScheduledSongsAsync(categoryList);
                 newDaysLog = await CreateProgramLogItemsAsync(scheduledSongs);
-                await AddNewDaysLogToDbLog(newDaysLog);
+                await AddNewDayLogToDbLog(newDaysLog);
             }
         }
 
@@ -147,25 +147,13 @@ namespace Audionix.Components.Pages.MusicSchedule
             {
                 var newLogItem = new ProgramLogItem
                 {
-                    Status = "Scheduled",
-                    Cue = CueType.AutoStart.ToString(),
                     Title = song.Title,
                     Artist = song.Artist,
                     Date = DateOnly.FromDateTime(MusicLogDate.Value),
-                    TimeScheduled = new TimeOnly(0, 0),
-                    TimeEstimated = new TimeOnly(0, 0),
-                    TimePlayed = new TimeOnly(0, 0),
+                    //TimeScheduled = new TimeOnly(0, 0),
                     Name = song.Filename,
-                    Cart = song.Filename,
                     Length = song.Duration.ToString(),
                     Segue = "0",
-                    Category = song.SelectedCategory,
-                    From = FromType.CLOCKS.ToString(),
-                    Description = "",
-                    Passthrough = "",
-                    States = StatesType.isReady.ToString(),
-                    Device = 0,
-                    Progress = 0,
                     StationId = AppStateService.station.StationId
                 };
 
@@ -175,15 +163,63 @@ namespace Audionix.Components.Pages.MusicSchedule
             return newDaysLog;
         }
 
-        private async Task AddNewDaysLogToDbLog(List<ProgramLogItem> newDaysLog)
+        //private async Task AddNewDayLogToDbLog(List<ProgramLogItem> newDaysLog)
+        //{
+        //    if (DbContext == null)
+        //    {
+        //        throw new InvalidOperationException("DbContext is not initialized.");
+        //    }
+
+        //    DbContext.Log.AddRange(newDaysLog);
+        //    await DbContext.SaveChangesAsync();
+        //}
+
+        private async Task AddNewDayLogToDbLog(List<ProgramLogItem> newDaysLog)
         {
             if (DbContext == null)
             {
                 throw new InvalidOperationException("DbContext is not initialized.");
             }
 
-            DbContext.Log.AddRange(newDaysLog);
+            if (newDaysLog == null || !newDaysLog.Any())
+            {
+                throw new ArgumentException("newDaysLog is null or empty.");
+            }
+
+            var newLogDate = newDaysLog.First().Date;
+
+            // Retrieve the maximum LogOrderID for the previous date in the log
+            int maxLogOrderIDForPreviousDate = await DbContext.Log
+                .Where(log => log.Date < newLogDate)
+                .MaxAsync(log => (int?)log.LogOrderID) ?? 0;
+
+            // Assign LogOrderID to the new log items starting from the retrieved maximum LogOrderID
+            int currentLogOrderID = maxLogOrderIDForPreviousDate;
+            foreach (var logItem in newDaysLog)
+            {
+                logItem.LogOrderID = ++currentLogOrderID;
+            }
+
+            // Insert the new log items into the database
+            await DbContext.Log.AddRangeAsync(newDaysLog);
+            await DbContext.SaveChangesAsync();
+
+            // Renumber all log items for dates after the new log items' date
+            var logsToRenumber = await DbContext.Log
+                .Where(log => log.Date > newLogDate)
+                .OrderBy(log => log.Date)
+                .ThenBy(log => log.LogOrderID)
+                .ToListAsync();
+
+            currentLogOrderID = newDaysLog.Max(log => log.LogOrderID);
+            foreach (var logItem in logsToRenumber)
+            {
+                logItem.LogOrderID = ++currentLogOrderID;
+            }
+
+            DbContext.Log.UpdateRange(logsToRenumber);
             await DbContext.SaveChangesAsync();
         }
+
     }
 }

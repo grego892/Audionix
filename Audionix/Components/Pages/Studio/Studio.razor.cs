@@ -84,7 +84,7 @@ namespace Audionix.Components.Pages.Studio
             {
                 ProgramLog = await DbContext.Log
                     .Where(li => li.StationId == AppStateService.station.StationId)
-                    .OrderBy(li => li.LogID)
+                    .OrderBy(li => li.LogOrderID)
                     .ToListAsync();
             }
             else
@@ -143,12 +143,12 @@ namespace Audionix.Components.Pages.Studio
             {
                 // Shift existing items' LogID
                 var itemsToShift = await DbContext.Log
-                    .Where(li => li.LogID >= index)
+                    .Where(li => li.LogOrderID >= index)
                     .ToListAsync();
 
                 foreach (var item in itemsToShift)
                 {
-                    item.LogID++;
+                    item.LogOrderID++;
                 }
 
                 var newLogItem = new ProgramLogItem
@@ -163,7 +163,7 @@ namespace Audionix.Components.Pages.Studio
                     TimePlayed = TimeOnly.FromDateTime(DateTime.Now),
                     Status = "PLAYING",
                     StationId = logItem.StationId,
-                    LogID = index
+                    LogOrderID = index
                 };
 
                 await DbContext.Log.AddAsync(newLogItem);

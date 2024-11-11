@@ -51,7 +51,7 @@
                  Dense="true"
                  Height="90vh">
         <Columns>
-            <PropertyColumn Property="x => x.LogID" CellStyle="width: 5%;" SortBy="@(x => x.LogID)" />
+            <PropertyColumn Property="x => x.LogOrderID" CellStyle="width: 5%;" SortBy="@(x => x.LogOrderID)" />
             <PropertyColumn Property="x => x.Cue" CellStyle="width: 5%;" Sortable="false" />
             <PropertyColumn Property="x => x.Title" CellStyle="width: 15%;" Sortable="false" />
             <PropertyColumn Property="x => x.Artist" CellStyle="width: 15%;" Sortable="false" />
@@ -66,7 +66,7 @@
             <PropertyColumn Property="x => x.Segue" CellStyle="width: 10%;" Sortable="false" />
             <TemplateColumn CellStyle="width: 5%;" Sortable="false">
                 <CellTemplate Context="cellContext">
-                    <MudButton Variant="Variant.Outlined" Disabled="@(!IsAudioFileSelected)" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogID, cellContext.Item)">Add</MudButton>
+                    <MudButton Variant="Variant.Outlined" Disabled="@(!IsAudioFileSelected)" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogOrderID, cellContext.Item)">Add</MudButton>
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn CellStyle="width: 5%;" Sortable="false">

@@ -3,7 +3,7 @@
     public class ProgramLogItem
     {
         public int Id { get; set; }
-        public int LogID { get; set; }
+        public int LogOrderID { get; set; }
         public string? Status { get; set; }
         public string? Cue { get; set; }
         public string? Title { get; set; }
