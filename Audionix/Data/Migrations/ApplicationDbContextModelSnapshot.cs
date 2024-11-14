@@ -402,6 +402,12 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("CallLetters")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("CurrentPlaying")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NextPlay")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Slogan")
                         .HasColumnType("TEXT");
 

@@ -13,7 +13,6 @@ using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
 using System.Net.NetworkInformation;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Services
@@ -81,8 +80,7 @@ void ConfigureServices(WebApplicationBuilder builder)
 
 async Task ConfigureSettings(WebApplicationBuilder builder)
 {
-    var appSettings = new AppSettings();
-    var appSettingsService = new AppSettingsService(appSettings);
+    var appSettingsService = new AppSettingsService();
     builder.Services.AddSingleton(appSettingsService);
 
     var config = await appSettingsService.GetOrCreateConfigurationAsync();
@@ -142,7 +140,6 @@ void ConfigureHost(WebApplicationBuilder builder)
     Log.Information("--- Program.cs - builder.Environment.EnvironmentName:  " + builder.Environment.EnvironmentName);
     var assembly = System.Reflection.Assembly.GetExecutingAssembly();
     Log.Information("--- Program.cs - Running version: " + assembly.GetName().Version);
-
 
     if (!builder.Environment.IsDevelopment())
     {

@@ -6,6 +6,8 @@
         public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
+        public int CurrentPlaying { get; set; } = 1;
+        public int NextPlay { get; set; } = 2;
         public ICollection<AudioMetadata>? AudioFiles { get; set; }
         public ICollection<Folder>? Folders { get; set; }
         public ICollection<ProgramLogItem>? ProgramLogItems { get; set; } // Navigation property
