@@ -9,6 +9,8 @@
     <PackageIcon>AudionixLogo.png</PackageIcon>
     <Version>0.0.4.1</Version>
     <Configurations>Debug;Release;test</Configurations>
+    <BaseOutputPath>bin\</BaseOutputPath>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

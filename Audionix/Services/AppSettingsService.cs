@@ -11,9 +11,8 @@ namespace Audionix.Services
         private AppSettings _appSettings;
         private readonly string _configFilePath;
 
-        public AppSettingsService(AppSettings appSettings)
+        public AppSettingsService()
         {
-            _appSettings = appSettings;
             _configFilePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                 "Audionix",

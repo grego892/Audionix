@@ -80,8 +80,7 @@ void ConfigureServices(WebApplicationBuilder builder)
 
 async Task ConfigureSettings(WebApplicationBuilder builder)
 {
-    var appSettings = new AppSettings();
-    var appSettingsService = new AppSettingsService(appSettings);
+    var appSettingsService = new AppSettingsService();
     builder.Services.AddSingleton(appSettingsService);
 
     var config = await appSettingsService.GetOrCreateConfigurationAsync();
