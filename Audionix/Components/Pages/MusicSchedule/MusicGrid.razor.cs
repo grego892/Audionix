@@ -1,6 +1,5 @@
-using Audionix.Data.Migrations;
-using Audionix.Models;
-using Audionix.Models.MusicSchedule;
+using Audionix.Shared.Data;
+using Audionix.Shared.Models.MusicSchedule;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;

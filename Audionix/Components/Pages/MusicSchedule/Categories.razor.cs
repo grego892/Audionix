@@ -1,4 +1,4 @@
-using Audionix.Models.MusicSchedule;
+using Audionix.Shared.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audionix.Components.Pages.MusicSchedule

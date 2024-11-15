@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Serilog;
 using Audionix.Services;
-using Audionix.Models;
+using Audionix.Shared;
 using System.ServiceProcess;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using Audionix.Shared.Models;
 
 
 namespace Audionix.Components.Pages

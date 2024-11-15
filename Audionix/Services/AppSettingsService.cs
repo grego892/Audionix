@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
-using Audionix.Models;
+using Audionix.Shared;
+using Audionix.Shared.Models;
 using MudBlazor;
 using Serilog;
 

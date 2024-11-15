@@ -1,7 +1,7 @@
 using Audionix.Components.Account;
 using Audionix.Components;
-using Audionix.Data;
-using Audionix.Models;
+using Audionix.Shared.Data;
+using Audionix.Shared.Models;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +12,6 @@ using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
 using System.Net.NetworkInformation;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -142,7 +141,6 @@ void ConfigureHost(WebApplicationBuilder builder)
     Log.Information("--- Program.cs - builder.Environment.EnvironmentName:  " + builder.Environment.EnvironmentName);
     var assembly = System.Reflection.Assembly.GetExecutingAssembly();
     Log.Information("--- Program.cs - Running version: " + assembly.GetName().Version);
-
 
     if (!builder.Environment.IsDevelopment())
     {

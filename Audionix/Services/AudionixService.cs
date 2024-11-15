@@ -1,8 +1,9 @@
-﻿using Audionix.Models;
+﻿using Audionix.Shared;
 using Serilog;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
+using Audionix.Shared.Models;
 
 namespace Audionix.Services
 {

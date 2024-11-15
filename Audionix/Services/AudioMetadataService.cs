@@ -1,7 +1,8 @@
-﻿using Audionix.Models;
-using Serilog;
+﻿using Serilog;
 using ATL;
 using Microsoft.EntityFrameworkCore;
+using Audionix.Shared.Models;
+using Audionix.Shared.Data;
 
 namespace Audionix.Services
 {
