@@ -54,7 +54,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Audionix.Shared\Audionix.Shared.csproj" />
-    <ProjectReference Include="..\AudionixAudioServer\AudionixAudioServer.csproj" />
   </ItemGroup>
 
 	<ItemGroup>
