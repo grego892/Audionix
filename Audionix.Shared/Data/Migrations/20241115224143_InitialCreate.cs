@@ -51,6 +51,20 @@ namespace Audionix.Shared.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AudioDevices",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DeviceID = table.Column<string>(type: "TEXT", nullable: true),
+                    FriendlyName = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AudioDevices", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Grids",
                 columns: table => new
                 {
@@ -101,22 +115,6 @@ namespace Audionix.Shared.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MusicPatterns", x => x.PatternId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Stations",
-                columns: table => new
-                {
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    StationSortOrder = table.Column<int>(type: "INTEGER", nullable: false),
-                    CallLetters = table.Column<string>(type: "TEXT", nullable: true),
-                    Slogan = table.Column<string>(type: "TEXT", nullable: true),
-                    CurrentPlaying = table.Column<int>(type: "INTEGER", nullable: false),
-                    NextPlay = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Stations", x => x.StationId);
                 });
 
             migrationBuilder.CreateTable(
@@ -221,6 +219,29 @@ namespace Audionix.Shared.Data.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Stations",
+                columns: table => new
+                {
+                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    StationSortOrder = table.Column<int>(type: "INTEGER", nullable: false),
+                    CallLetters = table.Column<string>(type: "TEXT", nullable: true),
+                    Slogan = table.Column<string>(type: "TEXT", nullable: true),
+                    AudioDeviceId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CurrentPlaying = table.Column<int>(type: "INTEGER", nullable: false),
+                    NextPlay = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stations", x => x.StationId);
+                    table.ForeignKey(
+                        name: "FK_Stations_AudioDevices_AudioDeviceId",
+                        column: x => x.AudioDeviceId,
+                        principalTable: "AudioDevices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -433,6 +454,11 @@ namespace Audionix.Shared.Data.Migrations
                 name: "IX_PatternCategories_MusicPatternId",
                 table: "PatternCategories",
                 column: "MusicPatternId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stations_AudioDeviceId",
+                table: "Stations",
+                column: "AudioDeviceId");
         }
 
         /// <inheritdoc />
@@ -482,6 +508,9 @@ namespace Audionix.Shared.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "AudioDevices");
 
             migrationBuilder.DropTable(
                 name: "MusicPatterns");

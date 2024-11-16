@@ -37,7 +37,7 @@ namespace Audionix.Services
             }
 
             Log.Information($"--- AppSettingsService.cs -- GetOrCreateConfiguration - LoggingPath: {_appSettings.LoggingPath}");
-            Log.Information("--- AppSettingsService.cs -- GetOrCreateConfiguration - Method Complete - Configuration: {_appSettings}");
+            Log.Information($"--- AppSettingsService.cs -- GetOrCreateConfiguration - Method Complete - Configuration: {_appSettings}");
             return _appSettings;
         }
 

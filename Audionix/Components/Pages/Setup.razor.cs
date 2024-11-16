@@ -7,7 +7,7 @@ using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using Audionix.Shared.Models;
-
+using NAudio.CoreAudioApi;
 
 namespace Audionix.Components.Pages
 {
@@ -20,8 +20,10 @@ namespace Audionix.Components.Pages
         private Folder newFolder = new();
         private List<Station> stations = new List<Station>();
         private Station? selectedStation;
-        private AppSettings? AppConfig { get; set; }
+        private List<AudioDevice> audioDevices = new List<AudioDevice>();
         private List<Folder> folders = new List<Folder>();
+        private AudioDevice? selectedAudioDevice = new AudioDevice(); // Initialize to avoid warning
+        private AppSettings? AppConfig { get; set; }
         [Inject] private AppSettingsService AppSettingsService { get; set; } = null!;
         [Inject] ISnackbar? Snackbar { get; set; }
         [Inject] private FileManagerService FileManagerService { get; set; } = null!;
@@ -52,8 +54,18 @@ namespace Audionix.Components.Pages
             AppSettings = await AppSettingsService.GetOrCreateConfigurationAsync();
             oldDataPath = AppSettings.DataPath;
             stations = await DbContext.Stations.ToListAsync();
-        }
+            audioDevices = GetWasapiOutputDevices();
 
+            if (audioDevices == null || !audioDevices.Any())
+            {
+                Log.Warning("--- Setup.razor.cs - OnInitializedAsync() -- No audio devices found");
+                Snackbar?.Add("No audio devices found.", Severity.Warning);
+            }
+            else
+            {
+                Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Found {Count} audio devices", audioDevices.Count);
+            }
+        }
 
         private bool IsValidPath(string path)
         {
@@ -74,7 +86,6 @@ namespace Audionix.Components.Pages
             return isValid;
         }
 
-
         private void AddStation()
         {
             Log.Information("--- Setup - AddStation() -- Begin");
@@ -83,6 +94,17 @@ namespace Audionix.Components.Pages
                 // Check if there are any stations in the database
                 int maxSortOrder = DbContext.Stations.Any() ? DbContext.Stations.Max(s => s.StationSortOrder) : 0;
                 newStation.StationSortOrder = maxSortOrder + 1;
+
+                // Ensure the selected AudioDeviceId is valid
+                if (selectedAudioDevice == null)
+                {
+                    Log.Error("++++++ Setup - AddStation() -- No AudioDevice selected");
+                    Snackbar?.Add("No Audio Device selected.", Severity.Error);
+                    return;
+                }
+
+                newStation.AudioDeviceId = selectedAudioDevice.Id;
+                newStation.AudioDevice = selectedAudioDevice;
 
                 DbContext.Stations.Add(newStation);
                 DbContext.SaveChanges();
@@ -102,7 +124,6 @@ namespace Audionix.Components.Pages
 
             StateHasChanged();
         }
-
 
         private void RemoveStation(Station station)
         {
@@ -128,14 +149,13 @@ namespace Audionix.Components.Pages
             }
         }
 
-
-
         private void EditStationButton(Station editingStation)
         {
             Log.Information("--- Setup - EditStationButton() -- Editing Station");
             tempEditStation = editingStation.DeepCopy();
             StationEditing = editingStation.StationId;
         }
+
         private void SaveEditedStation(Station saveEditedStation)
         {
             Log.Information("--- Setup - SaveEditedStation() -- Saving Edited Station");
@@ -151,6 +171,7 @@ namespace Audionix.Components.Pages
             }
             StationEditing = Guid.Empty;
         }
+
         private void CancelStationEdit(Station editingStation)
         {
             Log.Information("--- Setup - CancelStationEdit() -- Cancelling Station Edit");
@@ -173,6 +194,7 @@ namespace Audionix.Components.Pages
             }
             RestartService();
         }
+
         public void RestartService()
         {
             try
@@ -188,12 +210,15 @@ namespace Audionix.Components.Pages
 
         private async void AddFolder()
         {
-            await FileManagerService.AddFolder(newFolder, selectedStation, DbContext, Snackbar);
-            newFolder = new Folder();
-            LoadFolders();
+            if (selectedStation != null && Snackbar != null)
+            {
+                await FileManagerService.AddFolder(newFolder, selectedStation, DbContext, Snackbar);
+                newFolder = new Folder();
+                LoadFolders();
+            }
         }
 
-        private Station SelectedStation
+        private Station? SelectedStation
         {
             get { return selectedStation; }
             set
@@ -219,6 +244,7 @@ namespace Audionix.Components.Pages
             await FileManagerService.RemoveFolder(folder);
             LoadFolders();
         }
+
         private void MoveStationUp(Station station)
         {
             var currentOrder = station.StationSortOrder;
@@ -250,6 +276,52 @@ namespace Audionix.Components.Pages
                 nextStation.StationSortOrder = currentOrder;
                 DbContext.SaveChanges();
                 StateHasChanged();
+            }
+        }
+
+        public List<AudioDevice> GetWasapiOutputDevices()
+        {
+            var devices = new List<AudioDevice>();
+            var enumerator = new MMDeviceEnumerator();
+
+            try
+            {
+                foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+                {
+                    devices.Add(new AudioDevice
+                    {
+                        Id = Guid.NewGuid(), // Use GUID for unique Id
+                        DeviceID = device.ID,
+                        FriendlyName = device.FriendlyName
+                    });
+                }
+
+                Log.Information("--- Setup.razor.cs - GetWasapiOutputDevices() -- Found {Count} devices", devices.Count);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ Setup.razor.cs - GetWasapiOutputDevices() -- Error enumerating audio devices");
+            }
+
+            return devices;
+        }
+
+        public string GetAudioDeviceFriendlyName(Guid audioDeviceId)
+        {
+            Log.Debug("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Getting friendly name for device: {DeviceId}", audioDeviceId);
+
+            // Query the database for the AudioDevice with the given audioDeviceId
+            var device = DbContext.AudioDevices.FirstOrDefault(ad => ad.Id == audioDeviceId);
+
+            if (device != null)
+            {
+                Log.Debug("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Found device: {Device}", device);
+                return device.FriendlyName ?? "Unknown Device";
+            }
+            else
+            {
+                Log.Warning("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Device not found for Id: {DeviceId}", audioDeviceId);
+                return "Unknown Device";
             }
         }
 

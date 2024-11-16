@@ -34,60 +34,63 @@ namespace AudionixAudioServer
                 .FirstOrDefault(log => log.LogOrderID == station.CurrentPlaying);
         }
 
-        public async Task PlayAudioAsync(ProgramLogItem logItem, CancellationToken stoppingToken)
+        public Task PlayAudioAsync(ProgramLogItem logItem, CancellationToken stoppingToken)
         {
-            if (logItem != null)
+            return Task.Run(async () =>
             {
-                if (!string.IsNullOrEmpty(logItem.Name))
+                if (logItem != null)
                 {
-                    var audioMetadata = await _context.AudioFiles
-                        .FirstOrDefaultAsync(am => am.Filename == logItem.Name);
-
-                    if (audioMetadata != null)
+                    if (!string.IsNullOrEmpty(logItem.Name))
                     {
-                        var folderName = audioMetadata.Folder;
-                        var station = await _context.Stations
-                            .FirstOrDefaultAsync(s => s.StationId == audioMetadata.StationId);
+                        var audioMetadata = await _context.AudioFiles
+                            .FirstOrDefaultAsync(am => am.Filename == logItem.Name);
 
-                        if (station != null)
+                        if (audioMetadata != null)
                         {
-                            var filePath = Path.Combine(_configurationService.AppSettings.DataPath ?? string.Empty, "Stations", station.CallLetters ?? string.Empty, "Audio", folderName ?? string.Empty, logItem.Name);
+                            var folderName = audioMetadata.Folder;
+                            var station = await _context.Stations
+                                .FirstOrDefaultAsync(s => s.StationId == audioMetadata.StationId);
 
-                            Log.Debug("--- AudioService.cs -- PlayAudioAsync() - FilePath: {FilePath}", filePath);
-
-                            using (var audioFile = new AudioFileReader(filePath))
-                            using (var outputDevice = new WaveOutEvent())
+                            if (station != null)
                             {
-                                outputDevice.Init(audioFile);
-                                outputDevice.Play();
+                                var filePath = Path.Combine(_configurationService.AppSettings.DataPath ?? string.Empty, "Stations", station.CallLetters ?? string.Empty, "Audio", folderName ?? string.Empty, logItem.Name);
 
-                                while (outputDevice.PlaybackState == PlaybackState.Playing)
+                                Log.Debug("--- AudioService.cs -- PlayAudioAsync() - FilePath: {FilePath}", filePath);
+
+                                using (var audioFile = new AudioFileReader(filePath))
+                                using (var outputDevice = new WaveOutEvent())
                                 {
-                                    await Task.Delay(1000, stoppingToken);
-                                }
-                            }
+                                    outputDevice.Init(audioFile);
+                                    outputDevice.Play();
 
-                            Log.Information("Playing audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                                    while (outputDevice.PlaybackState == PlaybackState.Playing)
+                                    {
+                                        await Task.Delay(1000, stoppingToken);
+                                    }
+                                }
+
+                                Log.Information("Playing audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                            }
+                            else
+                            {
+                                Log.Error("Station with ID {stationId} not found.", audioMetadata.StationId);
+                            }
                         }
                         else
                         {
-                            Log.Error("Station with ID {stationId} not found.", audioMetadata.StationId);
+                            Log.Debug("--- AudioService.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {Name}", logItem.Name);
                         }
                     }
                     else
                     {
-                        Log.Debug("--- AudioService.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {Name}", logItem.Name);
+                        Log.Debug("--- AudioService.cs -- PlayAudioAsync() - LogItem Name is null or empty.");
                     }
                 }
                 else
                 {
-                    Log.Debug("--- AudioService.cs -- PlayAudioAsync() - LogItem Name is null or empty.");
+                    Log.Debug("--- AudioService.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {LogOrderID}", logItem?.LogOrderID);
                 }
-            }
-            else
-            {
-                Log.Debug("--- AudioService.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {LogOrderID}", logItem?.LogOrderID);
-            }
+            }, stoppingToken);
         }
     }
 }

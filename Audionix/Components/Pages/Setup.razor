@@ -10,16 +10,15 @@
 @inject NavigationManager NavigationManager
 @inject AppSettings? AppSettings
 
-
 <PageTitle>Setup</PageTitle>
 
-<MudPaper >
+<MudPaper>
     <h2 Class="ptb-2 ml-2">Setup</h2>
 </MudPaper>
 
- <MudGrid>
+<MudGrid>
     <MudCard Outlined=true Class="ma-8" Elevation="9">
-        <MudCardContent >
+        <MudCardContent>
             <MudText>Settings Path</MudText>
             <MudTextField @bind-Value="@DataPath" Label="App Data Path" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
         </MudCardContent>
@@ -33,88 +32,102 @@
 
     @if (AppSettings != null && AppSettings.IsDatapathSetup)
     {
-    <MudCard Outlined="true" Class="ma-8" Elevation="25">
-        <MudCardContent>
-            <MudText>Stations</MudText>
-            <MudTable Items="@DbContext.Stations.OrderBy(s => s.StationSortOrder)"
-                ReadOnly=false
-                Dense=true
-                Bordered=true
-                Class="border-solid">
-                <HeaderContent>
-                    <MudTh>Station Number</MudTh>
-                    <MudTh>Call Letters</MudTh>
-                    <MudTh>Slogan</MudTh>
-                    <MudTh/>
-                    <MudTh/>
-                </HeaderContent>
-                <RowTemplate>
-                    @if (context.StationId == StationEditing)
+        <MudCard Outlined="true" Class="ma-8" Elevation="25">
+            <MudCardContent>
+                <MudText>Stations</MudText>
+                <MudTable Items="@DbContext.Stations.OrderBy(s => s.StationSortOrder)"
+                          ReadOnly=false
+                          Dense=true
+                          Bordered=true
+                          Class="border-solid">
+                    <HeaderContent>
+                        <MudTh>Station Number</MudTh>
+                        <MudTh>Call Letters</MudTh>
+                        <MudTh>Slogan</MudTh>
+                        <MudTh>Audio Device</MudTh>
+                        <MudTh />
+                        <MudTh />
+                    </HeaderContent>
+                    <RowTemplate>
+                        @if (context.StationId == StationEditing)
+                        {
+                            <MudTd>
+                                <MudStack Row="true">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationUp(@context))">Up</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationDown(@context))">Down</MudButton>
+                                </MudStack>
+                            </MudTd>
+                            <MudTd DataLabel="CallLetters">
+                                <MudTextField @bind-Value="@context.CallLetters" Label="Call Letters" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                            </MudTd>
+                            <MudTd DataLabel="Slogan">
+                                <MudTextField @bind-Value="@context.Slogan" Label="Slogan" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                            </MudTd>
+                            <MudTd>
+                                <MudSelect T="AudioDevice" Label="Audio Device" @bind-Value="selectedAudioDevice" Variant="Variant.Outlined">
+                                    @foreach (var device in audioDevices)
+                                    {
+                                        <MudSelectItem T="AudioDevice" Value="@device">@device.FriendlyName</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTd>
+                            <MudTd>
+                                <MudStack Row="true">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStation(@context))">Save</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(@context))">Cancel</MudButton>
+                                </MudStack>
+                            </MudTd>
+                            <MudTd>
+                                <MudButton Variant="Variant.Outlined" Disabled="true">Delete</MudButton>
+                            </MudTd>
+                        }
+                        else if (StationEditing != Guid.Empty)
+                        {
+                            <MudTd DataLabel="Id">@context.StationSortOrder</MudTd>
+                            <MudTd DataLabel="CallLetters">@context.CallLetters</MudTd>
+                            <MudTd DataLabel="Slogan">@context.Slogan</MudTd>
+                            <MudTd DataLabel="AudioDevice">@GetAudioDeviceFriendlyName(context.AudioDeviceId)</MudTd>
+                            <MudTd>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStation(@context))" Disabled="true">Save</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(@context))" Disabled="true">Cancel</MudButton>
+                            </MudTd>
+                            <MudTd>
+                                <MudButton Variant="Variant.Outlined" Disabled="true">Delete</MudButton>
+                            </MudTd>
+                        }
+                        else
+                        {
+                            <MudTd DataLabel="Id">@context.StationSortOrder</MudTd>
+                            <MudTd DataLabel="CallLetters">@context.CallLetters</MudTd>
+                            <MudTd DataLabel="Slogan">@context.Slogan</MudTd>
+                            <MudTd DataLabel="AudioDevice">@GetAudioDeviceFriendlyName(context.AudioDeviceId)</MudTd>
+                            <MudTd>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>EditStationButton(@context))">Edit</MudButton>
+                            </MudTd>
+                            <MudTd>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveStation(@context))">Delete</MudButton>
+                            </MudTd>
+                        }
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+
+            <MudCardActions>
+                <MudTextField @bind-Value="@newStation.CallLetters" Label="Call Letters" Variant="Variant.Outlined"></MudTextField>
+                <MudTextField @bind-Value="@newStation.Slogan" Label="Slogan" Variant="Variant.Outlined"></MudTextField>
+                <MudSelect T="AudioDevice" Label="Audio Device" @bind-Value="selectedAudioDevice" Variant="Variant.Outlined">
+                    @foreach (var device in audioDevices)
                     {
-                    <MudTd>
-                        <MudStack Row="true">
-                            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationUp(@context))">Up</MudButton>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationDown(@context))">Down</MudButton>
-                        </MudStack>
-                    </MudTd>
-                    <MudTd DataLabel="CallLetters">
-                        <MudTextField @bind-Value="@context.CallLetters" Label="Call Letters" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                    </MudTd>
-
-                    <MudTd DataLabel="Slogan">
-                        <MudTextField @bind-Value="@context.Slogan" Label="Slogan" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                    </MudTd>
-
-                    <MudTd>
-                        <MudStack Row="true">
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStation(@context))">Save</MudButton>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(@context))">Cancel</MudButton>
-                        </MudStack>
-                    </MudTd>
-
-                    <MudTd>
-                        <MudButton Variant="Variant.Outlined" Disabled="true">Delete</MudButton>
-                    </MudTd>
+                        <MudSelectItem T="AudioDevice" Value="@device">@device.FriendlyName</MudSelectItem>
                     }
-                    else if (StationEditing != Guid.Empty)
-                    {
-                        <MudTd DataLabel="Id">@context.StationSortOrder</MudTd>
-                        <MudTd DataLabel="CallLetters">@context.CallLetters</MudTd>
-                        <MudTd DataLabel="Slogan">@context.Slogan</MudTd>                        
-                        <MudTd>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStation(@context))" Disabled="true">Save</MudButton>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(@context))" Disabled="true">Cancel</MudButton>
-                        </MudTd>
-                        <MudTd>
-                            <MudButton Variant="Variant.Outlined" Disabled="true">Delete</MudButton>
-                        </MudTd>
-                    } else 
-                    {
-                        <MudTd DataLabel="Id">@context.StationSortOrder</MudTd>
-                        <MudTd DataLabel="CallLetters">@context.CallLetters</MudTd>
-                        <MudTd DataLabel="Slogan">@context.Slogan</MudTd>
-                        <MudTd>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>EditStationButton(@context))">Edit</MudButton>
-                        </MudTd>
-                        <MudTd>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveStation(@context))">Delete</MudButton>
-                        </MudTd>
-                    }
-                </RowTemplate>
-            </MudTable>
-        </MudCardContent>
-
-        <MudCardActions>
-            <MudTextField @bind-Value="@newStation.CallLetters" Label="Call Letters" Variant="Variant.Outlined"></MudTextField>
-            <MudTextField @bind-Value="@newStation.Slogan" Label="Slogan" Variant="Variant.Outlined"></MudTextField>
-            <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddStation">Add Station</MudButton>
-        </MudCardActions>
-    </MudCard>
-    } 
+                </MudSelect>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddStation">Add Station</MudButton>
+            </MudCardActions>
+        </MudCard>
+    }
     else
     {
     }
-
 
     @if (AppSettings != null && AppSettings.IsDatapathSetup)
     {
@@ -132,8 +145,8 @@
             </MudCardContent>
 
             <MudTable Items="@folders"
-                ReadOnly=false
-                Dense=true>
+                      ReadOnly=false
+                      Dense=true>
                 <HeaderContent>
                     <MudTh>Call Letters</MudTh>
                     <MudTh>Delete</MudTh>
@@ -143,7 +156,7 @@
                     <MudTd>
                         <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveFolder(@context))">Delete</MudButton>
                     </MudTd>
-                    </RowTemplate>
+                </RowTemplate>
             </MudTable>
             <MudCardActions>
                 <MudTextField @bind-Value="@newFolder.Name" Label="Folder Name" Variant="Variant.Outlined"></MudTextField>
@@ -154,7 +167,6 @@
     else
     {
     }
-
 
 </MudGrid>
 

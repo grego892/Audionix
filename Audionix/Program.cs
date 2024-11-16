@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
 using System.Net.NetworkInformation;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Services

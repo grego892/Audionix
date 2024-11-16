@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
-<<<<<<< HEAD
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -23,7 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Audionix.Shared\Audionix.Shared.csproj" />
   </ItemGroup>
-=======
+  
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
@@ -56,5 +55,4 @@
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
->>>>>>> 27d7ef494a86774933472634846363b9f0ad13ea
 </Project>

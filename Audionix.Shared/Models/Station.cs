@@ -6,6 +6,8 @@
         public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
+        public Guid AudioDeviceId { get; set; } // Foreign key property
+        public AudioDevice AudioDevice { get; set; } // Navigation property
         public int CurrentPlaying { get; set; } = 1;
         public int NextPlay { get; set; } = 2;
         public ICollection<AudioMetadata>? AudioFiles { get; set; }
@@ -24,6 +26,7 @@
                 StationSortOrder = this.StationSortOrder,
                 CallLetters = this.CallLetters,
                 Slogan = this.Slogan,
+                AudioDeviceId = this.AudioDeviceId,
                 AudioFiles = this.AudioFiles?.Select(af => new AudioMetadata
                 {
                     StationId = af.StationId,
