@@ -82,6 +82,7 @@ public class AudioService
 
                             fadeOutProvider.BeginFadeIn(.1);
 
+                            Log.Information("Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
                             outputDevice.Play();
 
                             // Update the station's CurrentPlaying and NextPlay properties
@@ -96,23 +97,31 @@ public class AudioService
                             var seguePosition = audioFile.TotalTime - TimeSpan.FromMilliseconds(audioMetadata.Segue);
                             Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - TotalTime: {audioFile.TotalTime} - {TimeSpan.FromMilliseconds(audioMetadata.Segue).ToString()} = seguePosition: {seguePosition}");
 
+                            Task? nextAudioTask = null;
+
                             while (outputDevice.PlaybackState == PlaybackState.Playing)
                             {
                                 // Check if segue is reached
-                                if (audioFile.CurrentTime >= seguePosition)
+                                if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null)
                                 {
                                     Log.Information("Reached segue point for audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                     fadeOutProvider.BeginFadeOut(fadeTime);
-                                    await Task.Delay(fadeTime, stoppingToken);
-                                    break;
+
+                                    // Start playing the next audio
+                                    Log.Information("Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                                    nextAudioTask = PlayAudioAsync(stationId, stoppingToken);
                                 }
                                 await Task.Delay(100, stoppingToken);
-
-                                
                             }
 
                             outputDevice.Stop();
                             Log.Information("Stopped audio: {title} by {artist}", logItem.Title, logItem.Artist);
+
+                            // Wait for the next audio task to complete if it was started
+                            if (nextAudioTask != null)
+                            {
+                                await nextAudioTask;
+                            }
                         }
 
                         Log.Information("Playing audio: {title} by {artist}", logItem.Title, logItem.Artist);

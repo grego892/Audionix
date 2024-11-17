@@ -29,6 +29,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>dotnet-AudionixAudioServer-568420fe-b5a3-4b90-98cc-dee8224b4e79</UserSecretsId>
 		<BaseOutputPath>bin\</BaseOutputPath>
+		<Version>0.0.4.2</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
