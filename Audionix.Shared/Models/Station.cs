@@ -9,7 +9,7 @@
         public Guid AudioDeviceId { get; set; } // Foreign key property
         public AudioDevice AudioDevice { get; set; } // Navigation property
         public int CurrentPlaying { get; set; } = 1;
-        public int NextPlay { get; set; } = 2;
+        public int NextPlay { get; set; } = 1;
         public ICollection<AudioMetadata>? AudioFiles { get; set; }
         public ICollection<Folder>? Folders { get; set; }
         public ICollection<ProgramLogItem>? ProgramLogItems { get; set; } // Navigation property

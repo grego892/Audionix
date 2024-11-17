@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = Host.CreateApplicationBuilder(args);
 
 // LOGGING
+builder.Configuration.AddJsonFile("appsettingsAudioServer.json", optional: false, reloadOnChange: true);
+
 string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
 var configuration = builder.Configuration;
 var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
