@@ -1,9 +1,7 @@
-using Audionix.Shared.Data;
-using Audionix.Shared.Models.MusicSchedule;
+using Audionix.Models.MusicSchedule;
+using Audionix.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -12,14 +10,17 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<MusicGridItem> musicGridItems = new();
         private List<MusicPattern> musicPatterns = new();
         private Guid? selectedMusicPatternId;
-        [Inject] private ApplicationDbContext? DbContext { get; set; }
         [Inject] private AppStateService? AppStateService { get; set; }
+        [Inject] private AppDatabaseService? DatabaseService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadMusicPatterns();
-            await InitializeGridData();
-            AppStateService.OnStationChanged += HandleStationChanged;
+            if (AppStateService != null)
+            {
+                await LoadMusicPatterns();
+                await InitializeGridData();
+                AppStateService.OnStationChanged += HandleStationChanged;
+            }
         }
 
         private async void HandleStationChanged(object? sender, EventArgs e)
@@ -31,19 +32,12 @@ namespace Audionix.Components.Pages.MusicSchedule
             StateHasChanged();
         }
 
-        private async Task LoadDataAsync()
-        {
-            musicPatterns = await DbContext.MusicPatterns.ToListAsync();
-        }
-
         private async Task InitializeGridData()
         {
-            if (AppStateService.station != null)
+            if (AppStateService?.station != null && DatabaseService != null)
             {
                 var stationId = AppStateService.station.StationId;
-                musicGridItems = await DbContext.MusicGridItems
-                    .Where(mgi => mgi.StationId == stationId)
-                    .ToListAsync();
+                musicGridItems = await DatabaseService.GetMusicGridItemsAsync(stationId);
 
                 if (musicGridItems.Count == 0)
                 {
@@ -61,24 +55,19 @@ namespace Audionix.Components.Pages.MusicSchedule
                             Friday = string.Empty,
                             Saturday = string.Empty
                         };
-                        DbContext.MusicGridItems.Add(newItem);
+                        await DatabaseService.AddMusicGridItemAsync(newItem);
                     }
-                    await DbContext.SaveChangesAsync();
-                    musicGridItems = await DbContext.MusicGridItems
-                        .Where(mgi => mgi.StationId == stationId)
-                        .ToListAsync();
+                    musicGridItems = await DatabaseService.GetMusicGridItemsAsync(stationId);
                 }
             }
         }
 
         private async Task LoadMusicPatterns()
         {
-            if (AppStateService.station != null)
+            if (AppStateService?.station != null && DatabaseService != null)
             {
                 var stationId = AppStateService.station.StationId;
-                musicPatterns = await DbContext.MusicPatterns
-                    .Where(mp => mp.StationId == stationId)
-                    .ToListAsync();
+                musicPatterns = await DatabaseService.GetMusicPatternsAsync(stationId);
             }
             else
             {
@@ -91,30 +80,6 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             selectedMusicPatternId = patternId;
             return Task.CompletedTask;
-        }
-
-        private async Task OnGridButtonClick(DayOfWeek day, int hour)
-        {
-            if (AppStateService.station != null && selectedMusicPatternId.HasValue)
-            {
-                var musicGridItem = new MusicGridItem
-                {
-                    Hour = $"{hour}:00",
-                    Sunday = day == DayOfWeek.Sunday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
-                    Monday = day == DayOfWeek.Monday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
-                    Tuesday = day == DayOfWeek.Tuesday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
-                    Wednesday = day == DayOfWeek.Wednesday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
-                    Thursday = day == DayOfWeek.Thursday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
-                    Friday = day == DayOfWeek.Friday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty,
-                    Saturday = day == DayOfWeek.Saturday ? selectedMusicPatternId?.ToString() ?? string.Empty : string.Empty
-                };
-
-                DbContext.MusicGridItems.Add(musicGridItem);
-                await DbContext.SaveChangesAsync();
-
-                // Update the UI
-                StateHasChanged();
-            }
         }
 
         private string GetPatternNameForCell(int day, int hour)
@@ -140,11 +105,10 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task OnCellClick(DayOfWeek day, int hour)
         {
-            if (AppStateService.station != null && selectedMusicPatternId.HasValue)
+            if (AppStateService?.station != null && selectedMusicPatternId.HasValue && DatabaseService != null)
             {
                 var stationId = AppStateService.station.StationId;
-                var musicGridItem = await DbContext.MusicGridItems
-                    .FirstOrDefaultAsync(mgi => mgi.Hour == $"{hour}:00" && mgi.StationId == stationId);
+                var musicGridItem = musicGridItems.FirstOrDefault(mgi => mgi.Hour == $"{hour}:00" && mgi.StationId == stationId);
 
                 if (musicGridItem != null)
                 {
@@ -173,7 +137,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                             break;
                     }
 
-                    await DbContext.SaveChangesAsync();
+                    await DatabaseService.UpdateMusicGridItemAsync(musicGridItem);
                     StateHasChanged();
                 }
             }

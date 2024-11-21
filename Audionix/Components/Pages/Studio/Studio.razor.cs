@@ -2,8 +2,8 @@
 using Serilog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components;
-using Audionix.Shared.Models;
-using Audionix.Shared.Data;
+using Audionix.Models;
+using Audionix.Data;
 
 
 namespace Audionix.Components.Pages.Studio

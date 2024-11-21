@@ -3,7 +3,7 @@
 @using System.Text
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using Audionix.Shared.Data
+@using Audionix.Data
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IEmailSender<ApplicationUser> EmailSender
@@ -46,23 +46,34 @@ else
         if (Email is null)
         {
             RedirectManager.RedirectTo("");
+            return;
         }
 
-        var user = await UserManager.FindByEmailAsync(Email);
-        if (user is null)
+        try
         {
-            HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = "Error finding user for unspecified email";
+            var user = await UserManager.FindByEmailAsync(Email);
+            if (user is null)
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                statusMessage = "Error finding user for specified email";
+                return;
+            }
+
+            if (EmailSender is IdentityNoOpEmailSender)
+            {
+                // Once you add a real email sender, you should remove this code that lets you confirm the account
+                var userId = await UserManager.GetUserIdAsync(user);
+                var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                emailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
+                    NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+            }
         }
-        else if (EmailSender is IdentityNoOpEmailSender)
+        catch (Exception ex)
         {
-            // Once you add a real email sender, you should remove this code that lets you confirm the account
-            var userId = await UserManager.GetUserIdAsync(user);
-            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            emailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+            HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            statusMessage = $"An error occurred while processing your request: {ex.Message}";
         }
     }
 }

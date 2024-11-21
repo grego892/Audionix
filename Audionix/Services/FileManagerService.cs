@@ -1,10 +1,7 @@
-﻿using Audionix.Shared.Data;
-using Audionix.Shared.Models;
+﻿using Audionix.Models;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using Serilog;
-
 
 namespace Audionix.Services
 {
@@ -12,12 +9,12 @@ namespace Audionix.Services
     {
         private const int BufferSize = 81920; // 80 KB chunks
         long maxFileSize = 2L * 1024 * 1024 * 1024; // 2 GB
-        private readonly ApplicationDbContext _dbContext;
-        private readonly AppSettings? _appSettings;
+        private readonly AppDatabaseService _databaseService;
+        private readonly AppSettings _appSettings;
 
-        public FileManagerService(ApplicationDbContext dbContext, AppSettings? appSettings)
+        public FileManagerService(AppDatabaseService databaseService, AppSettings appSettings)
         {
-            _dbContext = dbContext;
+            _databaseService = databaseService;
             _appSettings = appSettings;
         }
 
@@ -26,7 +23,8 @@ namespace Audionix.Services
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
             // Filter out the files that already exist in the database before adding them to filesToUpload
-            var distinctFiles = selectedFiles.Where(file => !_dbContext.AudioFiles.Any(f => f.Filename == file.Name)).ToList();
+            var audioFiles = await _databaseService.GetAudioFilesAsync();
+            var distinctFiles = selectedFiles.Where(file => !audioFiles.Any(f => f.Filename == file.Name)).ToList();
             var existingFiles = selectedFiles.Except(distinctFiles).ToList();
 
             filesToUpload.Clear();
@@ -42,7 +40,7 @@ namespace Audionix.Services
             Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
 
             // Fetch the CallLetters for the selectedStation
-            var station = await _dbContext.Stations.AsNoTracking().FirstOrDefaultAsync(s => s.StationId == selectedStation);
+            var station = await _databaseService.GetStationByIdAsync(selectedStation);
             if (station == null)
             {
                 Log.Error("Station not found for StationId: {StationId}", selectedStation);
@@ -83,7 +81,7 @@ namespace Audionix.Services
 
                     Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
 
-                    var audioMetadataService = new AudioMetadataService(_dbContext);
+                    var audioMetadataService = new AudioMetadataService(_databaseService);
                     var audioMetadata = await audioMetadataService.GetMetadataAsync(path);
                     audioMetadata.Folder = selectedFolder;
                     await audioMetadataService.SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
@@ -94,35 +92,32 @@ namespace Audionix.Services
                 }
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _databaseService.SaveChangesAsync();
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
 
-
-        public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, ApplicationDbContext dbContext, Action getFolderFileList)
+        public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, Action getFolderFileList)
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
 
             // Fetch the audioMetadata without tracking it
-            var audioMetadataForDb = dbContext.AudioFiles.AsNoTracking().FirstOrDefault(am => am.Id == audioMetadata.Id);
+            var audioMetadataForDb = await _databaseService.GetAudioFileByIdAsync(audioMetadata.Id);
             if (audioMetadataForDb != null)
             {
-                // Attach the entity to the DbContext before removing it
-                dbContext.AudioFiles.Attach(audioMetadataForDb);
-                dbContext.AudioFiles.Remove(audioMetadataForDb);
-                await dbContext.SaveChangesAsync();
+                await _databaseService.DeleteAudioFileAsync(audioMetadataForDb);
             }
 
             getFolderFileList();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
-        public async Task AddFolder(Folder newFolder, Station selectedStation, ApplicationDbContext dbContext, ISnackbar snackbar)
+
+        public async Task AddFolder(Folder newFolder, Station selectedStation, ISnackbar snackbar)
         {
             try
             {
-                var existingFolder = await dbContext.Folders
-                    .FirstOrDefaultAsync(f => f.Name == newFolder.Name && f.StationId == selectedStation.StationId);
+                var existingFolders = await _databaseService.GetFoldersForStationAsync(selectedStation.StationId);
+                var existingFolder = existingFolders.FirstOrDefault(f => f.Name == newFolder.Name);
 
                 if (existingFolder != null)
                 {
@@ -137,8 +132,7 @@ namespace Audionix.Services
                     if (newFolder != null && selectedStation != null)
                     {
                         newFolder.StationId = selectedStation.StationId;
-                        dbContext.Folders.Add(newFolder);
-                        await dbContext.SaveChangesAsync();
+                        await _databaseService.AddFolderAsync(newFolder);
                     }
                 }
             }
@@ -154,7 +148,7 @@ namespace Audionix.Services
             try
             {
                 // Get the station associated with the folder
-                var station = await _dbContext.Stations.FirstOrDefaultAsync(s => s.StationId == folder.StationId);
+                var station = await _databaseService.GetStationByIdAsync(folder.StationId);
 
                 if (station != null)
                 {
@@ -169,8 +163,7 @@ namespace Audionix.Services
                     if (folder != null)
                     {
                         // Remove the folder from the database
-                        _dbContext.Folders.Remove(folder);
-                        await _dbContext.SaveChangesAsync();
+                        await _databaseService.DeleteFolderAsync(folder);
                     }
 
                     Log.Information("--- FileManager - RemoveFolder() -- Folder Removed: {FolderName}", folder.Name);
@@ -193,25 +186,21 @@ namespace Audionix.Services
                 throw new ArgumentException("Invalid station ID format", nameof(stationId));
             }
 
-            return await _dbContext.Folders
-                .Where(f => f.StationId == stationGuid)
-                .Select(f => f.Name)
-                .ToListAsync();
+            var folders = await _databaseService.GetFoldersForStationAsync(stationGuid);
+            return folders.Select(f => f.Name).ToList();
         }
 
-        public List<AudioMetadata> GetFolderFileList(Guid selectedStation, string selectedFolder, ApplicationDbContext dbContext)
+        public async Task<List<AudioMetadata>> GetFolderFileList(Guid selectedStation, string selectedFolder)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
-            var filesInDirectory = new List<AudioMetadata>();
+            var filesInDirectory = await _databaseService.GetAudioFilesAsync();
 
-            filesInDirectory = dbContext.AudioFiles
-                .AsNoTracking()
+            var filteredFiles = filesInDirectory
                 .Where(am => am.StationId == selectedStation && am.Folder == selectedFolder)
                 .ToList();
 
-
-            Log.Information("--- StationService - GetFolderFileList() -- End - filesInDirectory: {Count}", filesInDirectory.Count);
-            return filesInDirectory;
+            Log.Information("--- StationService - GetFolderFileList() -- End - filesInDirectory: {Count}", filteredFiles.Count);
+            return filteredFiles;
         }
     }
 }

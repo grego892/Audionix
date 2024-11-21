@@ -1,4 +1,4 @@
-﻿namespace Audionix.Shared.Models.MusicSchedule
+﻿namespace AudionixAudioServer.Models.MusicSchedule
 {
     public class PatternCategory
     {

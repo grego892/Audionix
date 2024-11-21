@@ -1,10 +1,9 @@
 ﻿@page "/setup"
 @rendermode InteractiveServer
 @using System.Net.Http.Json
-@using Audionix.Shared.Data
-@using Audionix.Shared
-@using Audionix.Shared.Data
-@using Audionix.Shared.Models
+@using Audionix.Data
+@using Audionix
+@using Audionix.Models
 @inject ApplicationDbContext DbContext
 @inject ISnackbar snackbar
 @inject NavigationManager NavigationManager
@@ -25,7 +24,7 @@
         <MudCardActions>
             @if (AppSettings != null)
             {
-                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Secondary" OnClick="SaveConfigurationAndRestart">Save Path</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Secondary" OnClick="SaveDataPath">Save Path</MudButton>
             }
         </MudCardActions>
     </MudCard>

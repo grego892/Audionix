@@ -1,14 +1,13 @@
 ﻿@using Audionix.Components.Pages
-@using Audionix.Shared
-@using Audionix.Shared.Data
+@using Audionix
+@using Audionix.Data
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
+@inject AppDatabaseService StationService
 @inject AppStateService AppStateService
-
 
 <AuthorizeView>
     <MudNavMenu>
@@ -38,7 +37,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        stations = await DbContext.Stations.ToListAsync();
+        stations = await StationService.GetStationsAsync();
         if (stations.Any() && AppStateService.station == null)
         {
             AppStateService.station = stations.First();

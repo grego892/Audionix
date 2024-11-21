@@ -1,4 +1,4 @@
-using Audionix.Shared.Data;
+using Audionix.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace Audionix.Components.Account

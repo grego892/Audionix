@@ -1,4 +1,6 @@
-﻿namespace Audionix.Shared.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Audionix.Models
 {
     public class ProgramLogItem
     {
@@ -8,10 +10,19 @@
         public string? Cue { get; set; }
         public string? Title { get; set; }
         public string? Artist { get; set; }
+
+        [Column(TypeName = "date")]
         public DateOnly? Date { get; set; }
+
+        [Column(TypeName = "time")]
         public TimeOnly TimeScheduled { get; set; }
+
+        [Column(TypeName = "time")]
         public TimeOnly TimeEstimated { get; set; }
+
+        [Column(TypeName = "time")]
         public TimeOnly TimePlayed { get; set; }
+
         public string? Name { get; set; }
         public string? Cart { get; set; }
         public string? Length { get; set; }

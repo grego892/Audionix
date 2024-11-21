@@ -1,15 +1,15 @@
-﻿using Audionix.Shared;
+﻿using Audionix;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using WavesurferBlazorWrapper;
-using System;
-using Audionix.Shared.Models;
+using Audionix.Models;
+using Audionix.Services;
 
 namespace Audionix.Components.Pages.FileManager
 {
     public partial class FileManager
     {
+
         private async Task EditAudio(AudioMetadata audioMetadata)
         {
             isUploading = true;
@@ -22,7 +22,6 @@ namespace Audionix.Components.Pages.FileManager
                 await StopAndEmptyWavePlayer();
 
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - finished StopAndEmptyWavePlayer() -- about the RequestFileFromAPI(audioMetadata)");
-
 
                 var url = await RequestFileFromAPI(audioMetadata);
 
@@ -106,11 +105,10 @@ namespace Audionix.Components.Pages.FileManager
             return string.Empty;
         }
 
-
         private async Task LoadFileIntoWavePlayer(string url, AudioMetadata audioMetadata)
         {
             wavePlayer?.Load(url);
-            audioMetadata = DbContext.AudioFiles.FirstOrDefault(am => am.Filename == audioMetadata.Filename);
+            audioMetadata = await AppDatabaseService.GetAudioFileByIdAsync(audioMetadata.Id);
         }
 
         private async Task UpdateWavePlayerRegions(AudioMetadata audioMetadata)
@@ -172,7 +170,6 @@ namespace Audionix.Components.Pages.FileManager
                 Log.Error("++++++ FileManager - UpdateWavePlayerRegions() -- No wavePlayer found");
             }
         }
-
 
         private void UpdateEditorFields(AudioMetadata audioMetadata)
         {

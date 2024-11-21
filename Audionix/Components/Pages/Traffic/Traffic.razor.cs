@@ -2,8 +2,8 @@ using Audionix.Components.Pages.MusicSchedule;
 using Audionix.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components;
-using Audionix.Shared.Models;
-using Audionix.Shared.Data;
+using Audionix.Models;
+using Audionix.Data;
 
 namespace Audionix.Components.Pages.Traffic;
 public partial class Traffic

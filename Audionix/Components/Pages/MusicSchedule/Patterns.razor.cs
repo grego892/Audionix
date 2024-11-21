@@ -1,4 +1,4 @@
-using Audionix.Shared.Models.MusicSchedule;
+using Audionix.Models.MusicSchedule;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;

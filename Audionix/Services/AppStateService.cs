@@ -1,4 +1,4 @@
-﻿using Audionix.Shared.Models;
+﻿using Audionix.Models;
 
 public class AppStateService
 {

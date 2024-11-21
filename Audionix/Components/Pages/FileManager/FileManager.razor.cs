@@ -5,10 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using WavesurferBlazorWrapper;
 using MudBlazor;
-using Audionix.Shared.Models;
-using Audionix.Shared.Models.MusicSchedule;
-using Audionix.Shared.Data;
-
+using Audionix.Models;
+using Audionix.Models.MusicSchedule;
+using Audionix.Data;
 
 namespace Audionix.Components.Pages.FileManager
 {
@@ -30,7 +29,7 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] public AppSettings? AppSettings { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
-        [Inject] public ApplicationDbContext? DbContext { get; set; }
+        [Inject] public AppDatabaseService? AppDatabaseService { get; set; }
         [Inject] public AppStateService? AppStateService { get; set; }
         [Inject] FileManagerService? FileManagerService { get; set; }
         [Inject] ISnackbar? Snackbar { get; set; }
@@ -45,20 +44,14 @@ namespace Audionix.Components.Pages.FileManager
         {
             Log.Information("--- FileManager - OnInitializedAsync() -- Initializing FileManager Page");
             folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
-            categories = await DbContext.Categories
-                            .Where(c => c.StationId == AppStateService.station.StationId)
-                            .AsNoTracking()
-                            .ToListAsync();
+            categories = await AppDatabaseService.GetCategoriesAsync(AppStateService.station.StationId);
             AppStateService.OnStationChanged += HandleStationChanged;
         }
 
         private async void HandleStationChanged(object? sender, EventArgs e)
         {
             folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
-            categories = await DbContext.Categories
-                .Where(c => c.StationId == AppStateService.station.StationId)
-                .AsNoTracking()
-                .ToListAsync();
+            categories = await AppDatabaseService.GetCategoriesAsync(AppStateService.station.StationId);
 
             filesInDirectory.Clear();
             SelectedFolder = string.Empty;
@@ -66,15 +59,14 @@ namespace Audionix.Components.Pages.FileManager
             StateHasChanged();
         }
 
-        private async Task<Task> GetFolderFileList(string selectedFolder)
+        private async Task GetFolderFileList(string selectedFolder)
         {
             SelectedFolder = selectedFolder;
 
-            if (FileManagerService != null && DbContext != null)
+            if (FileManagerService != null && AppDatabaseService != null)
             {
-                filesInDirectory = FileManagerService.GetFolderFileList(AppStateService.station.StationId, selectedFolder, DbContext) ?? new List<AudioMetadata>();
+                filesInDirectory = await FileManagerService.GetFolderFileList(AppStateService.station.StationId, selectedFolder);
             }
-            return Task.CompletedTask;
         }
 
         private async Task UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles)
@@ -100,17 +92,19 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task SongCategoryChanged(AudioMetadata audioMetadata, string newCategory)
         {
-            audioMetadata.SelectedCategory = newCategory;
-            DbContext?.AudioFiles.Update(audioMetadata);
-            await DbContext?.SaveChangesAsync();
-            Snackbar?.Add("Category updated successfully", Severity.Success);
+            if (AppDatabaseService != null)
+            {
+                audioMetadata.SelectedCategory = newCategory;
+                await AppDatabaseService.UpdateAudioMetadataAsync(audioMetadata);
+                Snackbar?.Add("Category updated successfully", Severity.Success);
+            }
         }
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
-            if (FileManagerSvc != null && DbContext != null)
+            if (FileManagerSvc != null && AppDatabaseService != null)
             {
-                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, AppSettings?.DataPath ?? string.Empty, DbContext, async () => await GetFolderFileList(SelectedFolder));
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, AppSettings?.DataPath ?? string.Empty, async () => await GetFolderFileList(SelectedFolder));
             }
         }
 

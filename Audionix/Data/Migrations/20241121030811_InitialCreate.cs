@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Audionix.Shared.Data.Migrations
+namespace Audionix.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -12,13 +13,27 @@ namespace Audionix.Shared.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AppSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DataPath = table.Column<string>(type: "text", nullable: true),
+                    IsDatapathSetup = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -29,21 +44,21 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "text", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,10 +69,9 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AudioDevices",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DeviceID = table.Column<string>(type: "TEXT", nullable: true),
-                    FriendlyName = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    DeviceID = table.Column<string>(type: "text", nullable: true),
+                    FriendlyName = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -68,8 +82,8 @@ namespace Audionix.Shared.Data.Migrations
                 name: "Grids",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 },
                 constraints: table =>
                 {
@@ -80,24 +94,24 @@ namespace Audionix.Shared.Data.Migrations
                 name: "MusicGridItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Hour = table.Column<string>(type: "TEXT", nullable: false),
-                    Sunday = table.Column<string>(type: "TEXT", nullable: false),
-                    Monday = table.Column<string>(type: "TEXT", nullable: false),
-                    Tuesday = table.Column<string>(type: "TEXT", nullable: false),
-                    Wednesday = table.Column<string>(type: "TEXT", nullable: false),
-                    Thursday = table.Column<string>(type: "TEXT", nullable: false),
-                    Friday = table.Column<string>(type: "TEXT", nullable: false),
-                    Saturday = table.Column<string>(type: "TEXT", nullable: false),
-                    SundayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    MondayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    TuesdayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    WednesdayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    ThursdayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    FridayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    SaturdayPatternId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Hour = table.Column<string>(type: "text", nullable: false),
+                    Sunday = table.Column<string>(type: "text", nullable: false),
+                    Monday = table.Column<string>(type: "text", nullable: false),
+                    Tuesday = table.Column<string>(type: "text", nullable: false),
+                    Wednesday = table.Column<string>(type: "text", nullable: false),
+                    Thursday = table.Column<string>(type: "text", nullable: false),
+                    Friday = table.Column<string>(type: "text", nullable: false),
+                    Saturday = table.Column<string>(type: "text", nullable: false),
+                    SundayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    MondayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TuesdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    WednesdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ThursdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    FridayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    SaturdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -108,9 +122,9 @@ namespace Audionix.Shared.Data.Migrations
                 name: "MusicPatterns",
                 columns: table => new
                 {
-                    PatternId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    PatternId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,11 +135,11 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RoleId = table.Column<string>(type: "TEXT", nullable: false),
-                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
-                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoleId = table.Column<string>(type: "text", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true),
+                    ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -142,11 +156,11 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
-                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true),
+                    ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -163,10 +177,10 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    ProviderKey = table.Column<string>(type: "TEXT", nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "TEXT", nullable: true),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                    LoginProvider = table.Column<string>(type: "text", nullable: false),
+                    ProviderKey = table.Column<string>(type: "text", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -183,8 +197,8 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    RoleId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,10 +221,10 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    LoginProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Value = table.Column<string>(type: "TEXT", nullable: true)
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    LoginProvider = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Value = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -227,13 +241,13 @@ namespace Audionix.Shared.Data.Migrations
                 name: "Stations",
                 columns: table => new
                 {
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    StationSortOrder = table.Column<int>(type: "INTEGER", nullable: false),
-                    CallLetters = table.Column<string>(type: "TEXT", nullable: true),
-                    Slogan = table.Column<string>(type: "TEXT", nullable: true),
-                    AudioDeviceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CurrentPlaying = table.Column<int>(type: "INTEGER", nullable: false),
-                    NextPlay = table.Column<int>(type: "INTEGER", nullable: false)
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StationSortOrder = table.Column<int>(type: "integer", nullable: false),
+                    CallLetters = table.Column<string>(type: "text", nullable: true),
+                    Slogan = table.Column<string>(type: "text", nullable: true),
+                    AudioDeviceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CurrentPlaying = table.Column<int>(type: "integer", nullable: false),
+                    NextPlay = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -250,11 +264,11 @@ namespace Audionix.Shared.Data.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryName = table.Column<string>(type: "TEXT", nullable: true),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TemplateId = table.Column<int>(type: "INTEGER", nullable: true),
-                    TemplatePatternId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryName = table.Column<string>(type: "text", nullable: true),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TemplateId = table.Column<int>(type: "integer", nullable: true),
+                    TemplatePatternId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -270,23 +284,23 @@ namespace Audionix.Shared.Data.Migrations
                 name: "AudioFiles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Filename = table.Column<string>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Artist = table.Column<string>(type: "TEXT", nullable: false),
-                    Intro = table.Column<short>(type: "INTEGER", nullable: false),
-                    Segue = table.Column<short>(type: "INTEGER", nullable: false),
-                    StartDate = table.Column<int>(type: "INTEGER", nullable: false),
-                    EndDate = table.Column<int>(type: "INTEGER", nullable: false),
-                    NoFade = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ProtectNextIntro = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IntroSeconds = table.Column<double>(type: "REAL", nullable: false),
-                    SegueSeconds = table.Column<double>(type: "REAL", nullable: false),
-                    Duration = table.Column<double>(type: "REAL", nullable: false),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Folder = table.Column<string>(type: "TEXT", nullable: true),
-                    SelectedCategory = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Filename = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Artist = table.Column<string>(type: "text", nullable: false),
+                    Intro = table.Column<short>(type: "smallint", nullable: false),
+                    Segue = table.Column<short>(type: "smallint", nullable: false),
+                    StartDate = table.Column<int>(type: "integer", nullable: false),
+                    EndDate = table.Column<int>(type: "integer", nullable: false),
+                    NoFade = table.Column<bool>(type: "boolean", nullable: false),
+                    ProtectNextIntro = table.Column<bool>(type: "boolean", nullable: false),
+                    IntroSeconds = table.Column<double>(type: "double precision", nullable: false),
+                    SegueSeconds = table.Column<double>(type: "double precision", nullable: false),
+                    Duration = table.Column<double>(type: "double precision", nullable: false),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Folder = table.Column<string>(type: "text", nullable: true),
+                    SelectedCategory = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -303,10 +317,10 @@ namespace Audionix.Shared.Data.Migrations
                 name: "Folders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -323,30 +337,30 @@ namespace Audionix.Shared.Data.Migrations
                 name: "Log",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    LogOrderID = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: true),
-                    Cue = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Artist = table.Column<string>(type: "TEXT", nullable: true),
-                    Date = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    TimeScheduled = table.Column<TimeOnly>(type: "TEXT", nullable: false),
-                    TimeEstimated = table.Column<TimeOnly>(type: "TEXT", nullable: false),
-                    TimePlayed = table.Column<TimeOnly>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Cart = table.Column<string>(type: "TEXT", nullable: true),
-                    Length = table.Column<string>(type: "TEXT", nullable: true),
-                    Segue = table.Column<string>(type: "TEXT", nullable: true),
-                    Category = table.Column<string>(type: "TEXT", nullable: true),
-                    From = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Passthrough = table.Column<string>(type: "TEXT", nullable: true),
-                    States = table.Column<string>(type: "TEXT", nullable: true),
-                    Device = table.Column<int>(type: "INTEGER", nullable: true),
-                    sID = table.Column<int>(type: "INTEGER", nullable: true),
-                    Progress = table.Column<double>(type: "REAL", nullable: false),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LogOrderID = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: true),
+                    Cue = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Artist = table.Column<string>(type: "text", nullable: true),
+                    Date = table.Column<DateOnly>(type: "date", nullable: true),
+                    TimeScheduled = table.Column<TimeOnly>(type: "time", nullable: false),
+                    TimeEstimated = table.Column<TimeOnly>(type: "time", nullable: false),
+                    TimePlayed = table.Column<TimeOnly>(type: "time", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Cart = table.Column<string>(type: "text", nullable: true),
+                    Length = table.Column<string>(type: "text", nullable: true),
+                    Segue = table.Column<string>(type: "text", nullable: true),
+                    Category = table.Column<string>(type: "text", nullable: true),
+                    From = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Passthrough = table.Column<string>(type: "text", nullable: true),
+                    States = table.Column<string>(type: "text", nullable: true),
+                    Device = table.Column<int>(type: "integer", nullable: true),
+                    sID = table.Column<int>(type: "integer", nullable: true),
+                    Progress = table.Column<double>(type: "double precision", nullable: false),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -363,13 +377,13 @@ namespace Audionix.Shared.Data.Migrations
                 name: "PatternCategories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    MusicPatternSortOrder = table.Column<int>(type: "INTEGER", nullable: false),
-                    MusicPatternId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryName = table.Column<string>(type: "TEXT", nullable: false),
-                    StationId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    MusicPatternSortOrder = table.Column<int>(type: "integer", nullable: false),
+                    MusicPatternId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryName = table.Column<string>(type: "text", nullable: false),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -387,6 +401,12 @@ namespace Audionix.Shared.Data.Migrations
                         principalColumn: "PatternId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppSettings_Id",
+                table: "AppSettings",
+                column: "Id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -464,6 +484,9 @@ namespace Audionix.Shared.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AppSettings");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

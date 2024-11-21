@@ -1,7 +1,6 @@
 using Audionix.Components.Account;
 using Audionix.Components;
-using Audionix.Shared.Data;
-using Audionix.Shared.Models;
+using Audionix.Data;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -11,16 +10,12 @@ using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
-using System.Net.NetworkInformation;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Services
 ConfigureServices(builder);
-
-// Settings
-await ConfigureSettings(builder);
 
 // Authentication
 ConfigureAuthentication(builder);
@@ -29,7 +24,7 @@ ConfigureAuthentication(builder);
 ConfigureIdentity(builder);
 
 // Database
-ConfigureDatabase(builder);
+//ConfigureDatabase(builder);
 
 // Logger
 ConfigureLogger(builder);
@@ -77,17 +72,17 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddControllers();
 
     builder.Services.AddSingleton<AppStateService>();
-}
+    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddScoped<AppDatabaseService>();
 
-async Task ConfigureSettings(WebApplicationBuilder builder)
-{
-    var appSettingsService = new AppSettingsService();
-    builder.Services.AddSingleton(appSettingsService);
-
-    var config = await appSettingsService.GetOrCreateConfigurationAsync();
-    builder.Services.AddSingleton(config);
-
-    Log.Information($"--- Program.cs - config.LoggingPath: {config.LoggingPath}", config.LoggingPath);
+    // Register AppSettings
+    builder.Services.AddSingleton(sp =>
+    {
+        using var scope = sp.CreateScope();
+        var databaseService = scope.ServiceProvider.GetRequiredService<AppDatabaseService>();
+        return databaseService.GetAppSettingsAsync().GetAwaiter().GetResult();
+    });
 }
 
 void ConfigureAuthentication(WebApplicationBuilder builder)
@@ -108,20 +103,11 @@ void ConfigureIdentity(WebApplicationBuilder builder)
     .AddDefaultTokenProviders();
 }
 
-void ConfigureDatabase(WebApplicationBuilder builder)
-{
-    var databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Database", "Audionix.db");
-
-    var databaseDirectory = Path.GetDirectoryName(databasePath);
-    if (string.IsNullOrEmpty(databaseDirectory))
-    {
-        Log.Error("--- Program.cs - Database directory path is null or empty.");
-        throw new ArgumentNullException(nameof(databaseDirectory), "Database directory path cannot be null or empty.");
-    }
-    Directory.CreateDirectory(databaseDirectory);
-    var connectionString = $"Data Source={databasePath}";
-    builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
-}
+//void ConfigureDatabase(WebApplicationBuilder builder)
+//{
+//    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+//}
 
 void ConfigureLogger(WebApplicationBuilder builder)
 {

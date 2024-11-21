@@ -2,8 +2,9 @@ using AudionixAudioServer;
 using AudionixAudioServer.Services;
 using Serilog.Settings.Configuration;
 using Serilog;
-using Audionix.Shared.Data;
+using AudionixAudioServer.Data;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -21,6 +22,12 @@ Log.Logger = new LoggerConfiguration()
 //
 
 // DATABASE
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+
+
 var databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Database", "Audionix.db");
 var databaseDirectory = Path.GetDirectoryName(databasePath);
 if (string.IsNullOrEmpty(databaseDirectory))
@@ -28,9 +35,9 @@ if (string.IsNullOrEmpty(databaseDirectory))
     Log.Error("--- Program.cs - Database directory path is null or empty.");
     throw new ArgumentNullException(nameof(databaseDirectory), "Database directory path cannot be null or empty.");
 }
-Directory.CreateDirectory(databaseDirectory);
-var connectionString = $"Data Source={databasePath}";
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+//Directory.CreateDirectory(databaseDirectory);
+//var connectionString = $"Data Source={databasePath}";
+//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 //
 
 // ConfigurationService

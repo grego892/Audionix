@@ -1,4 +1,4 @@
-﻿namespace Audionix.Shared.Models.MusicSchedule 
+﻿namespace Audionix.Models.MusicSchedule 
 {
     public class MusicGridItem
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Audionix.Shared.Models.MusicSchedule
+namespace AudionixAudioServer.Models.MusicSchedule
 {
     public class Grid
     {

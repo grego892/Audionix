@@ -1,5 +1,5 @@
-﻿@using Audionix.Shared.Data
-@using Audionix.Shared
+﻿@using Audionix.Data
+@using Audionix
 @using Audionix.Services
 @using Serilog
 @inherits LayoutComponentBase
@@ -45,7 +45,6 @@
     private string userName = "";
     private Color buttonColor = Color.Error;
     private bool isLoginPage = false;
-    [Inject] private AppSettingsService? AppSettingsService { get; set; }
     [Inject] private NavigationManager? NavigationManager { get; set; }
     [Inject] private IDialogService? DialogService { get; set; }
     [CascadingParameter]

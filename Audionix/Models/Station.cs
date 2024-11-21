@@ -1,4 +1,4 @@
-﻿namespace Audionix.Shared.Models
+﻿namespace Audionix.Models
 {
     public class Station
     {

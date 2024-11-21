@@ -1,4 +1,4 @@
-﻿namespace Audionix.Shared.Models
+﻿namespace AudionixAudioServer.Models
 {
     public class AudioDevice
     {

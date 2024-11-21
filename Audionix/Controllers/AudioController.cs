@@ -2,8 +2,8 @@
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
-using Audionix.Shared;
-using Audionix.Shared.Models;
+using Audionix;
+using Audionix.Models;
 
 [Route("api/[controller]")]
 [ApiController]

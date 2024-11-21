@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Serilog;
 using Audionix.Services;
-using Audionix.Shared;
-using System.ServiceProcess;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using Audionix.Shared.Models;
+using Audionix.Models;
 using NAudio.CoreAudioApi;
 
 namespace Audionix.Components.Pages
@@ -22,23 +19,22 @@ namespace Audionix.Components.Pages
         private Station? selectedStation;
         private List<AudioDevice> audioDevices = new List<AudioDevice>();
         private List<Folder> folders = new List<Folder>();
-        private AudioDevice? selectedAudioDevice = new AudioDevice(); // Initialize to avoid warning
-        private AppSettings? AppConfig { get; set; }
-        [Inject] private AppSettingsService AppSettingsService { get; set; } = null!;
+        private AudioDevice? selectedAudioDevice = new AudioDevice();
+        private AppSettings? appSettings;
         [Inject] ISnackbar? Snackbar { get; set; }
         [Inject] private FileManagerService FileManagerService { get; set; } = null!;
-
+        [Inject] private AppDatabaseService AppDatabaseService { get; set; } = null!;
 
         public string DataPath
         {
-            get => AppSettings?.DataPath ?? string.Empty;
+            get => appSettings?.DataPath ?? string.Empty;
             set
             {
-                if (AppSettings != null)
+                if (appSettings != null)
                 {
                     if (IsValidPath(value))
                     {
-                        AppSettings.DataPath = value;
+                        appSettings.DataPath = value;
                     }
                     else
                     {
@@ -51,9 +47,9 @@ namespace Audionix.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Initializing");
-            AppSettings = await AppSettingsService.GetOrCreateConfigurationAsync();
-            oldDataPath = AppSettings.DataPath;
-            stations = await DbContext.Stations.ToListAsync();
+            appSettings = await AppDatabaseService.GetAppSettingsAsync();
+            oldDataPath = appSettings.DataPath;
+            stations = await AppDatabaseService.GetStationsAsync();
             audioDevices = GetWasapiOutputDevices();
 
             if (audioDevices == null || !audioDevices.Any())
@@ -108,9 +104,9 @@ namespace Audionix.Components.Pages
 
                 DbContext.Stations.Add(newStation);
                 DbContext.SaveChanges();
-                if (AppSettings != null)
+                if (appSettings != null)
                 {
-                    AppSettingsService.AddStationToDataPath(newStation, AppSettings);
+                    AppDatabaseService.AddStationToDataPath(newStation, appSettings);
                 }
                 StateHasChanged();
                 NavigationManager.NavigateTo(NavigationManager.Uri, true);
@@ -181,18 +177,19 @@ namespace Audionix.Components.Pages
             StationEditing = Guid.Empty;
         }
 
-        public async Task SaveConfigurationAndRestart()
+        public async Task SaveDataPath()
         {
-            Log.Information("--- Setup - SaveConfigurationAndRestart() -- Saving Configuration and Restarting");
+            Log.Information("--- Setup - SaveConfigurationAndRestart() -- Saving Configuration");
             Log.Information("--- Setup - SaveConfigurationAndRestart() -- Old Data Path: {OldDataPath}", oldDataPath);
-            if (AppSettings != null)
+            if (appSettings != null)
             {
-                AppSettings.DataPath = DataPath;
-                await AppSettingsService.SaveConfigurationAsync(DataPath);
+                appSettings.DataPath = DataPath;
+                appSettings.IsDatapathSetup = true;
+                await AppDatabaseService.SaveConfigurationAsync(appSettings);
                 Log.Information("--- Setup - SaveConfigurationAndRestart() -- New Data Path: {DataPath}", DataPath);
-                //await AppSettingsService.MoveDatabaseAndLoggingFoldersAsync(oldDataPath, DataPath);
             }
-            RestartService();
+            AppSettings.IsDatapathSetup = true;
+            StateHasChanged();
         }
 
         public void RestartService()
@@ -208,13 +205,14 @@ namespace Audionix.Components.Pages
             }
         }
 
-        private async void AddFolder()
+        private async Task AddFolder()
         {
             if (selectedStation != null && Snackbar != null)
             {
-                await FileManagerService.AddFolder(newFolder, selectedStation, DbContext, Snackbar);
+                await FileManagerService.AddFolder(newFolder, selectedStation, Snackbar);
                 newFolder = new Folder();
-                LoadFolders();
+                await LoadFolders();
+                StateHasChanged();
             }
         }
 
@@ -231,18 +229,19 @@ namespace Audionix.Components.Pages
             }
         }
 
-        private async void LoadFolders()
+        private async Task LoadFolders()
         {
             if (selectedStation != null)
             {
-                folders = await DbContext.Folders.Where(f => f.StationId == selectedStation.StationId).ToListAsync();
+                folders = await AppDatabaseService.GetFoldersForStationAsync(selectedStation.StationId);
+                StateHasChanged();
             }
         }
 
-        private async void RemoveFolder(Folder folder)
+        private async Task RemoveFolder(Folder folder)
         {
             await FileManagerService.RemoveFolder(folder);
-            LoadFolders();
+            await LoadFolders();
         }
 
         private void MoveStationUp(Station station)
@@ -324,6 +323,5 @@ namespace Audionix.Components.Pages
                 return "Unknown Device";
             }
         }
-
     }
 }

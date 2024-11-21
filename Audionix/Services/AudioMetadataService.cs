@@ -1,18 +1,19 @@
 ﻿using Serilog;
 using ATL;
-using Microsoft.EntityFrameworkCore;
-using Audionix.Shared.Models;
-using Audionix.Shared.Data;
+using Audionix.Models;
+using Audionix.Services;
 
 namespace Audionix.Services
 {
     public class AudioMetadataService
     {
-        private readonly ApplicationDbContext _dbContext;
-        public AudioMetadataService(ApplicationDbContext dbContext)
+        private readonly AppDatabaseService _databaseService;
+
+        public AudioMetadataService(AppDatabaseService databaseService)
         {
-            _dbContext = dbContext;
+            _databaseService = databaseService;
         }
+
         public async Task<AudioMetadata> GetMetadataAsync(string filepath)
         {
             Track? theTrack = null;
@@ -81,18 +82,17 @@ namespace Audionix.Services
             };
 
             // Find the station with the selected call letters and assign its ID to StationId
-            var station = _dbContext.Stations.AsNoTracking().FirstOrDefault(s => s.StationId == selectedStation);
+            var station = await _databaseService.GetStationByIdAsync(selectedStation);
             if (station != null)
             {
                 audioMetadataForDb.StationId = station.StationId;
             }
             else
             {
-                Log.Error("Station with call letters {CallLetters} not found", selectedStation);
+                Log.Error("Station with ID {StationId} not found", selectedStation);
             }
 
-            _dbContext.AudioFiles.Add(audioMetadataForDb);
-            await _dbContext.SaveChangesAsync();
+            await _databaseService.AddAudioFileAsync(audioMetadataForDb);
         }
     }
 }
