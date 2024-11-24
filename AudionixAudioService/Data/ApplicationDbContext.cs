@@ -1,10 +1,12 @@
 using AudionixAudioServer.Models.MusicSchedule;
 using AudionixAudioServer.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace AudionixAudioServer.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -14,19 +16,19 @@ namespace AudionixAudioServer.Data
             Log = Set<ProgramLogItem>();
             Categories = Set<Category>();
             MusicPatterns = Set<MusicPattern>();
-            Grids = Set<Grid>();
             PatternCategories = Set<PatternCategory>();
             MusicGridItems = Set<MusicGridItem>();
             AudioDevices = Set<AudioDevice>();
+            AppSettings = Set<AppSettings>();
         }
 
+        public DbSet<AppSettings> AppSettings { get; set; }
         public DbSet<Station> Stations { get; set; }
         public DbSet<AudioMetadata> AudioFiles { get; set; }
         public DbSet<Folder> Folders { get; set; }
         public DbSet<ProgramLogItem> Log { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<MusicPattern> MusicPatterns { get; set; }
-        public DbSet<Grid> Grids { get; set; }
         public DbSet<PatternCategory> PatternCategories { get; set; }
         public DbSet<MusicGridItem> MusicGridItems { get; set; }
         public DbSet<AudioDevice> AudioDevices { get; set; }
@@ -67,10 +69,6 @@ namespace AudionixAudioServer.Data
                 .WithMany(s => s.ProgramLogItems)
                 .HasForeignKey(pl => pl.StationId);
 
-            // Configure Grid entity if necessary
-            modelBuilder.Entity<Grid>()
-                .HasKey(g => g.Id);
-
             // Configure MusicGridItem entity
             modelBuilder.Entity<MusicGridItem>()
                 .HasKey(mgi => mgi.Id);
@@ -80,6 +78,11 @@ namespace AudionixAudioServer.Data
                 .HasOne(s => s.AudioDevice)
                 .WithMany()
                 .HasForeignKey(s => s.AudioDeviceId);
+
+            // Add unique constraint to AppSettings Id
+            modelBuilder.Entity<AppSettings>()
+                .HasIndex(a => a.Id)
+                .IsUnique();
         }
     }
 }

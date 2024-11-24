@@ -4,12 +4,17 @@ using Serilog;
 using WavesurferBlazorWrapper;
 using Audionix.Models;
 using Audionix.Services;
+using Audionix.Repositories;
 
 namespace Audionix.Components.Pages.FileManager
 {
     public partial class FileManager
     {
-
+        private readonly IStationRepository _stationRepository;
+        public FileManager(IStationRepository stationRepository)
+        {
+            _stationRepository = stationRepository;
+        }
         private async Task EditAudio(AudioMetadata audioMetadata)
         {
             isUploading = true;
@@ -108,7 +113,7 @@ namespace Audionix.Components.Pages.FileManager
         private async Task LoadFileIntoWavePlayer(string url, AudioMetadata audioMetadata)
         {
             wavePlayer?.Load(url);
-            audioMetadata = await AppDatabaseService.GetAudioFileByIdAsync(audioMetadata.Id);
+            audioMetadata = await _stationRepository.GetAudioFileByIdAsync(audioMetadata.Id);
         }
 
         private async Task UpdateWavePlayerRegions(AudioMetadata audioMetadata)

@@ -2,6 +2,8 @@ using Audionix.Components.Account;
 using Audionix.Components;
 using Audionix.Data;
 using Audionix.Services;
+using Audionix.Repositories;
+using Audionix.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,9 @@ using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
+using DataAccess.UnitOfWork;
+using Audionix.DataAccess;
+using Microsoft.AspNetCore.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +41,9 @@ var app = builder.Build();
 
 // Database Migration
 MigrateDatabase(app);
+
+// Seed Data
+await SeedDataAsync(app);
 
 // Middleware
 ConfigureMiddleware(app);
@@ -71,29 +79,42 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddHostedService<AudionixService>()
     .AddControllers();
 
-    builder.Services.AddSingleton<AppStateService>();
-    builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    builder.Services.AddScoped<AppDatabaseService>();
-
-    // Register AppSettings
-    builder.Services.AddSingleton(sp =>
-    {
-        using var scope = sp.CreateScope();
-        var databaseService = scope.ServiceProvider.GetRequiredService<AppDatabaseService>();
-        return databaseService.GetAppSettingsAsync().GetAwaiter().GetResult();
-    });
+    builder.Services.AddSingleton<AppStateService>(); // Register AppStateService
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddScoped<IStationRepository, StationRepository>(); // Register IStationRepository with its implementation
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); // Register IUnitOfWork with its implementation
+    builder.Services.AddSingleton<AppSettings>();
 }
+
+//void ConfigureAuthentication(WebApplicationBuilder builder)
+//{
+//    builder.Services.AddAuthentication(options =>
+//    {
+//        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+//        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+//    })
+//    .AddIdentityCookies();
+//}
 
 void ConfigureAuthentication(WebApplicationBuilder builder)
 {
-    builder.Services.AddAuthentication(options =>
+    if (builder.Environment.IsDevelopment())
     {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
+        builder.Services.AddAuthentication("Development")
+            .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>("Development", options => { });
+    }
+    else
+    {
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+        })
+        .AddIdentityCookies();
+    }
 }
+
 
 void ConfigureIdentity(WebApplicationBuilder builder)
 {
@@ -102,12 +123,6 @@ void ConfigureIdentity(WebApplicationBuilder builder)
     .AddSignInManager()
     .AddDefaultTokenProviders();
 }
-
-//void ConfigureDatabase(WebApplicationBuilder builder)
-//{
-//    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-//}
 
 void ConfigureLogger(WebApplicationBuilder builder)
 {
@@ -170,6 +185,24 @@ void MigrateDatabase(WebApplication app)
         catch (Exception ex)
         {
             Log.Error(ex, "++++++ Program.cs - An error occurred while migrating the database.");
+        }
+    }
+}
+
+async Task SeedDataAsync(WebApplication app)
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        try
+        {
+            await SeedData.Initialize(services, userManager);
+            Log.Information("--- Program - Seed data completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "++++++ Program.cs - An error occurred while seeding the database.");
         }
     }
 }

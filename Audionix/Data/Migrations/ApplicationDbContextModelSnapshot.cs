@@ -106,6 +106,14 @@ namespace Audionix.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("AppSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DataPath = "C:\\Program Files\\Audionix\\AudionixAudio",
+                            IsDatapathSetup = false
+                        });
                 });
 
             modelBuilder.Entity("Audionix.Models.AudioDevice", b =>

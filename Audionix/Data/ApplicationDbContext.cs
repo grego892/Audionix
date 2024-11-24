@@ -83,6 +83,17 @@ namespace Audionix.Data
             modelBuilder.Entity<AppSettings>()
                 .HasIndex(a => a.Id)
                 .IsUnique();
+
+            // Seed data for AppSettings
+            modelBuilder.Entity<AppSettings>().HasData(
+                new AppSettings
+                {
+                    Id = 1,
+                    DataPath = "C:\\Program Files\\Audionix\\AudionixAudio",
+                    IsDatapathSetup = false
+                }
+            );
         }
+
     }
 }

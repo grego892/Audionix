@@ -8,13 +8,6 @@ namespace Audionix.Services
 {
     public class AudionixService : IHostedService
     {
-        private readonly AppSettings _appSettings;
-
-        public AudionixService(AppSettings appSettings)
-        {
-            _appSettings = appSettings;
-        }
-
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Log.Information("+++ AudionixService - StartAsync() -- Audionix Service starting");

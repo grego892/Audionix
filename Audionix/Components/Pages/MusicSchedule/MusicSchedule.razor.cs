@@ -1,5 +1,6 @@
 ﻿using Audionix.Models;
 using Audionix.Models.MusicSchedule;
+using Audionix.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Serilog;
@@ -10,7 +11,7 @@ namespace Audionix.Components.Pages.MusicSchedule
     {
         public DateTime? MusicLogDate { get; set; } = DateTime.Now.Date.AddDays(1);
         [Inject] private AppStateService? AppStateService { get; set; }
-        [Inject] private AppDatabaseService? DatabaseService { get; set; }
+        [Inject] private IStationRepository? StationRepository { get; set; }
 
         private List<Guid> musicPatterns = new();
         private List<Category> categoryList = new();
@@ -20,15 +21,15 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task SchedulePressed()
         {
-            if (MusicLogDate.HasValue && DatabaseService != null && AppStateService?.station != null)
+            if (MusicLogDate.HasValue && StationRepository != null && AppStateService?.station != null)
             {
                 var dayOfWeek = MusicLogDate.Value.DayOfWeek;
                 var stationId = AppStateService.station.StationId;
-                musicPatterns = await DatabaseService.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
-                categoryList = await DatabaseService.GetCategoriesForPatternsAsync(musicPatterns);
-                scheduledSongs = await DatabaseService.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
+                musicPatterns = await StationRepository.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
+                categoryList = await StationRepository.GetCategoriesForPatternsAsync(musicPatterns);
+                scheduledSongs = await StationRepository.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
-                await DatabaseService.AddNewDayLogToDbLogAsync(newDaysLog);
+                await StationRepository.AddNewDayLogToDbLogAsync(newDaysLog);
             }
         }
 

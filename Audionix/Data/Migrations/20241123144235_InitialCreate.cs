@@ -79,18 +79,6 @@ namespace Audionix.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Grids",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Grids", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MusicGridItems",
                 columns: table => new
                 {
@@ -402,6 +390,11 @@ namespace Audionix.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "AppSettings",
+                columns: new[] { "Id", "DataPath", "IsDatapathSetup" },
+                values: new object[] { 1, "C:\\Program Files\\Audionix\\AudionixAudio", false });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AppSettings_Id",
                 table: "AppSettings",
@@ -482,61 +475,58 @@ namespace Audionix.Data.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "AppSettings");
+        //protected override void Down(MigrationBuilder migrationBuilder)
+        //{
+        //    migrationBuilder.DropTable(
+        //        name: "AppSettings");
 
-            migrationBuilder.DropTable(
-                name: "AspNetRoleClaims");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetRoleClaims");
 
-            migrationBuilder.DropTable(
-                name: "AspNetUserClaims");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetUserClaims");
 
-            migrationBuilder.DropTable(
-                name: "AspNetUserLogins");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetUserLogins");
 
-            migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetUserRoles");
 
-            migrationBuilder.DropTable(
-                name: "AspNetUserTokens");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetUserTokens");
 
-            migrationBuilder.DropTable(
-                name: "AudioFiles");
+        //    migrationBuilder.DropTable(
+        //        name: "AudioFiles");
 
-            migrationBuilder.DropTable(
-                name: "Folders");
+        //    migrationBuilder.DropTable(
+        //        name: "Folders");
 
-            migrationBuilder.DropTable(
-                name: "Grids");
+        //    migrationBuilder.DropTable(
+        //        name: "Log");
 
-            migrationBuilder.DropTable(
-                name: "Log");
+        //    migrationBuilder.DropTable(
+        //        name: "MusicGridItems");
 
-            migrationBuilder.DropTable(
-                name: "MusicGridItems");
+        //    migrationBuilder.DropTable(
+        //        name: "PatternCategories");
 
-            migrationBuilder.DropTable(
-                name: "PatternCategories");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetRoles");
 
-            migrationBuilder.DropTable(
-                name: "AspNetRoles");
+        //    migrationBuilder.DropTable(
+        //        name: "AspNetUsers");
 
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
+        //    migrationBuilder.DropTable(
+        //        name: "Stations");
 
-            migrationBuilder.DropTable(
-                name: "Stations");
+        //    migrationBuilder.DropTable(
+        //        name: "Categories");
 
-            migrationBuilder.DropTable(
-                name: "Categories");
+        //    migrationBuilder.DropTable(
+        //        name: "AudioDevices");
 
-            migrationBuilder.DropTable(
-                name: "AudioDevices");
-
-            migrationBuilder.DropTable(
-                name: "MusicPatterns");
-        }
+        //    migrationBuilder.DropTable(
+        //        name: "MusicPatterns");
+        //}
     }
 }

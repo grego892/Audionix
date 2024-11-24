@@ -1,34 +1,43 @@
 ﻿@using Audionix.Components.Pages
 @using Audionix
 @using Audionix.Data
+@using Audionix.Models
+@using Audionix.Repositories
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
-@inject AppDatabaseService StationService
 @inject AppStateService AppStateService
+@inject IStationRepository StationRepository
 
 <AuthorizeView>
     <MudNavMenu>
-        <MudSelect Class="pa-2" Margin="Margin.Dense" T="Guid" Label="Station" Value="@(AppStateService.station?.StationId ?? Guid.Empty)" ValueChanged="OnStationChanged" Variant="Variant.Outlined" Placeholder="Select a station">
-            @foreach (var station in stations)
-            {
-                <MudSelectItem Value="@station.StationId">@(station.CallLetters ?? null)</MudSelectItem>
-            }
-        </MudSelect>
-        <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-        <MudNavLink Href="/studio" Icon="@Icons.Material.Filled.Mic">Studio</MudNavLink>
-        <MudNavLink Href="/filemanager" Icon="@Icons.Material.Filled.AudioFile">File Manager</MudNavLink>
-        <MudNavLink Href="/traffic" Icon="@Icons.Material.Filled.Traffic">Traffic</MudNavLink>
-        <MudNavLink Href="/musicschedule" Icon="@Icons.Material.Filled.MusicNote">Schedule Music</MudNavLink>
-        <MudNavGroup Title="Music Util" Expanded="false">
-            <MudNavLink Href="/categories" Icon="@Icons.Material.Filled.Category">Categories</MudNavLink>
-            <MudNavLink Href="/patterns" Icon="@Icons.Material.Filled.Pattern">Patterns</MudNavLink>
-            <MudNavLink Href="/musicgrid" Icon="@Icons.Material.Filled.Grid4x4">Music Grid</MudNavLink>
-        </MudNavGroup>
-        <MudNavLink Href="/audioedit" Icon="@Icons.Material.Filled.Edit">Audio Editor</MudNavLink>
-        <MudNavLink Href="/setup" Icon="@Icons.Material.Filled.Settings">Setup</MudNavLink>
+        @if (AppStateService.AppSettings?.IsDatapathSetup == true && stations.Count > 0)
+        {
+            <MudSelect Class="pa-2" Margin="Margin.Dense" T="Guid" Label="Station" Value="@(AppStateService.station?.StationId ?? Guid.Empty)" ValueChanged="OnStationChanged" Variant="Variant.Outlined" Placeholder="Select a station">
+                @foreach (var station in stations)
+                {
+                    <MudSelectItem Value="@station.StationId">@(station.CallLetters ?? null)</MudSelectItem>
+                }
+            </MudSelect>
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavLink Href="/studio" Icon="@Icons.Material.Filled.Mic">Studio</MudNavLink>
+            <MudNavLink Href="/filemanager" Icon="@Icons.Material.Filled.AudioFile">File Manager</MudNavLink>
+            <MudNavLink Href="/traffic" Icon="@Icons.Material.Filled.Traffic">Traffic</MudNavLink>
+            <MudNavLink Href="/musicschedule" Icon="@Icons.Material.Filled.MusicNote">Schedule Music</MudNavLink>
+            <MudNavGroup Title="Music Util" Expanded="false">
+                <MudNavLink Href="/categories" Icon="@Icons.Material.Filled.Category">Categories</MudNavLink>
+                <MudNavLink Href="/patterns" Icon="@Icons.Material.Filled.Pattern">Patterns</MudNavLink>
+                <MudNavLink Href="/musicgrid" Icon="@Icons.Material.Filled.Grid4x4">Music Grid</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/audioedit" Icon="@Icons.Material.Filled.Edit">Audio Editor</MudNavLink>
+            <MudNavLink Href="/setup" Icon="@Icons.Material.Filled.Settings">Setup</MudNavLink>
+        }
+        else
+        {
+            <MudNavLink Href="/setup" Icon="@Icons.Material.Filled.Settings">Initial Setup</MudNavLink>
+        }
     </MudNavMenu>
 </AuthorizeView>
 
@@ -37,7 +46,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        stations = await StationService.GetStationsAsync();
+        AppStateService.OnAppSettingsChanged += HandleAppSettingsChanged;
+        await AppStateService.LoadAppSettingsAsync(StationRepository);
+        stations = await StationRepository.GetStationsAsync();
         if (stations.Any() && AppStateService.station == null)
         {
             AppStateService.station = stations.First();
@@ -56,8 +67,14 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private void HandleAppSettingsChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
     public void Dispose()
     {
         AppStateService.OnStationChanged -= HandleStationChanged;
+        AppStateService.OnAppSettingsChanged -= HandleAppSettingsChanged;
     }
 }

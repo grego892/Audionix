@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241121030811_InitialCreate")]
+    [Migration("20241123144235_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -109,6 +109,14 @@ namespace Audionix.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("AppSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DataPath = "C:\\Program Files\\Audionix\\AudionixAudio",
+                            IsDatapathSetup = false
+                        });
                 });
 
             modelBuilder.Entity("Audionix.Models.AudioDevice", b =>
@@ -236,19 +244,6 @@ namespace Audionix.Data.Migrations
                     b.HasIndex("TemplatePatternId");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Audionix.Models.MusicSchedule.Grid", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Grids");
                 });
 
             modelBuilder.Entity("Audionix.Models.MusicSchedule.MusicGridItem", b =>

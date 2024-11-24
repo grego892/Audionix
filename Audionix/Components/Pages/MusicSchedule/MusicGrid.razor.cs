@@ -1,4 +1,5 @@
 using Audionix.Models.MusicSchedule;
+using Audionix.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -11,7 +12,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<MusicPattern> musicPatterns = new();
         private Guid? selectedMusicPatternId;
         [Inject] private AppStateService? AppStateService { get; set; }
-        [Inject] private AppDatabaseService? DatabaseService { get; set; }
+        [Inject] private IStationRepository? StationRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -34,10 +35,10 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task InitializeGridData()
         {
-            if (AppStateService?.station != null && DatabaseService != null)
+            if (AppStateService?.station != null && StationRepository != null)
             {
                 var stationId = AppStateService.station.StationId;
-                musicGridItems = await DatabaseService.GetMusicGridItemsAsync(stationId);
+                musicGridItems = await StationRepository.GetMusicGridItemsAsync(stationId);
 
                 if (musicGridItems.Count == 0)
                 {
@@ -55,19 +56,19 @@ namespace Audionix.Components.Pages.MusicSchedule
                             Friday = string.Empty,
                             Saturday = string.Empty
                         };
-                        await DatabaseService.AddMusicGridItemAsync(newItem);
+                        await StationRepository.AddMusicGridItemAsync(newItem);
                     }
-                    musicGridItems = await DatabaseService.GetMusicGridItemsAsync(stationId);
+                    musicGridItems = await StationRepository.GetMusicGridItemsAsync(stationId);
                 }
             }
         }
 
         private async Task LoadMusicPatterns()
         {
-            if (AppStateService?.station != null && DatabaseService != null)
+            if (AppStateService?.station != null && StationRepository != null)
             {
                 var stationId = AppStateService.station.StationId;
-                musicPatterns = await DatabaseService.GetMusicPatternsAsync(stationId);
+                musicPatterns = await StationRepository.GetMusicPatternsAsync(stationId);
             }
             else
             {
@@ -105,7 +106,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task OnCellClick(DayOfWeek day, int hour)
         {
-            if (AppStateService?.station != null && selectedMusicPatternId.HasValue && DatabaseService != null)
+            if (AppStateService?.station != null && selectedMusicPatternId.HasValue && StationRepository != null)
             {
                 var stationId = AppStateService.station.StationId;
                 var musicGridItem = musicGridItems.FirstOrDefault(mgi => mgi.Hour == $"{hour}:00" && mgi.StationId == stationId);
@@ -137,7 +138,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                             break;
                     }
 
-                    await DatabaseService.UpdateMusicGridItemAsync(musicGridItem);
+                    await StationRepository.UpdateMusicGridItemAsync(musicGridItem);
                     StateHasChanged();
                 }
             }

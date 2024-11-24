@@ -5,6 +5,7 @@ using System.Diagnostics;
 using MudBlazor;
 using Audionix.Models;
 using NAudio.CoreAudioApi;
+using Audionix.Repositories;
 
 namespace Audionix.Components.Pages
 {
@@ -20,21 +21,21 @@ namespace Audionix.Components.Pages
         private List<AudioDevice> audioDevices = new List<AudioDevice>();
         private List<Folder> folders = new List<Folder>();
         private AudioDevice? selectedAudioDevice = new AudioDevice();
-        private AppSettings? appSettings;
         [Inject] ISnackbar? Snackbar { get; set; }
         [Inject] private FileManagerService FileManagerService { get; set; } = null!;
-        [Inject] private AppDatabaseService AppDatabaseService { get; set; } = null!;
+        [Inject] private IStationRepository StationRepository { get; set; } = null!;
+        [Inject] private AppStateService AppStateService { get; set; } = null!;
 
         public string DataPath
         {
-            get => appSettings?.DataPath ?? string.Empty;
+            get => AppStateService.AppSettings?.DataPath ?? string.Empty;
             set
             {
-                if (appSettings != null)
+                if (AppStateService.AppSettings != null)
                 {
                     if (IsValidPath(value))
                     {
-                        appSettings.DataPath = value;
+                        AppStateService.AppSettings.DataPath = value;
                     }
                     else
                     {
@@ -47,9 +48,20 @@ namespace Audionix.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Initializing");
-            appSettings = await AppDatabaseService.GetAppSettingsAsync();
-            oldDataPath = appSettings.DataPath;
-            stations = await AppDatabaseService.GetStationsAsync();
+            await AppStateService.LoadAppSettingsAsync(StationRepository);
+
+            if (AppStateService.AppSettings != null)
+            {
+                oldDataPath = AppStateService.AppSettings.DataPath;
+            }
+            else
+            {
+                Log.Error("+++ Setup.razor.cs - OnInitializedAsync() -- appSettings is null");
+                Snackbar?.Add("Failed to load application settings.", Severity.Error);
+                return;
+            }
+
+            stations = await StationRepository.GetStationsAsync();
             audioDevices = GetWasapiOutputDevices();
 
             if (audioDevices == null || !audioDevices.Any())
@@ -61,6 +73,20 @@ namespace Audionix.Components.Pages
             {
                 Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Found {Count} audio devices", audioDevices.Count);
             }
+        }
+
+        public async Task SaveDataPath()
+        {
+            Log.Information("--- Setup - SaveConfigurationAndRestart() -- Saving Configuration");
+            Log.Information("--- Setup - SaveConfigurationAndRestart() -- Old Data Path: {OldDataPath}", oldDataPath);
+            if (AppStateService.AppSettings != null)
+            {
+                AppStateService.AppSettings.DataPath = DataPath;
+                AppStateService.AppSettings.IsDatapathSetup = true;
+                await AppStateService.SaveAppSettingsAsync(StationRepository);
+                Log.Information("--- Setup - SaveConfigurationAndRestart() -- New Data Path: {DataPath}", DataPath);
+            }
+            StateHasChanged();
         }
 
         private bool IsValidPath(string path)
@@ -82,13 +108,13 @@ namespace Audionix.Components.Pages
             return isValid;
         }
 
-        private void AddStation()
+        private async Task AddStationAsync()
         {
             Log.Information("--- Setup - AddStation() -- Begin");
             try
             {
                 // Check if there are any stations in the database
-                int maxSortOrder = DbContext.Stations.Any() ? DbContext.Stations.Max(s => s.StationSortOrder) : 0;
+                int maxSortOrder = stations.Any() ? stations.Max(s => s.StationSortOrder) : 0;
                 newStation.StationSortOrder = maxSortOrder + 1;
 
                 // Ensure the selected AudioDeviceId is valid
@@ -102,12 +128,8 @@ namespace Audionix.Components.Pages
                 newStation.AudioDeviceId = selectedAudioDevice.Id;
                 newStation.AudioDevice = selectedAudioDevice;
 
-                DbContext.Stations.Add(newStation);
-                DbContext.SaveChanges();
-                if (appSettings != null)
-                {
-                    AppDatabaseService.AddStationToDataPath(newStation, appSettings);
-                }
+                await StationRepository.AddStationAsync(newStation);
+
                 StateHasChanged();
                 NavigationManager.NavigateTo(NavigationManager.Uri, true);
                 Log.Information("--- Setup - AddStation() -- Station Added");
@@ -121,21 +143,19 @@ namespace Audionix.Components.Pages
             StateHasChanged();
         }
 
-        private void RemoveStation(Station station)
+        private async Task RemoveStationAsync(Station station)
         {
             Log.Information("--- Setup - RemoveStation() -- Removing Station");
             try
             {
-                DbContext.Stations.Remove(station);
-                DbContext.SaveChanges();
+                await StationRepository.DeleteStationAsync(station.StationId);
 
                 // Reorder the remaining stations to ensure StationSortOrder values are consecutive
-                var stations = DbContext.Stations.OrderBy(s => s.StationSortOrder).ToList();
+                stations = await StationRepository.GetStationsAsync();
                 for (int i = 0; i < stations.Count; i++)
                 {
                     stations[i].StationSortOrder = i + 1;
                 }
-                DbContext.SaveChanges();
 
                 Log.Information("--- Setup - RemoveStation() -- Station Removed");
             }
@@ -152,13 +172,12 @@ namespace Audionix.Components.Pages
             StationEditing = editingStation.StationId;
         }
 
-        private void SaveEditedStation(Station saveEditedStation)
+        private async Task SaveEditedStationAsync(Station saveEditedStation)
         {
             Log.Information("--- Setup - SaveEditedStation() -- Saving Edited Station");
             try
             {
-                DbContext.Stations.Update(saveEditedStation);
-                DbContext.SaveChanges();
+                await StationRepository.UpdateStationAsync(saveEditedStation);
                 Log.Information("--- Setup - SaveEditedStation() -- Station Saved");
             }
             catch (Exception ex)
@@ -175,21 +194,6 @@ namespace Audionix.Components.Pages
             editingStation.Slogan = tempEditStation.Slogan;
             editingStation.CallLetters = tempEditStation.CallLetters;
             StationEditing = Guid.Empty;
-        }
-
-        public async Task SaveDataPath()
-        {
-            Log.Information("--- Setup - SaveConfigurationAndRestart() -- Saving Configuration");
-            Log.Information("--- Setup - SaveConfigurationAndRestart() -- Old Data Path: {OldDataPath}", oldDataPath);
-            if (appSettings != null)
-            {
-                appSettings.DataPath = DataPath;
-                appSettings.IsDatapathSetup = true;
-                await AppDatabaseService.SaveConfigurationAsync(appSettings);
-                Log.Information("--- Setup - SaveConfigurationAndRestart() -- New Data Path: {DataPath}", DataPath);
-            }
-            AppSettings.IsDatapathSetup = true;
-            StateHasChanged();
         }
 
         public void RestartService()
@@ -224,7 +228,7 @@ namespace Audionix.Components.Pages
                 if (selectedStation != value)
                 {
                     selectedStation = value;
-                    LoadFolders();
+                    _ = LoadFolders(); // Fix the asynchronous method call
                 }
             }
         }
@@ -233,7 +237,7 @@ namespace Audionix.Components.Pages
         {
             if (selectedStation != null)
             {
-                folders = await AppDatabaseService.GetFoldersForStationAsync(selectedStation.StationId);
+                folders = await StationRepository.GetFoldersForStationAsync(selectedStation.StationId);
                 StateHasChanged();
             }
         }
@@ -244,10 +248,10 @@ namespace Audionix.Components.Pages
             await LoadFolders();
         }
 
-        private void MoveStationUp(Station station)
+        private async Task MoveStationUpAsync(Station station)
         {
             var currentOrder = station.StationSortOrder;
-            var previousStation = DbContext.Stations
+            var previousStation = stations
                 .Where(s => s.StationSortOrder < currentOrder)
                 .OrderByDescending(s => s.StationSortOrder)
                 .FirstOrDefault();
@@ -256,15 +260,16 @@ namespace Audionix.Components.Pages
             {
                 station.StationSortOrder = previousStation.StationSortOrder;
                 previousStation.StationSortOrder = currentOrder;
-                DbContext.SaveChanges();
+                await StationRepository.UpdateStationAsync(station);
+                await StationRepository.UpdateStationAsync(previousStation);
                 StateHasChanged();
             }
         }
 
-        private void MoveStationDown(Station station)
+        private async Task MoveStationDownAsync(Station station)
         {
             var currentOrder = station.StationSortOrder;
-            var nextStation = DbContext.Stations
+            var nextStation = stations
                 .Where(s => s.StationSortOrder > currentOrder)
                 .OrderBy(s => s.StationSortOrder)
                 .FirstOrDefault();
@@ -273,7 +278,8 @@ namespace Audionix.Components.Pages
             {
                 station.StationSortOrder = nextStation.StationSortOrder;
                 nextStation.StationSortOrder = currentOrder;
-                DbContext.SaveChanges();
+                await StationRepository.UpdateStationAsync(station);
+                await StationRepository.UpdateStationAsync(nextStation);
                 StateHasChanged();
             }
         }
@@ -310,7 +316,7 @@ namespace Audionix.Components.Pages
             Log.Debug("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Getting friendly name for device: {DeviceId}", audioDeviceId);
 
             // Query the database for the AudioDevice with the given audioDeviceId
-            var device = DbContext.AudioDevices.FirstOrDefault(ad => ad.Id == audioDeviceId);
+            var device = audioDevices.FirstOrDefault(ad => ad.Id == audioDeviceId);
 
             if (device != null)
             {

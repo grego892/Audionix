@@ -1,8 +1,8 @@
-using AudionixAudioServer.Data;
 using AudionixAudioServer.Models;
-using Microsoft.EntityFrameworkCore;
+using AudionixAudioServer.Services;
+using AudionixAudioServer.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-
 
 public class Worker : BackgroundService
 {
@@ -31,10 +31,10 @@ public class Worker : BackgroundService
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var stationRepository = scope.ServiceProvider.GetRequiredService<IStationRepository>();
                 var audioService = scope.ServiceProvider.GetRequiredService<AudioService>();
 
-                var stations = await dbContext.Stations.ToListAsync(stoppingToken);
+                List<Station> stations = await stationRepository.GetStationsAsync();
 
                 var tasks = new List<Task>();
 
@@ -42,8 +42,8 @@ public class Worker : BackgroundService
                 {
                     Log.Debug("---- AudioService.cs -- PlayAudioAsync() -  BEFORE tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken)");
                     tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken));
-                    Log.Debug("---- AudioService.cs -- PlayAudioAsync() -  AFTER tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken)");  
-                
+                    Log.Debug("---- AudioService.cs -- PlayAudioAsync() -  AFTER tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken)");
+
                     Log.Debug($"=================  TASKS: {tasks.Count.ToString()}");
                 }
 
