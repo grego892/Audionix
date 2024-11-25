@@ -2,6 +2,7 @@
 using Audionix.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
+using System.Threading.Tasks;
 
 namespace Audionix.Repositories
 {
@@ -34,5 +35,21 @@ namespace Audionix.Repositories
         Task UpdateMusicGridItemAsync(MusicGridItem musicGridItem);
         Task<AppSettings?> GetAppSettingsAsync();
         Task SaveAppSettingsAsync(AppSettings appSettings);
+        Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId);
+        Task<bool> HasLogEntriesAsync(Guid stationId);
+        Task AddProgramLogItemAsync(ProgramLogItem logItem);
+        Task RemoveProgramLogItemAsync(ProgramLogItem logItem);
+        Task<List<string>> GetCategoryNamesAsync();
+        Task<List<string>> GetMusicPatternNamesAsync();
+        Task AddMusicPatternAsync(MusicPattern musicPattern);
+        Task<MusicPattern?> GetMusicPatternByNameAsync(string name);
+        Task DeleteMusicPatternAsync(MusicPattern musicPattern);
+        Task<Category?> GetCategoryByIdAsync(Guid categoryId);
+        Task AddCategoryToPatternAsync(MusicPattern musicPattern, Category category);
+        Task RemoveCategoryFromPatternAsync(MusicPattern musicPattern, Category category);
+        Task MoveCategoryUpAsync(MusicPattern musicPattern, Category category);
+        Task MoveCategoryDownAsync(MusicPattern musicPattern, Category category);
+        Task<List<Category>> GetSelectedPatternCategoriesAsync(Guid musicPatternId);
+        Task<List<Category>> GetSelectedPatternCategoriesAsync(Guid stationId, string patternName);
     }
 }

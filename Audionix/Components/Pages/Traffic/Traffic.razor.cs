@@ -13,10 +13,4 @@ public partial class Traffic
 
     DateTime? trafficDate = DateTime.Now.Date.AddDays(1);
     private List<Station> stations = new();
-
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    //stations = await DbContext.Stations.ToListAsync();
-    //}
-
 }

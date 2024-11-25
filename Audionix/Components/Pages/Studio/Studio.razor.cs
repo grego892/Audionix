@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components;
 using Audionix.Models;
 using Audionix.Data;
-
+using Audionix.Repositories;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -22,8 +22,9 @@ namespace Audionix.Components.Pages.Studio
         public List<Folder> Folders = new();
         private Folder? selectedFolder = null;
 
-        [Inject] private ApplicationDbContext DbContext { get; set; }
-        [Inject] private AppStateService AppStateService { get; set; }
+        //[Inject] private ApplicationDbContext DbContext { get; set; }
+        [Inject] private AppStateService? AppStateService { get; set; }
+        [Inject] private IStationRepository? StationRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -55,7 +56,7 @@ namespace Audionix.Components.Pages.Studio
         {
             if (AppStateService.station != null)
             {
-                Folders = await DbContext.Folders.Where(f => f.StationId == AppStateService.station.StationId).ToListAsync();
+                Folders = await StationRepository.GetFoldersForStationAsync(AppStateService.station.StationId);
             }
             else
             {
@@ -67,7 +68,7 @@ namespace Audionix.Components.Pages.Studio
         {
             if (selectedFolder != null)
             {
-                AudioFiles = await DbContext.AudioFiles.Where(af => af.Folder == selectedFolder.Name).ToListAsync();
+                AudioFiles = await StationRepository.GetAudioFilesAsync();
             }
         }
 
@@ -83,10 +84,7 @@ namespace Audionix.Components.Pages.Studio
 
             if (AppStateService.station != null)
             {
-                ProgramLog = await DbContext.Log
-                    .Where(li => li.StationId == AppStateService.station.StationId)
-                    .OrderBy(li => li.LogOrderID)
-                    .ToListAsync();
+                ProgramLog = await StationRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
             }
             else
             {
@@ -113,7 +111,7 @@ namespace Audionix.Components.Pages.Studio
 
             if (AppStateService.station != null)
             {
-                bool hasLogEntries = await DbContext.Log.AnyAsync(li => li.StationId == AppStateService.station.StationId);
+                bool hasLogEntries = await StationRepository.HasLogEntriesAsync(AppStateService.station.StationId);
 
                 if (!hasLogEntries)
                 {
@@ -143,9 +141,7 @@ namespace Audionix.Components.Pages.Studio
             if (selectedAudioFile != null)
             {
                 // Shift existing items' LogID
-                var itemsToShift = await DbContext.Log
-                    .Where(li => li.LogOrderID >= index)
-                    .ToListAsync();
+                var itemsToShift = await StationRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
 
                 foreach (var item in itemsToShift)
                 {
@@ -167,9 +163,7 @@ namespace Audionix.Components.Pages.Studio
                     LogOrderID = index
                 };
 
-                await DbContext.Log.AddAsync(newLogItem);
-                await DbContext.SaveChangesAsync();
-
+                await StationRepository.AddProgramLogItemAsync(newLogItem);
                 await LoadTodaysLog();
 
                 // Update the UI without reloading the entire log
@@ -180,10 +174,9 @@ namespace Audionix.Components.Pages.Studio
 
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)
         {
+            await StationRepository.RemoveProgramLogItemAsync(logItem);
+
             ProgramLog.Remove(logItem);
-            DbContext.Log.Remove(logItem);
-            await DbContext.SaveChangesAsync();
-            StateHasChanged();
             _delete = false;
         }
 
