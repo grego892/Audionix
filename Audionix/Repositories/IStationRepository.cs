@@ -1,7 +1,5 @@
 ﻿using Audionix.Models;
 using Audionix.Models.MusicSchedule;
-using Microsoft.EntityFrameworkCore.Internal;
-using Serilog;
 using System.Threading.Tasks;
 
 namespace Audionix.Repositories

@@ -16,7 +16,6 @@ using DataAccess.UnitOfWork;
 using Audionix.DataAccess;
 using Microsoft.AspNetCore.Authentication;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Services
@@ -27,9 +26,6 @@ ConfigureAuthentication(builder);
 
 // Identity
 ConfigureIdentity(builder);
-
-// Database
-//ConfigureDatabase(builder);
 
 // Logger
 ConfigureLogger(builder);
@@ -79,23 +75,14 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddHostedService<AudionixService>()
     .AddControllers();
 
-    builder.Services.AddSingleton<AppStateService>(); // Register AppStateService
+    builder.Services.AddSingleton<AppStateService>();
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    builder.Services.AddScoped<IStationRepository, StationRepository>(); // Register IStationRepository with its implementation
-    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); // Register IUnitOfWork with its implementation
+    builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
+    builder.Services.AddScoped<IStationRepository, StationRepository>();
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddSingleton<AppSettings>();
 }
-
-//void ConfigureAuthentication(WebApplicationBuilder builder)
-//{
-//    builder.Services.AddAuthentication(options =>
-//    {
-//        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-//        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-//    })
-//    .AddIdentityCookies();
-//}
 
 void ConfigureAuthentication(WebApplicationBuilder builder)
 {
@@ -114,7 +101,6 @@ void ConfigureAuthentication(WebApplicationBuilder builder)
         .AddIdentityCookies();
     }
 }
-
 
 void ConfigureIdentity(WebApplicationBuilder builder)
 {
