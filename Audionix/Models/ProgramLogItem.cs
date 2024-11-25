@@ -26,6 +26,7 @@ namespace Audionix.Models
         public string? Name { get; set; }
         public string? Cart { get; set; }
         public string? Length { get; set; }
+        public string? Intro { get; set; }
         public string? Segue { get; set; }
         public string? Category { get; set; }
         public string? From { get; set; }

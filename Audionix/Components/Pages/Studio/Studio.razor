@@ -51,29 +51,28 @@
                  Dense="true"
                  Height="90vh">
         <Columns>
-            <PropertyColumn Property="x => x.LogOrderID" CellStyle="width: 5%;" SortBy="@(x => x.LogOrderID)" />
-            <PropertyColumn Property="x => x.Cue" CellStyle="width: 5%;" Sortable="false" />
-            <PropertyColumn Property="x => x.Title" CellStyle="width: 15%;" Sortable="false" />
-            <PropertyColumn Property="x => x.Artist" CellStyle="width: 15%;" Sortable="false" />
-            <PropertyColumn Property="x => x.Name" CellStyle="width: 15%;" Sortable="false" />
-            <PropertyColumn Property="x => x.TimeScheduled" CellStyle="width: 10%;" Sortable="false" />
-            <PropertyColumn Property="x => x.Length" CellStyle="width: 10%;" Sortable="false" />
-            <TemplateColumn CellStyle="width: 10%;" Sortable="false">
-                <CellTemplate>
-                    <MudProgressLinear Variant="Variant.Determinate" Color="Color.Success" Size="Size.Large" Value="50" />
-                </CellTemplate>
-            </TemplateColumn>
-            <PropertyColumn Property="x => x.Segue" CellStyle="width: 10%;" Sortable="false" />
-            <TemplateColumn CellStyle="width: 5%;" Sortable="false">
-                <CellTemplate Context="cellContext">
-                    <MudButton Variant="Variant.Outlined" Disabled="@(!IsAudioFileSelected)" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogOrderID, cellContext.Item)">Add</MudButton>
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn CellStyle="width: 5%;" Sortable="false">
-                <CellTemplate Context="cellContext">
-                    <MudButton Variant="Variant.Outlined" Disabled="@(!_delete)" OnClick="() => DeleteSelectedLogItem(cellContext.Item)">Delete</MudButton>
-                </CellTemplate>
-            </TemplateColumn>
+            <PropertyColumn Title="ID" Property="x => x.LogOrderID" SortBy="@(x => x.LogOrderID)" CellStyle="width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" />
+            <PropertyColumn Property="x => x.Title" Sortable="false" />
+            <PropertyColumn Property="x => x.Artist" Sortable="false" />
+            <PropertyColumn Property="x => x.TimeScheduled" Sortable="false" CellStyle="width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" />
+            <PropertyColumn Property="x => x.Length" Sortable="false" CellStyle="width: 100px;" />
+            <PropertyColumn Property="x => x.Date" Sortable="false" />
+            @if (IsAudioFileSelected)
+            {
+                <TemplateColumn Sortable="false">
+                    <CellTemplate Context="cellContext">
+                        <MudButton Variant="Variant.Outlined" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogOrderID, cellContext.Item)">Add</MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
+            @if (_delete)
+            {
+                <TemplateColumn Sortable="false">
+                    <CellTemplate Context="cellContext">
+                        <MudButton Variant="Variant.Outlined" OnClick="() => DeleteSelectedLogItem(cellContext.Item)">Delete</MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
         </Columns>
     </MudDataGrid>
 </MudPaper>

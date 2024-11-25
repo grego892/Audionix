@@ -22,7 +22,6 @@ namespace Audionix.Components.Pages.Studio
         public List<Folder> Folders = new();
         private Folder? selectedFolder = null;
 
-        //[Inject] private ApplicationDbContext DbContext { get; set; }
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
 
