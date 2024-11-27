@@ -2,6 +2,9 @@
 using ATL;
 using Audionix.Models;
 using Audionix.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using Microsoft.AspNetCore.Components;
 
 
 namespace Audionix.Services
@@ -9,10 +12,12 @@ namespace Audionix.Services
     public class AudioMetadataService
     {
         private readonly IStationRepository _stationRepository;
+        private readonly IAudioMetadataRepository _audioMetadataRepository;
 
-        public AudioMetadataService(IStationRepository stationRepository)
+        public AudioMetadataService(IStationRepository stationRepository, IAudioMetadataRepository audioMetadataRepository)
         {
             _stationRepository = stationRepository;
+            _audioMetadataRepository = audioMetadataRepository;  
         }
 
         public async Task<AudioMetadata> GetMetadataAsync(string filepath)
@@ -93,7 +98,7 @@ namespace Audionix.Services
                 Log.Error("Station with ID {StationId} not found", selectedStation);
             }
 
-            await _stationRepository.AddAudioFileAsync(audioMetadataForDb);
+            await _audioMetadataRepository.AddAudioFileAsync(audioMetadataForDb);
         }
     }
 }

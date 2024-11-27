@@ -9,6 +9,7 @@
 @inject AppStateService AppStateService
 @inject MudBlazor.ISnackbar Snackbar
 
+
 <PageTitle>Audionix</PageTitle>
 
 @if (appSettings?.IsDatapathSetup == true)
@@ -175,10 +176,11 @@ else
 
     int stationCount;
     private AppSettings? appSettings;
+    [Inject] IAppSettingsRepository AppSettingsRepository { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        appSettings = await StationRepository.GetAppSettingsAsync();
+        appSettings = await AppSettingsRepository.GetAppSettingsAsync();
 
         if (appSettings?.IsDatapathSetup == true)
         {

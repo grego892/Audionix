@@ -17,8 +17,10 @@ namespace Audionix.Components.Pages.MusicSchedule
         private Guid? selectedCategoryId;
         private List<Category> filteredCategories = new();
         private List<string> categories = new(); // Changed from List<Category> to List<string>
-        [Inject] private AppStateService AppStateService { get; set; }
+        [Inject] private AppStateService AppStateService { get; set; } = default!;
         [Inject] private IStationRepository? StationRepository { get; set; }
+        [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
+        [Inject] private ICategoryRepository? CategoryRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -41,15 +43,21 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task LoadDataAsync()
         {
-            MusicPatternNames = await StationRepository.GetMusicPatternNamesAsync();
-            categories = await StationRepository.GetCategoryNamesAsync();
+            if (MusicPatternRepository != null)
+            {
+                MusicPatternNames = await MusicPatternRepository.GetMusicPatternNamesAsync();
+            }
+            if (CategoryRepository != null)
+            {
+                categories = await CategoryRepository.GetCategoryNamesAsync();
+            }
         }
 
         private async Task FilterPatterns()
         {
-            if (AppStateService.station != null)
+            if (AppStateService.station != null && MusicPatternRepository != null)
             {
-                filteredMusicPatternNames = await StationRepository.GetMusicPatternsAsync(AppStateService.station.StationId);
+                filteredMusicPatternNames = await MusicPatternRepository.GetMusicPatternsAsync(AppStateService.station.StationId);
             }
             else
             {
@@ -59,7 +67,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task AddMusicPattern()
         {
-            if (AppStateService.station != null)
+            if (AppStateService.station != null && MusicPatternRepository != null)
             {
                 var newMusicPattern = new MusicPattern
                 {
@@ -67,7 +75,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                     StationId = AppStateService.station.StationId,
                     PatternId = Guid.NewGuid()
                 };
-                await StationRepository.AddMusicPatternAsync(newMusicPattern);
+                await MusicPatternRepository.AddMusicPatternAsync(newMusicPattern);
                 newMusicPatternName = string.Empty;
 
                 await FilterPatterns();
@@ -77,12 +85,12 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task RemoveMusicPattern()
         {
-            if (!string.IsNullOrEmpty(selectedMusicPatternName))
+            if (!string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
-                var musicPatternToRemove = await StationRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+                var musicPatternToRemove = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPatternToRemove != null)
                 {
-                    await StationRepository.DeleteMusicPatternAsync(musicPatternToRemove);
+                    await MusicPatternRepository.DeleteMusicPatternAsync(musicPatternToRemove);
                     MusicPatternNames.Remove(selectedMusicPatternName);
                     selectedMusicPatternName = null;
                     await FilterPatterns();
@@ -111,9 +119,9 @@ namespace Audionix.Components.Pages.MusicSchedule
         private async Task OnPatternChanged(string? patternName)
         {
             selectedMusicPatternName = patternName;
-            if (!string.IsNullOrEmpty(selectedMusicPatternName) && AppStateService.station != null)
+            if (!string.IsNullOrEmpty(selectedMusicPatternName) && AppStateService.station != null && MusicPatternRepository != null)
             {
-                selectedPatternCategories = await StationRepository.GetSelectedPatternCategoriesAsync(AppStateService.station.StationId, selectedMusicPatternName);
+                selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(AppStateService.station.StationId, selectedMusicPatternName);
             }
             else
             {
@@ -123,16 +131,16 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task AddCategoryToPattern()
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedCategoryId.HasValue)
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedCategoryId.HasValue && MusicPatternRepository != null && CategoryRepository != null)
             {
-                var musicPattern = await StationRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+                var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    var category = await StationRepository.GetCategoryByIdAsync(selectedCategoryId.Value);
+                    var category = await CategoryRepository.GetCategoryByIdAsync(selectedCategoryId.Value);
                     if (category != null)
                     {
-                        await StationRepository.AddCategoryToPatternAsync(musicPattern, category);
-                        selectedPatternCategories = await StationRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+                        await MusicPatternRepository.AddCategoryToPatternAsync(musicPattern, category);
+                        selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                         StateHasChanged();
                     }
                 }
@@ -141,9 +149,9 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task FilterCategories()
         {
-            if (AppStateService.station != null)
+            if (AppStateService.station != null && CategoryRepository != null)
             {
-                filteredCategories = await StationRepository.GetCategoriesAsync(AppStateService.station.StationId);
+                filteredCategories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
             }
         }
 
@@ -154,13 +162,13 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         public async Task RemoveCategoryFromPattern(Category category)
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName))
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
-                var musicPattern = await StationRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+                var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await StationRepository.RemoveCategoryFromPatternAsync(musicPattern, category);
-                    selectedPatternCategories = await StationRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+                    await MusicPatternRepository.RemoveCategoryFromPatternAsync(musicPattern, category);
+                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }
@@ -168,13 +176,13 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         public async Task MoveCategoryUp(Category category)
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName))
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
-                var musicPattern = await StationRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+                var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await StationRepository.MoveCategoryUpAsync(musicPattern, category);
-                    selectedPatternCategories = await StationRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+                    await MusicPatternRepository.MoveCategoryUpAsync(musicPattern, category);
+                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }
@@ -182,13 +190,13 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         public async Task MoveCategoryDown(Category category)
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName))
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
-                var musicPattern = await StationRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+                var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await StationRepository.MoveCategoryDownAsync(musicPattern, category);
-                    selectedPatternCategories = await StationRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+                    await MusicPatternRepository.MoveCategoryDownAsync(musicPattern, category);
+                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }

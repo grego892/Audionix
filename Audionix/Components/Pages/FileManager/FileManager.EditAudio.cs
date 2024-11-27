@@ -113,7 +113,7 @@ namespace Audionix.Components.Pages.FileManager
         private async Task LoadFileIntoWavePlayer(string url, AudioMetadata audioMetadata)
         {
             wavePlayer?.Load(url);
-            audioMetadata = await _stationRepository.GetAudioFileByIdAsync(audioMetadata.Id);
+            audioMetadata = await AudioMetadataRepository.GetAudioFileByIdAsync(audioMetadata.Id);
         }
 
         private async Task UpdateWavePlayerRegions(AudioMetadata audioMetadata)

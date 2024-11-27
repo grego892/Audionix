@@ -1,6 +1,8 @@
 ﻿using Audionix.Models;
 using Audionix.Repositories;
+using Microsoft.AspNetCore.Components;
 using System;
+using System.Threading.Tasks;
 
 public class AppStateService
 {
@@ -38,16 +40,23 @@ public class AppStateService
     private void NotifyStationChanged() => OnStationChanged?.Invoke(this, EventArgs.Empty);
     private void NotifyAppSettingsChanged() => OnAppSettingsChanged?.Invoke(this, EventArgs.Empty);
 
-    public async Task LoadAppSettingsAsync(IStationRepository stationRepository)
+    private readonly IAppSettingsRepository _appSettingsRepository;
+
+    public AppStateService(IAppSettingsRepository appSettingsRepository)
     {
-        AppSettings = await stationRepository.GetAppSettingsAsync();
+        _appSettingsRepository = appSettingsRepository ?? throw new ArgumentNullException(nameof(appSettingsRepository));
     }
 
-    public async Task SaveAppSettingsAsync(IStationRepository stationRepository)
+    public async Task LoadAppSettingsAsync()
+    {
+        AppSettings = await _appSettingsRepository.GetAppSettingsAsync();
+    }
+
+    public async Task SaveAppSettingsAsync()
     {
         if (AppSettings != null)
         {
-            await stationRepository.SaveAppSettingsAsync(AppSettings);
+            await _appSettingsRepository.SaveAppSettingsAsync(AppSettings);
             NotifyAppSettingsChanged();
         }
     }

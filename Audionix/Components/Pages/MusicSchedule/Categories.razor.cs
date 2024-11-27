@@ -12,7 +12,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<Category> filteredCategories = new();
         private string? newCategoryName;
         [Inject] private IStationRepository StationRepository { get; set; }
-        //[Inject] private AppStateService AppStateService { get; set; }
+        [Inject] private ICategoryRepository CategoryRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -32,7 +32,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             if (AppStateService.station != null)
             {
-                categories = await StationRepository.GetCategoriesAsync(AppStateService.station.StationId);
+                categories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
             }
         }
 
@@ -54,7 +54,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                     StationId = AppStateService.station.StationId,
                     CategoryId = Guid.NewGuid()
                 };
-                await StationRepository.AddCategoryAsync(category);
+                await CategoryRepository.AddCategoryAsync(category);
                 categories.Add(category);
                 FilterCategories();
                 newCategoryName = string.Empty;
@@ -63,7 +63,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task DeleteCategory(Guid categoryId)
         {
-            await StationRepository.DeleteCategoryAsync(categoryId);
+            await CategoryRepository.DeleteCategoryAsync(categoryId);
             categories.RemoveAll(c => c.CategoryId == categoryId);
             FilterCategories();
         }

@@ -48,7 +48,7 @@ namespace Audionix.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Initializing");
-            await AppStateService.LoadAppSettingsAsync(StationRepository);
+            await AppStateService.LoadAppSettingsAsync();
 
             if (AppStateService.AppSettings != null)
             {
@@ -83,7 +83,7 @@ namespace Audionix.Components.Pages
             {
                 AppStateService.AppSettings.DataPath = DataPath;
                 AppStateService.AppSettings.IsDatapathSetup = true;
-                await AppStateService.SaveAppSettingsAsync(StationRepository);
+                await AppStateService.SaveAppSettingsAsync();
                 Log.Information("--- Setup - SaveConfigurationAndRestart() -- New Data Path: {DataPath}", DataPath);
             }
             StateHasChanged();

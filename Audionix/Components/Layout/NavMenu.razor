@@ -47,7 +47,7 @@
     protected override async Task OnInitializedAsync()
     {
         AppStateService.OnAppSettingsChanged += HandleAppSettingsChanged;
-        await AppStateService.LoadAppSettingsAsync(StationRepository);
+        await AppStateService.LoadAppSettingsAsync();
         stations = await StationRepository.GetStationsAsync();
         if (stations.Any() && AppStateService.station == null)
         {

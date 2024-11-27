@@ -4,6 +4,7 @@ using Audionix.DataAccess;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using Serilog;
+using Microsoft.AspNetCore.Components;
 
 namespace Audionix.Services
 {
@@ -12,13 +13,18 @@ namespace Audionix.Services
         private const int BufferSize = 81920; // 80 KB chunks
         long maxFileSize = 2L * 1024 * 1024 * 1024; // 2 GB
         private readonly IStationRepository _stationRepository;
+        private readonly IAudioMetadataRepository _audioMetadataRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private AppSettings appSettings;
+        private AppSettings? appSettings;
+        [Inject] public IAppSettingsRepository AppSettingsRepository { get; set; } = default!;
+        [Inject] public IAudioMetadataRepository AudioMetadataRepository { get; set; } = default!;
+        [Inject] public IFolderRepository FolderRepository { get; set; } = default!;
 
-        public FileManagerService(IStationRepository stationRepository, IUnitOfWork unitOfWork)
+        public FileManagerService(IStationRepository stationRepository, IUnitOfWork unitOfWork, IAudioMetadataRepository audioMetadataRepository)
         {
             _stationRepository = stationRepository;
             _unitOfWork = unitOfWork;
+            _audioMetadataRepository = audioMetadataRepository;
         }
 
         public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
@@ -26,7 +32,7 @@ namespace Audionix.Services
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
             // Filter out the files that already exist in the database before adding them to filesToUpload
-            var audioFiles = await _stationRepository.GetAudioFilesAsync();
+            var audioFiles = await _audioMetadataRepository.GetAudioFilesAsync();
             var distinctFiles = selectedFiles.Where(file => !audioFiles.Any(f => f.Filename == file.Name)).ToList();
             var existingFiles = selectedFiles.Except(distinctFiles).ToList();
 
@@ -50,7 +56,7 @@ namespace Audionix.Services
                 return;
             }
             var selectedStationCallLetters = station.CallLetters;
-            appSettings = await _stationRepository.GetAppSettingsAsync();
+            appSettings = await AppSettingsRepository.GetAppSettingsAsync();
 
             foreach (var file in selectedFiles)
             {
@@ -85,7 +91,7 @@ namespace Audionix.Services
 
                     Log.Information("--- FileManager - LoadFiles() -- File: {Filename} Size: {Size} bytes", file.Name, file.Size);
 
-                    var audioMetadataService = new AudioMetadataService(_stationRepository); // Pass the StationRepository instance
+                    var audioMetadataService = new AudioMetadataService(_stationRepository, _audioMetadataRepository);
                     var audioMetadata = await audioMetadataService.GetMetadataAsync(path);
                     audioMetadata.Folder = selectedFolder;
                     await audioMetadataService.SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
@@ -106,10 +112,10 @@ namespace Audionix.Services
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
 
             // Fetch the audioMetadata without tracking it
-            var audioMetadataForDb = await _stationRepository.GetAudioFileByIdAsync(audioMetadata.Id);
+            var audioMetadataForDb = await AudioMetadataRepository.GetAudioFileByIdAsync(audioMetadata.Id);
             if (audioMetadataForDb != null)
             {
-                await _stationRepository.DeleteAudioFileAsync(audioMetadataForDb);
+                await AudioMetadataRepository.DeleteAudioFileAsync(audioMetadataForDb);
             }
 
             getFolderFileList();
@@ -130,7 +136,7 @@ namespace Audionix.Services
                 else
                 {
                     // Ensure appSettings is initialized
-                    appSettings = appSettings ?? await _stationRepository.GetAppSettingsAsync();
+                    appSettings = appSettings ?? await AppSettingsRepository.GetAppSettingsAsync();
 
                     // Create the new folder in the station's path
                     var path = Path.Combine(appSettings?.DataPath ?? string.Empty, "Stations", selectedStation?.CallLetters ?? string.Empty, "Audio", newFolder?.Name ?? string.Empty);
@@ -139,7 +145,7 @@ namespace Audionix.Services
                     if (newFolder != null && selectedStation != null)
                     {
                         newFolder.StationId = selectedStation.StationId;
-                        await _stationRepository.AddFolderAsync(newFolder);
+                        await FolderRepository.AddFolderAsync(newFolder);
                     }
                 }
             }
@@ -156,7 +162,7 @@ namespace Audionix.Services
             {
                 // Get the station associated with the folder
                 var station = await _stationRepository.GetStationByIdAsync(folder.StationId);
-                appSettings = appSettings ?? await _unitOfWork.GetAppSettingsDataPathAsync();
+                appSettings = appSettings ?? await AppSettingsRepository.GetAppSettingsAsync();
 
                 if (station != null)
                 {
@@ -171,7 +177,7 @@ namespace Audionix.Services
                     if (folder != null)
                     {
                         // Remove the folder from the database
-                        await _stationRepository.DeleteFolderAsync(folder);
+                        await FolderRepository.DeleteFolderAsync(folder);
                     }
 
                     Log.Information("--- FileManager - RemoveFolder() -- Folder Removed: {FolderName}", folder.Name);
@@ -201,7 +207,7 @@ namespace Audionix.Services
         public async Task<List<AudioMetadata>> GetFolderFileList(Guid selectedStation, string selectedFolder)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
-            var filesInDirectory = await _stationRepository.GetAudioFilesAsync();
+            var filesInDirectory = await _audioMetadataRepository.GetAudioFilesAsync();
 
             var filteredFiles = filesInDirectory
                 .Where(am => am.StationId == selectedStation && am.Folder == selectedFolder)
@@ -212,3 +218,4 @@ namespace Audionix.Services
         }
     }
 }
+

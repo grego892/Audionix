@@ -12,6 +12,11 @@ namespace Audionix.Components.Pages.MusicSchedule
         public DateTime? MusicLogDate { get; set; } = DateTime.Now.Date.AddDays(1);
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
+        [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
+        [Inject] private ICategoryRepository? CategoryRepository { get; set; }
+        [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
+        [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
+
 
         private List<Guid> musicPatterns = new();
         private List<Category> categoryList = new();
@@ -25,11 +30,11 @@ namespace Audionix.Components.Pages.MusicSchedule
             {
                 var dayOfWeek = MusicLogDate.Value.DayOfWeek;
                 var stationId = AppStateService.station.StationId;
-                musicPatterns = await StationRepository.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
-                categoryList = await StationRepository.GetCategoriesForPatternsAsync(musicPatterns);
-                scheduledSongs = await StationRepository.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
+                musicPatterns = await MusicPatternRepository.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
+                categoryList = await CategoryRepository.GetCategoriesForPatternsAsync(musicPatterns);
+                scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
-                await StationRepository.AddNewDayLogToDbLogAsync(newDaysLog);
+                await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
             }
         }
 

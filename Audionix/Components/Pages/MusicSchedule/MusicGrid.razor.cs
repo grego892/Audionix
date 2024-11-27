@@ -13,6 +13,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private Guid? selectedMusicPatternId;
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
+        [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -38,7 +39,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             if (AppStateService?.station != null && StationRepository != null)
             {
                 var stationId = AppStateService.station.StationId;
-                musicGridItems = await StationRepository.GetMusicGridItemsAsync(stationId);
+                musicGridItems = await MusicPatternRepository.GetMusicGridItemsAsync(stationId);
 
                 if (musicGridItems.Count == 0)
                 {
@@ -56,9 +57,9 @@ namespace Audionix.Components.Pages.MusicSchedule
                             Friday = string.Empty,
                             Saturday = string.Empty
                         };
-                        await StationRepository.AddMusicGridItemAsync(newItem);
+                        await MusicPatternRepository.AddMusicGridItemAsync(newItem);
                     }
-                    musicGridItems = await StationRepository.GetMusicGridItemsAsync(stationId);
+                    musicGridItems = await MusicPatternRepository.GetMusicGridItemsAsync(stationId);
                 }
             }
         }
@@ -68,7 +69,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             if (AppStateService?.station != null && StationRepository != null)
             {
                 var stationId = AppStateService.station.StationId;
-                musicPatterns = await StationRepository.GetMusicPatternsAsync(stationId);
+                musicPatterns = await MusicPatternRepository.GetMusicPatternsAsync(stationId);
             }
             else
             {
@@ -138,7 +139,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                             break;
                     }
 
-                    await StationRepository.UpdateMusicGridItemAsync(musicGridItem);
+                    await MusicPatternRepository.UpdateMusicGridItemAsync(musicGridItem);
                     StateHasChanged();
                 }
             }

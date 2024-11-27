@@ -24,21 +24,29 @@ namespace Audionix.Components.Pages.Studio
 
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
+        [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
+        [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Studio - OnInitializedAsync() -- Initializing Studio Page");
-            AppStateService.OnStationChanged += HandleStationChanged;
-            await LoadTodaysLog();
-            await LoadFolders();
-            StateHasChanged();
+            if (AppStateService != null)
+            {
+                AppStateService.OnStationChanged += HandleStationChanged;
+                await LoadTodaysLog();
+                await LoadFolders();
+                StateHasChanged();
+            }
         }
 
         private async void HandleStationChanged(object? sender, EventArgs e)
         {
-            await LoadFolders();
-            await LoadTodaysLog();
-            StateHasChanged();
+            if (AppStateService?.station != null)
+            {
+                await LoadFolders();
+                await LoadTodaysLog();
+                StateHasChanged();
+            }
         }
 
         private void ToggleInsertDrawer()
@@ -53,7 +61,7 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task LoadFolders()
         {
-            if (AppStateService.station != null)
+            if (AppStateService?.station != null && StationRepository != null)
             {
                 Folders = await StationRepository.GetFoldersForStationAsync(AppStateService.station.StationId);
             }
@@ -65,9 +73,9 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task LoadAudioFiles()
         {
-            if (selectedFolder != null)
+            if (selectedFolder != null && AudioMetadataRepository != null)
             {
-                AudioFiles = await StationRepository.GetAudioFilesAsync();
+                AudioFiles = await AudioMetadataRepository.GetAudioFilesAsync();
             }
         }
 
@@ -81,9 +89,9 @@ namespace Audionix.Components.Pages.Studio
         {
             Log.Information("--- Studio - LoadTodaysLog() -- Loading Today's Log");
 
-            if (AppStateService.station != null)
+            if (AppStateService?.station != null && ProgramLogRepository != null)
             {
-                ProgramLog = await StationRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
+                ProgramLog = await ProgramLogRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
             }
             else
             {
@@ -108,9 +116,9 @@ namespace Audionix.Components.Pages.Studio
             selectedAudioFile = audioFile;
             _open = false;
 
-            if (AppStateService.station != null)
+            if (AppStateService?.station != null && ProgramLogRepository != null)
             {
-                bool hasLogEntries = await StationRepository.HasLogEntriesAsync(AppStateService.station.StationId);
+                bool hasLogEntries = await ProgramLogRepository.HasLogEntriesAsync(AppStateService.station.StationId);
 
                 if (!hasLogEntries)
                 {
@@ -137,10 +145,10 @@ namespace Audionix.Components.Pages.Studio
 
         public async Task AddSelectedAudioToLog(int index, ProgramLogItem logItem)
         {
-            if (selectedAudioFile != null)
+            if (selectedAudioFile != null && ProgramLogRepository != null && AppStateService?.station != null)
             {
                 // Shift existing items' LogID
-                var itemsToShift = await StationRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
+                var itemsToShift = await ProgramLogRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
 
                 foreach (var item in itemsToShift)
                 {
@@ -162,7 +170,7 @@ namespace Audionix.Components.Pages.Studio
                     LogOrderID = index
                 };
 
-                await StationRepository.AddProgramLogItemAsync(newLogItem);
+                await ProgramLogRepository.AddProgramLogItemAsync(newLogItem);
                 await LoadTodaysLog();
 
                 // Update the UI without reloading the entire log
@@ -173,15 +181,21 @@ namespace Audionix.Components.Pages.Studio
 
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)
         {
-            await StationRepository.RemoveProgramLogItemAsync(logItem);
+            if (ProgramLogRepository != null)
+            {
+                await ProgramLogRepository.RemoveProgramLogItemAsync(logItem);
 
-            ProgramLog.Remove(logItem);
-            _delete = false;
+                ProgramLog.Remove(logItem);
+                _delete = false;
+            }
         }
 
         public void Dispose()
         {
-            AppStateService.OnStationChanged -= HandleStationChanged;
+            if (AppStateService != null)
+            {
+                AppStateService.OnStationChanged -= HandleStationChanged;
+            }
         }
     }
 }

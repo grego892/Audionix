@@ -75,11 +75,25 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddHostedService<AudionixService>()
     .AddControllers();
 
-    builder.Services.AddSingleton<AppStateService>();
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+    builder.Services.AddScoped<IMusicPatternRepository, MusicPatternRepository>();
+    builder.Services.AddScoped<IProgramLogRepository, ProgramLogRepository>();
+    builder.Services.AddScoped<IStationRepository, StationRepository>();
     builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
     builder.Services.AddScoped<IStationRepository, StationRepository>();
+    builder.Services.AddScoped<IMusicPatternRepository, MusicPatternRepository>();
+    builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
+    builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+    builder.Services.AddScoped<AppStateService>();
+
+    //builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
+
+    //builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddSingleton<AppSettings>();
 }
