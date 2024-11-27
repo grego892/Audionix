@@ -40,25 +40,32 @@ namespace Audionix.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task AddCategoryToPatternAsync(MusicPattern musicPattern, Category category)
+        public async Task AddCategoryToPatternAsync(Guid musicPatternId, Guid categoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            var maxSortOrder = musicPattern.PatternCategories.Any()
-                ? musicPattern.PatternCategories.Max(pc => pc.MusicPatternSortOrder)
-                : 0;
+            var musicPattern = await context.MusicPatterns.Include(mp => mp.PatternCategories).FirstOrDefaultAsync(mp => mp.PatternId == musicPatternId);
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == categoryId);
 
-            var patternCategory = new PatternCategory
+            if (musicPattern != null && category != null)
             {
-                MusicPatternId = musicPattern.PatternId,
-                CategoryId = category.CategoryId,
-                CategoryName = category.CategoryName!,
-                MusicPatternSortOrder = maxSortOrder + 1,
-                StationId = musicPattern.StationId
-            };
+                var maxSortOrder = musicPattern.PatternCategories.Any()
+                    ? musicPattern.PatternCategories.Max(pc => pc.MusicPatternSortOrder)
+                    : 0;
 
-            musicPattern.PatternCategories.Add(patternCategory);
-            await context.SaveChangesAsync();
+                var patternCategory = new PatternCategory
+                {
+                    MusicPatternId = musicPattern.PatternId,
+                    CategoryId = category.CategoryId,
+                    CategoryName = category.CategoryName!,
+                    MusicPatternSortOrder = maxSortOrder + 1,
+                    StationId = musicPattern.StationId
+                };
+
+                musicPattern.PatternCategories.Add(patternCategory);
+                await context.SaveChangesAsync();
+            }
         }
+
 
         public async Task RemoveCategoryFromPatternAsync(MusicPattern musicPattern, Category category)
         {

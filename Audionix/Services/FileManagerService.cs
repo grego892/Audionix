@@ -14,18 +14,21 @@ namespace Audionix.Services
         long maxFileSize = 2L * 1024 * 1024 * 1024; // 2 GB
         private readonly IStationRepository _stationRepository;
         private readonly IAudioMetadataRepository _audioMetadataRepository;
+        private readonly IAppSettingsRepository _appSettingsRepository;
+        private readonly IFolderRepository _folderRepository;
         private readonly IUnitOfWork _unitOfWork;
         private AppSettings? appSettings;
-        [Inject] public IAppSettingsRepository AppSettingsRepository { get; set; } = default!;
-        [Inject] public IAudioMetadataRepository AudioMetadataRepository { get; set; } = default!;
-        [Inject] public IFolderRepository FolderRepository { get; set; } = default!;
 
-        public FileManagerService(IStationRepository stationRepository, IUnitOfWork unitOfWork, IAudioMetadataRepository audioMetadataRepository)
+
+        public FileManagerService(IStationRepository stationRepository, IAudioMetadataRepository audioMetadataRepository, IAppSettingsRepository appSettingsRepository, IFolderRepository FolderRepository, IUnitOfWork unitOfWork)
         {
             _stationRepository = stationRepository;
-            _unitOfWork = unitOfWork;
             _audioMetadataRepository = audioMetadataRepository;
+            _appSettingsRepository = appSettingsRepository;
+            _folderRepository = FolderRepository;
+            _unitOfWork = unitOfWork;
         }
+
 
         public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
         {
@@ -56,11 +59,17 @@ namespace Audionix.Services
                 return;
             }
             var selectedStationCallLetters = station.CallLetters;
-            appSettings = await AppSettingsRepository.GetAppSettingsAsync();
+            appSettings = await _appSettingsRepository.GetAppSettingsAsync();
+
+            if (appSettings == null)
+            {
+                Log.Error("AppSettings is null");
+                return;
+            }
 
             foreach (var file in selectedFiles)
             {
-                var path = Path.Combine(appSettings?.DataPath ?? string.Empty, "Stations", selectedStationCallLetters, "Audio", selectedFolder, file.Name);
+                var path = Path.Combine(appSettings.DataPath ?? string.Empty, "Stations", selectedStationCallLetters, "Audio", selectedFolder, file.Name);
 
                 try
                 {
@@ -93,8 +102,15 @@ namespace Audionix.Services
 
                     var audioMetadataService = new AudioMetadataService(_stationRepository, _audioMetadataRepository);
                     var audioMetadata = await audioMetadataService.GetMetadataAsync(path);
-                    audioMetadata.Folder = selectedFolder;
-                    await audioMetadataService.SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
+                    if (audioMetadata != null)
+                    {
+                        audioMetadata.Folder = selectedFolder;
+                        await audioMetadataService.SaveAudioMetadata(audioMetadata, file.Name, selectedStation);
+                    }
+                    else
+                    {
+                        Log.Error("Audio metadata is null for file: {Filename}", file.Name);
+                    }
                 }
                 catch (IOException ioEx)
                 {
@@ -106,16 +122,17 @@ namespace Audionix.Services
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
 
+
         public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, Action getFolderFileList)
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
 
             // Fetch the audioMetadata without tracking it
-            var audioMetadataForDb = await AudioMetadataRepository.GetAudioFileByIdAsync(audioMetadata.Id);
+            var audioMetadataForDb = await _audioMetadataRepository.GetAudioFileByIdAsync(audioMetadata.Id);
             if (audioMetadataForDb != null)
             {
-                await AudioMetadataRepository.DeleteAudioFileAsync(audioMetadataForDb);
+                await _audioMetadataRepository.DeleteAudioFileAsync(audioMetadataForDb);
             }
 
             getFolderFileList();
@@ -126,6 +143,20 @@ namespace Audionix.Services
         {
             try
             {
+                if (newFolder == null)
+                {
+                    Log.Error("++++++ FileManagerService -- AddFolder() - newFolder is null");
+                    snackbar.Add("Folder cannot be null", Severity.Error);
+                    return;
+                }
+
+                if (selectedStation == null)
+                {
+                    Log.Error("++++++ FileManagerService -- AddFolder() - selectedStation is null");
+                    snackbar.Add("Station cannot be null", Severity.Error);
+                    return;
+                }
+
                 var existingFolders = await _stationRepository.GetFoldersForStationAsync(selectedStation.StationId);
                 var existingFolder = existingFolders.FirstOrDefault(f => f.Name == newFolder.Name);
 
@@ -136,17 +167,20 @@ namespace Audionix.Services
                 else
                 {
                     // Ensure appSettings is initialized
-                    appSettings = appSettings ?? await AppSettingsRepository.GetAppSettingsAsync();
+                    appSettings = appSettings ?? await _appSettingsRepository.GetAppSettingsAsync();
+
+                    if (appSettings == null)
+                    {
+                        Log.Error("AppSettings is null");
+                        return;
+                    }
 
                     // Create the new folder in the station's path
-                    var path = Path.Combine(appSettings?.DataPath ?? string.Empty, "Stations", selectedStation?.CallLetters ?? string.Empty, "Audio", newFolder?.Name ?? string.Empty);
+                    var path = Path.Combine(appSettings.DataPath ?? string.Empty, "Stations", selectedStation.CallLetters ?? string.Empty, "Audio", newFolder.Name ?? string.Empty);
                     Directory.CreateDirectory(path);
 
-                    if (newFolder != null && selectedStation != null)
-                    {
-                        newFolder.StationId = selectedStation.StationId;
-                        await FolderRepository.AddFolderAsync(newFolder);
-                    }
+                    newFolder.StationId = selectedStation.StationId;
+                    await _folderRepository.AddFolderAsync(newFolder);
                 }
             }
             catch (Exception ex)
@@ -155,6 +189,7 @@ namespace Audionix.Services
             }
         }
 
+
         public async Task RemoveFolder(Folder folder)
         {
             Log.Information("--- FileManager - RemoveFolder() -- Removing Folder: {FolderName}", folder.Name);
@@ -162,12 +197,18 @@ namespace Audionix.Services
             {
                 // Get the station associated with the folder
                 var station = await _stationRepository.GetStationByIdAsync(folder.StationId);
-                appSettings = appSettings ?? await AppSettingsRepository.GetAppSettingsAsync();
+                appSettings = appSettings ?? await _appSettingsRepository.GetAppSettingsAsync();
+
+                if (appSettings == null)
+                {
+                    Log.Error("AppSettings is null");
+                    return;
+                }
 
                 if (station != null)
                 {
                     // Remove the folder from the file system
-                    var path = Path.Combine(appSettings?.DataPath ?? string.Empty, "Stations", station?.CallLetters ?? string.Empty, "Audio", folder?.Name ?? string.Empty);
+                    var path = Path.Combine(appSettings.DataPath ?? string.Empty, "Stations", station?.CallLetters ?? string.Empty, "Audio", folder?.Name ?? string.Empty);
 
                     if (Directory.Exists(path))
                     {
@@ -177,7 +218,7 @@ namespace Audionix.Services
                     if (folder != null)
                     {
                         // Remove the folder from the database
-                        await FolderRepository.DeleteFolderAsync(folder);
+                        await _folderRepository.DeleteFolderAsync(folder);
                     }
 
                     Log.Information("--- FileManager - RemoveFolder() -- Folder Removed: {FolderName}", folder.Name);
@@ -218,4 +259,3 @@ namespace Audionix.Services
         }
     }
 }
-

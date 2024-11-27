@@ -8,7 +8,8 @@ namespace Audionix.Repositories
         Task AddMusicPatternAsync(MusicPattern musicPattern);
         Task<MusicPattern?> GetMusicPatternByNameAsync(string name);
         Task DeleteMusicPatternAsync(MusicPattern musicPattern);
-        Task AddCategoryToPatternAsync(MusicPattern musicPattern, Category category);
+        //Task AddCategoryToPatternAsync(MusicPattern musicPattern, Category category);
+        Task AddCategoryToPatternAsync(Guid musicPatternId, Guid categoryId);
         Task RemoveCategoryFromPatternAsync(MusicPattern musicPattern, Category category);
         Task MoveCategoryUpAsync(MusicPattern musicPattern, Category category);
         Task MoveCategoryDownAsync(MusicPattern musicPattern, Category category);

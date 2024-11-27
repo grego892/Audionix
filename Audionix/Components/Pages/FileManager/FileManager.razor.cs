@@ -25,7 +25,7 @@ namespace Audionix.Components.Pages.FileManager
         private bool isSongdataEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
-        [Inject] public AppSettings? AppSettings { get; set; }
+        [Inject] public IAppSettingsRepository? AppSettingsRepository { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
         [Inject] private IStationRepository StationRepository { get; set; } = default!;
@@ -111,7 +111,7 @@ namespace Audionix.Components.Pages.FileManager
         {
             if (FileManagerSvc != null && AppStateService?.station != null)
             {
-                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, AppSettings?.DataPath ?? string.Empty, async () => await GetFolderFileList(SelectedFolder));
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, AppSettingsRepository?.GetAppSettingsAsync().Result.DataPath ?? string.Empty, async () => await GetFolderFileList(SelectedFolder));
             }
         }
 

@@ -89,13 +89,9 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
     builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
     builder.Services.AddScoped<AppStateService>();
-
-    //builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
-
-    //builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
-
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-    builder.Services.AddSingleton<AppSettings>();
+    //builder.Services.AddSingleton<AppSettings>();
+
 }
 
 void ConfigureAuthentication(WebApplicationBuilder builder)

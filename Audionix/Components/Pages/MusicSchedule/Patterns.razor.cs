@@ -131,21 +131,18 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task AddCategoryToPattern()
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedCategoryId.HasValue && MusicPatternRepository != null && CategoryRepository != null)
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedCategoryId.HasValue && MusicPatternRepository != null)
             {
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    var category = await CategoryRepository.GetCategoryByIdAsync(selectedCategoryId.Value);
-                    if (category != null)
-                    {
-                        await MusicPatternRepository.AddCategoryToPatternAsync(musicPattern, category);
-                        selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
-                        StateHasChanged();
-                    }
+                    await MusicPatternRepository.AddCategoryToPatternAsync(musicPattern.PatternId, selectedCategoryId.Value);
+                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+                    StateHasChanged();
                 }
             }
         }
+
 
         private async Task FilterCategories()
         {
