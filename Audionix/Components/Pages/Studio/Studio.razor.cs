@@ -1,10 +1,10 @@
-﻿using MudBlazor;
-using Serilog;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Components;
-using Audionix.Models;
-using Audionix.Data;
+﻿using Audionix.Models;
 using Audionix.Repositories;
+using Audionix.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
+using MudBlazor;
+using Serilog;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -15,6 +15,8 @@ namespace Audionix.Components.Pages.Studio
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
         private string? _selectedAudioFolder;
+        private int songProgress;
+        private HubConnection _hubConnection;
 
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
@@ -37,6 +39,18 @@ namespace Audionix.Components.Pages.Studio
                 await LoadFolders();
                 StateHasChanged();
             }
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:5298/progressHub")
+                .Build();
+
+            _hubConnection.On<int>("ReceiveProgress", (progress) =>
+            {
+                songProgress = progress;
+                InvokeAsync(StateHasChanged);
+            });
+
+            await _hubConnection.StartAsync();
         }
 
         private async void HandleStationChanged(object? sender, EventArgs e)
@@ -185,12 +199,17 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
-
         public void Dispose()
         {
             if (AppStateService != null)
             {
                 AppStateService.OnStationChanged -= HandleStationChanged;
+            }
+
+            if (_hubConnection != null)
+            {
+                _hubConnection.StopAsync().GetAwaiter().GetResult();
+                _hubConnection.DisposeAsync().GetAwaiter().GetResult();
             }
         }
     }

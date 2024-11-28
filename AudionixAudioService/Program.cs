@@ -1,11 +1,10 @@
+using AudionixAudioServer.Data;
+using AudionixAudioServer.DataAccess;
+using AudionixAudioServer.Repositories;
 using AudionixAudioServer.Services;
+using Microsoft.EntityFrameworkCore;
 using Serilog.Settings.Configuration;
 using Serilog;
-using AudionixAudioServer.Data;
-using AudionixAudioServer.Repositories;
-using AudionixAudioServer.DataAccess;
-using Microsoft.EntityFrameworkCore;
-
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -18,6 +17,12 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File(Path.Combine(_logPath), rollingInterval: RollingInterval.Day)
     .WriteTo.Console()
     .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
 
 // DATABASE
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>

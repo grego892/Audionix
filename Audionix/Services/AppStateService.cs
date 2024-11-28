@@ -4,60 +4,63 @@ using Microsoft.AspNetCore.Components;
 using System;
 using System.Threading.Tasks;
 
-public class AppStateService
+namespace Audionix.Services
 {
-    private Station? _station;
-    public Station? station
+    public class AppStateService
     {
-        get => _station;
-        set
+        private Station? _station;
+        public Station? station
         {
-            if (_station != value)
+            get => _station;
+            set
             {
-                _station = value;
-                NotifyStationChanged();
+                if (_station != value)
+                {
+                    _station = value;
+                    NotifyStationChanged();
+                }
             }
         }
-    }
 
-    private AppSettings? _appSettings;
-    public AppSettings? AppSettings
-    {
-        get => _appSettings;
-        set
+        private AppSettings? _appSettings;
+        public AppSettings? AppSettings
         {
-            if (_appSettings != value)
+            get => _appSettings;
+            set
             {
-                _appSettings = value;
+                if (_appSettings != value)
+                {
+                    _appSettings = value;
+                    NotifyAppSettingsChanged();
+                }
+            }
+        }
+
+        public event EventHandler? OnStationChanged;
+        public event EventHandler? OnAppSettingsChanged;
+
+        private void NotifyStationChanged() => OnStationChanged?.Invoke(this, EventArgs.Empty);
+        private void NotifyAppSettingsChanged() => OnAppSettingsChanged?.Invoke(this, EventArgs.Empty);
+
+        private readonly IAppSettingsRepository _appSettingsRepository;
+
+        public AppStateService(IAppSettingsRepository appSettingsRepository)
+        {
+            _appSettingsRepository = appSettingsRepository ?? throw new ArgumentNullException(nameof(appSettingsRepository));
+        }
+
+        public async Task LoadAppSettingsAsync()
+        {
+            AppSettings = await _appSettingsRepository.GetAppSettingsAsync();
+        }
+
+        public async Task SaveAppSettingsAsync()
+        {
+            if (AppSettings != null)
+            {
+                await _appSettingsRepository.SaveAppSettingsAsync(AppSettings);
                 NotifyAppSettingsChanged();
             }
-        }
-    }
-
-    public event EventHandler? OnStationChanged;
-    public event EventHandler? OnAppSettingsChanged;
-
-    private void NotifyStationChanged() => OnStationChanged?.Invoke(this, EventArgs.Empty);
-    private void NotifyAppSettingsChanged() => OnAppSettingsChanged?.Invoke(this, EventArgs.Empty);
-
-    private readonly IAppSettingsRepository _appSettingsRepository;
-
-    public AppStateService(IAppSettingsRepository appSettingsRepository)
-    {
-        _appSettingsRepository = appSettingsRepository ?? throw new ArgumentNullException(nameof(appSettingsRepository));
-    }
-
-    public async Task LoadAppSettingsAsync()
-    {
-        AppSettings = await _appSettingsRepository.GetAppSettingsAsync();
-    }
-
-    public async Task SaveAppSettingsAsync()
-    {
-        if (AppSettings != null)
-        {
-            await _appSettingsRepository.SaveAppSettingsAsync(AppSettings);
-            NotifyAppSettingsChanged();
         }
     }
 }

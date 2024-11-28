@@ -9,8 +9,14 @@
 <MudPaper>
     <MudToolBar Dense="false" Variant="Variant.Outline">
         <MudPaper Class="mx-auto">
-            <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
-            <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
+            <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
+                <MudButton Class="ma-1" Variant="Variant.Outlined" >Play</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" >Pause</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" >Stop</MudButton>
+                <MudText>@songProgress%</MudText>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
+            </MudStack>
         </MudPaper>
     </MudToolBar>
 </MudPaper>
@@ -49,7 +55,7 @@
                  Virtualize="true"
                  ShowMenuIcon="false"
                  Dense="true"
-                 Height="90vh">
+                 Height="86vh">
         <Columns>
             <PropertyColumn Title="ID" Property="x => x.LogOrderID" SortBy="@(x => x.LogOrderID)" CellStyle="width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" />
             <PropertyColumn Property="x => x.Title" Sortable="false" />

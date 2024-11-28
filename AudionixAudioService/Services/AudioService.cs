@@ -1,11 +1,8 @@
-﻿using AudionixAudioServer.Data;
-using AudionixAudioServer.Models;
-using AudionixAudioServer;
+﻿using AudionixAudioServer.DataAccess;
 using AudionixAudioServer.Repositories;
-using AudionixAudioServer.DataAccess;
-using Microsoft.EntityFrameworkCore;
-using NAudio.Wave;
+using Microsoft.AspNetCore.SignalR.Client;
 using NAudio.Wave.SampleProviders;
+using NAudio.Wave;
 using Serilog;
 
 namespace AudionixAudioServer.Services
@@ -15,25 +12,62 @@ namespace AudionixAudioServer.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStationRepository _stationRepository;
         private int fadeTime = 2000;
+        private HubConnection _hubConnection;
 
         public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository)
         {
             _unitOfWork = unitOfWork;
             _stationRepository = stationRepository;
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:5298/progressHub", options =>
+                {
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+                })
+                .ConfigureLogging(logging =>
+                {
+                    logging.SetMinimumLevel(LogLevel.Debug);
+                    logging.AddConsole();
+                })
+                .WithAutomaticReconnect() // Enable automatic reconnection
+                .Build();
+
+
+            var hubConnection = new HubConnectionBuilder()
+    .WithUrl("https://localhost:7184/clienthub", options =>
+    {
+        options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+    })
+    .WithAutomaticReconnect()
+    .ConfigureLogging(logging =>
+    {
+        logging.AddConsole();
+        // This will set ALL logging to Debug level
+        logging.SetMinimumLevel(LogLevel.Debug);
+    })
+    .Build();
+
+            // Handle reconnection events
+            _hubConnection.Reconnecting += error =>
+            {
+                Log.Warning("Connection lost. Attempting to reconnect...");
+                return Task.CompletedTask;
+            };
+
+            _hubConnection.Reconnected += connectionId =>
+            {
+                Log.Information("Reconnected to the server. ConnectionId: {ConnectionId}", connectionId);
+                return Task.CompletedTask;
+            };
+
+            _hubConnection.Closed += async error =>
+            {
+                Log.Error("Connection closed. Trying to restart the connection...");
+                await Task.Delay(new Random().Next(0, 5) * 1000);
+                await _hubConnection.StartAsync();
+            };
+
+            _hubConnection.StartAsync().Wait();
         }
-
-        //public async Task<ProgramLogItem?> GetCurrentLogItemAsync(Guid stationId)
-        //{
-        //    var station = await _stationRepository.GetStationByIdAsync(stationId);
-        //    if (station == null)
-        //    {
-        //        Log.Error("+++ AudioService.cs -- GetCurrentLogItemAsync() - Station with ID {stationId} not found.", stationId);
-        //        return null;
-        //    }
-
-        //    return station.ProgramLogItems?
-        //        .FirstOrDefault(log => log.LogOrderID == station.NextPlay);
-        //}
 
         public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
         {
@@ -57,7 +91,7 @@ namespace AudionixAudioServer.Services
                     {
                         Log.Debug($"+++ AudioService.cs -- PlayAudioAsync() - Station with ID {station.CallLetters} found.");
                     }
-                    
+
                     var logItem = await _stationRepository.GetProgramLogItemAsync(stationId, station.NextPlay);
 
                     Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - LogItem: {logItem}");
@@ -112,6 +146,10 @@ namespace AudionixAudioServer.Services
 
                                 while (outputDevice.PlaybackState == PlaybackState.Playing)
                                 {
+                                    // Update song progress
+                                    var progress = (int)(audioFile.CurrentTime.TotalSeconds / audioFile.TotalTime.TotalSeconds * 100);
+                                    await _hubConnection.InvokeAsync("UpdateProgress", progress);
+
                                     // Check if segue is reached
                                     if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null)
                                     {

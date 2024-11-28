@@ -3,7 +3,6 @@ using Audionix.Components;
 using Audionix.Data;
 using Audionix.Services;
 using Audionix.Repositories;
-using Audionix.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +14,7 @@ using Serilog.Settings.Configuration;
 using DataAccess.UnitOfWork;
 using Audionix.DataAccess;
 using Microsoft.AspNetCore.Authentication;
+using Audionix.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,9 +90,13 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
     builder.Services.AddScoped<AppStateService>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-    //builder.Services.AddSingleton<AppSettings>();
+    builder.Services.AddSignalR();
 
+    // Add logging configuration for SignalR
+    builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
+    builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
 }
+
 
 void ConfigureAuthentication(WebApplicationBuilder builder)
 {
@@ -215,12 +219,19 @@ void ConfigureMiddleware(WebApplication app)
     }
     app.UseHttpsRedirection();
     app.UseStaticFiles();
+    app.UseRouting(); // Set up routing middleware
+    app.UseAuthentication(); // Add authentication middleware
+    app.UseAuthorization(); // Add authorization middleware
     app.UseAntiforgery();
 }
 
 void ConfigureEndpoints(WebApplication app)
 {
-    app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-    app.MapAdditionalIdentityEndpoints();
-    app.MapControllers();
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+        endpoints.MapAdditionalIdentityEndpoints();
+        endpoints.MapControllers();
+        endpoints.MapHub<ProgressHub>("/progressHub");
+    });
 }
