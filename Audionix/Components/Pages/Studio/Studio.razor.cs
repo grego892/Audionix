@@ -148,12 +148,7 @@ namespace Audionix.Components.Pages.Studio
             if (selectedAudioFile != null && ProgramLogRepository != null && AppStateService?.station != null)
             {
                 // Shift existing items' LogID
-                var itemsToShift = await ProgramLogRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
-
-                foreach (var item in itemsToShift)
-                {
-                    item.LogOrderID++;
-                }
+                await ProgramLogRepository.ShiftLogItemsDownAsync(AppStateService.station.StationId, index);
 
                 var newLogItem = new ProgramLogItem
                 {
@@ -184,11 +179,12 @@ namespace Audionix.Components.Pages.Studio
             if (ProgramLogRepository != null)
             {
                 await ProgramLogRepository.RemoveProgramLogItemAsync(logItem);
-
+                await ProgramLogRepository.ShiftLogItemsUpAsync(logItem.StationId, logItem.LogOrderID);
                 ProgramLog.Remove(logItem);
                 _delete = false;
             }
         }
+
 
         public void Dispose()
         {

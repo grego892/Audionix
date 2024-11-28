@@ -59,8 +59,6 @@
                     Id = pl.Id,
                     Status = pl.Status,
                     Cue = pl.Cue,
-                    //Scheduled = pl.Scheduled,
-                    //Actual = pl.Actual,
                     Name = pl.Name,
                     Cart = pl.Cart,
                     Length = pl.Length,

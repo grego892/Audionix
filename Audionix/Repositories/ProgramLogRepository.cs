@@ -83,5 +83,39 @@ namespace Audionix.Repositories
             context.Log.UpdateRange(logsToRenumber);
             await context.SaveChangesAsync();
         }
+
+        public async Task ShiftLogItemsDownAsync(Guid stationId, int startIndex)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            var itemsToShift = await context.Log
+                .Where(log => log.StationId == stationId && log.LogOrderID >= startIndex)
+                .OrderBy(log => log.LogOrderID)
+                .ToListAsync();
+
+            foreach (var item in itemsToShift)
+            {
+                item.LogOrderID++;
+            }
+
+            context.Log.UpdateRange(itemsToShift);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task ShiftLogItemsUpAsync(Guid stationId, int startIndex)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            var itemsToShift = await context.Log
+                .Where(log => log.StationId == stationId && log.LogOrderID > startIndex)
+                .OrderBy(log => log.LogOrderID)
+                .ToListAsync();
+
+            foreach (var item in itemsToShift)
+            {
+                item.LogOrderID--;
+            }
+
+            context.Log.UpdateRange(itemsToShift);
+            await context.SaveChangesAsync();
+        }
     }
 }

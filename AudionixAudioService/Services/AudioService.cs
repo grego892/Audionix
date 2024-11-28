@@ -8,7 +8,6 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Serilog;
 
-
 namespace AudionixAudioServer.Services
 {
     public class AudioService
@@ -21,42 +20,52 @@ namespace AudionixAudioServer.Services
         {
             _unitOfWork = unitOfWork;
             _stationRepository = stationRepository;
-
         }
 
-        public async Task<ProgramLogItem?> GetCurrentLogItemAsync(Guid stationId)
-        {
-            var station = await _unitOfWork.Stations.GetStationByIdAsync(stationId);
-            if (station == null)
-            {
-                Log.Error("Station with ID {stationId} not found.", stationId);
-                return null;
-            }
+        //public async Task<ProgramLogItem?> GetCurrentLogItemAsync(Guid stationId)
+        //{
+        //    var station = await _stationRepository.GetStationByIdAsync(stationId);
+        //    if (station == null)
+        //    {
+        //        Log.Error("+++ AudioService.cs -- GetCurrentLogItemAsync() - Station with ID {stationId} not found.", stationId);
+        //        return null;
+        //    }
 
-            return station.ProgramLogItems?
-                .FirstOrDefault(log => log.LogOrderID == station.NextPlay);
-        }
+        //    return station.ProgramLogItems?
+        //        .FirstOrDefault(log => log.LogOrderID == station.NextPlay);
+        //}
 
         public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
         {
+            Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - Starting PlayAudioAsync()");
+
             return Task.Run(async () =>
             {
+                Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - Inside Task.Run(async () =>)");
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    var station = await _unitOfWork.Stations.GetStationByIdAsync(stationId);
+                    Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - Inside while (!stoppingToken.IsCancellationRequested)");
+                    var station = await _stationRepository.GetStationByIdAsync(stationId);
 
                     if (station == null)
                     {
-                        Log.Error("Station with ID {stationId} not found.", stationId);
+                        Log.Error($"+++ AudioService.cs -- PlayAudioAsync() - station == null");
+                        await Task.Delay(10000, stoppingToken);
                         return;
                     }
+                    else
+                    {
+                        Log.Debug($"+++ AudioService.cs -- PlayAudioAsync() - Station with ID {station.CallLetters} found.");
+                    }
+                    
+                    var logItem = await _stationRepository.GetProgramLogItemAsync(stationId, station.NextPlay);
 
-                    var logItem = station.ProgramLogItems?
-                        .FirstOrDefault(log => log.LogOrderID == station.NextPlay);
+                    Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - LogItem: {logItem}");
 
                     if (logItem == null)
                     {
-                        Log.Debug("--- AudioService.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {LogOrderID}", station.NextPlay);
+                        Log.Error("+++ AudioService.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {LogOrderID}", station.NextPlay);
+                        await Task.Delay(10000, stoppingToken);
                         return;
                     }
 
@@ -64,7 +73,7 @@ namespace AudionixAudioServer.Services
                     {
                         var audioMetadata = await _stationRepository.GetAudioFileByFilenameAsync(logItem.Name);
 
-                        Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - AudioMetadata.Title: {audioMetadata?.Title}");
+                        Log.Information($"--- AudioService.cs -- PlayAudioAsync() - AudioMetadata.Title: {audioMetadata?.Title}");
 
                         if (audioMetadata != null)
                         {
@@ -84,7 +93,7 @@ namespace AudionixAudioServer.Services
 
                                 fadeOutProvider.BeginFadeIn(.1);
 
-                                Log.Information("Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                                Log.Information("--- AudioService.cs -- PlayAudioAsync() - Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                 outputDevice.Play();
 
                                 // Update the station's CurrentPlaying and NextPlay properties
@@ -93,7 +102,7 @@ namespace AudionixAudioServer.Services
                                 Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - station.CurrentPlaying ISNOW: {station.CurrentPlaying}");
                                 station.NextPlay += 1;
                                 Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - station.NextPlay ISNOW: {station.NextPlay}");
-                                await _unitOfWork.Stations.UpdateStationAsync(station);
+                                await _stationRepository.UpdateStationAsync(station);
                                 await _unitOfWork.CompleteAsync();
 
                                 var seguePosition = audioFile.TotalTime - TimeSpan.FromMilliseconds(audioMetadata.Segue);
@@ -106,11 +115,11 @@ namespace AudionixAudioServer.Services
                                     // Check if segue is reached
                                     if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null)
                                     {
-                                        Log.Information("Reached segue point for audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                                        Log.Information("--- AudioService.cs -- PlayAudioAsync() - Reached segue point for audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                         fadeOutProvider.BeginFadeOut(fadeTime);
 
                                         // Start playing the next audio
-                                        Log.Information("Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                                        Log.Information("--- AudioService.cs -- PlayAudioAsync() - Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                         nextAudioTask = PlayAudioAsync(stationId, stoppingToken);
                                     }
                                     await Task.Delay(100, stoppingToken);
@@ -122,7 +131,9 @@ namespace AudionixAudioServer.Services
                                 // Wait for the next audio task to complete if it was started
                                 if (nextAudioTask != null)
                                 {
+                                    Log.Debug("--- AudioService.cs -- PlayAudioAsync() - nextAudioTask != null.  About to await nextAudioTask");
                                     await nextAudioTask;
+                                    Log.Debug("--- AudioService.cs -- PlayAudioAsync() - Awaited nextAudioTask");
                                 }
                             }
 
@@ -130,12 +141,12 @@ namespace AudionixAudioServer.Services
                         }
                         else
                         {
-                            Log.Debug("--- AudioService.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {Name}", logItem.Name);
+                            Log.Warning("--- AudioService.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {Name}", logItem.Name);
                         }
                     }
                     else
                     {
-                        Log.Debug("--- AudioService.cs -- PlayAudioAsync() - LogItem Name is null or empty.");
+                        Log.Warning("--- AudioService.cs -- PlayAudioAsync() - LogItem Name is null or empty.");
                     }
                 }
             }, stoppingToken);

@@ -10,69 +10,78 @@ namespace AudionixAudioServer.Repositories
 {
     public class StationRepository : IStationRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-        public StationRepository(ApplicationDbContext context)
+        public StationRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
-            _context = context;
+            _dbContextFactory = dbContextFactory;
         }
 
         public async Task<List<Station>> GetStationsAsync()
         {
-            return await _context.Stations.ToListAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Stations.ToListAsync();
         }
 
         public async Task<Station?> GetStationByIdAsync(Guid stationId)
         {
-            return await _context.Stations.AsNoTracking().FirstOrDefaultAsync(s => s.StationId == stationId);
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Stations.AsNoTracking().FirstOrDefaultAsync(s => s.StationId == stationId);
         }
 
         public async Task AddStationAsync(Station station)
         {
-            _context.Stations.Add(station);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.Stations.Add(station);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateStationAsync(Station station)
         {
-            _context.Stations.Update(station);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.Stations.Update(station);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteStationAsync(Guid stationId)
         {
-            var station = await _context.Stations.FindAsync(stationId);
+            using var context = _dbContextFactory.CreateDbContext();
+            var station = await context.Stations.FindAsync(stationId);
             if (station != null)
             {
-                _context.Stations.Remove(station);
-                await _context.SaveChangesAsync();
+                context.Stations.Remove(station);
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task<List<Category>> GetCategoriesAsync(Guid stationId)
         {
-            return await _context.Categories.Where(c => c.StationId == stationId).ToListAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Categories.Where(c => c.StationId == stationId).ToListAsync();
         }
 
         public async Task AddCategoryAsync(Category category)
         {
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteCategoryAsync(Guid categoryId)
         {
-            var category = await _context.Categories.FindAsync(categoryId);
+            using var context = _dbContextFactory.CreateDbContext();
+            var category = await context.Categories.FindAsync(categoryId);
             if (category != null)
             {
-                _context.Categories.Remove(category);
-                await _context.SaveChangesAsync();
+                context.Categories.Remove(category);
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
         {
-            var musicGridItems = await _context.MusicGridItems
+            using var context = _dbContextFactory.CreateDbContext();
+            var musicGridItems = await context.MusicGridItems
                 .Where(item => item.StationId == stationId)
                 .ToListAsync();
 
@@ -93,11 +102,12 @@ namespace AudionixAudioServer.Repositories
 
         public async Task<List<Category>> GetCategoriesForPatternsAsync(List<Guid> musicPatterns)
         {
+            using var context = _dbContextFactory.CreateDbContext();
             var categories = new List<Category>();
 
             foreach (var patternId in musicPatterns)
             {
-                var patternCategories = await _context.PatternCategories
+                var patternCategories = await context.PatternCategories
                     .Where(pc => pc.MusicPatternId == patternId)
                     .Include(pc => pc.Category)
                     .ToListAsync();
@@ -116,11 +126,12 @@ namespace AudionixAudioServer.Repositories
 
         public async Task<List<AudioMetadata>> GetScheduledSongsAsync(List<Category> categories, Dictionary<string, int> categoryRotationIndex)
         {
+            using var context = _dbContextFactory.CreateDbContext();
             var scheduledSongs = new List<AudioMetadata>();
 
             foreach (var category in categories)
             {
-                var audioFiles = await _context.AudioFiles
+                var audioFiles = await context.AudioFiles
                     .Where(af => af.SelectedCategory == category.CategoryName)
                     .ToListAsync();
 
@@ -151,15 +162,11 @@ namespace AudionixAudioServer.Repositories
         {
             if (newDaysLog != null && newDaysLog.Count > 0)
             {
-                if (newDaysLog == null || !newDaysLog.Any())
-                {
-                    Log.Error("+++ AppDatabaseService - AddNewDayLogToDbLogAsync() -- NewDaysLog is null or empty.");
-                }
-
+                using var context = _dbContextFactory.CreateDbContext();
                 var newLogDate = newDaysLog.First().Date;
 
                 // Retrieve the maximum LogOrderID for the previous date in the log
-                int maxLogOrderIDForPreviousDate = await _context.Log
+                int maxLogOrderIDForPreviousDate = await context.Log
                     .Where(log => log.Date < newLogDate)
                     .MaxAsync(log => (int?)log.LogOrderID) ?? 0;
 
@@ -171,11 +178,11 @@ namespace AudionixAudioServer.Repositories
                 }
 
                 // Insert the new log items into the database
-                await _context.Log.AddRangeAsync(newDaysLog);
-                await _context.SaveChangesAsync();
+                await context.Log.AddRangeAsync(newDaysLog);
+                await context.SaveChangesAsync();
 
                 // Renumber all log items for dates after the new log items' date
-                var logsToRenumber = await _context.Log
+                var logsToRenumber = await context.Log
                     .Where(log => log.Date > newLogDate)
                     .OrderBy(log => log.Date)
                     .ThenBy(log => log.LogOrderID)
@@ -187,8 +194,8 @@ namespace AudionixAudioServer.Repositories
                     logItem.LogOrderID = ++currentLogOrderID;
                 }
 
-                _context.Log.UpdateRange(logsToRenumber);
-                await _context.SaveChangesAsync();
+                context.Log.UpdateRange(logsToRenumber);
+                await context.SaveChangesAsync();
             }
             else
             {
@@ -198,82 +205,107 @@ namespace AudionixAudioServer.Repositories
 
         public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId)
         {
-            return await _context.MusicGridItems.Where(mgi => mgi.StationId == stationId).ToListAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.MusicGridItems.Where(mgi => mgi.StationId == stationId).ToListAsync();
         }
 
         public async Task AddMusicGridItemAsync(MusicGridItem item)
         {
-            _context.MusicGridItems.Add(item);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.MusicGridItems.Add(item);
+            await context.SaveChangesAsync();
         }
 
         public async Task<List<MusicPattern>> GetMusicPatternsAsync(Guid stationId)
         {
-            return await _context.MusicPatterns.Where(mp => mp.StationId == stationId).ToListAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.MusicPatterns.Where(mp => mp.StationId == stationId).ToListAsync();
         }
 
         public async Task<List<AudioMetadata>> GetAudioFilesAsync()
         {
-            return await _context.AudioFiles.AsNoTracking().ToListAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AudioFiles.AsNoTracking().ToListAsync();
         }
 
         public async Task<AudioMetadata?> GetAudioFileByIdAsync(int id)
         {
-            return await _context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Id == id);
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Id == id);
         }
 
         public async Task AddAudioFileAsync(AudioMetadata audioMetadata)
         {
-            _context.AudioFiles.Add(audioMetadata);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.AudioFiles.Add(audioMetadata);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteAudioFileAsync(AudioMetadata audioMetadata)
         {
-            _context.AudioFiles.Remove(audioMetadata);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.AudioFiles.Remove(audioMetadata);
+            await context.SaveChangesAsync();
         }
 
         public async Task<List<Folder>> GetFoldersForStationAsync(Guid stationId)
         {
-            return await _context.Folders.Where(f => f.StationId == stationId).ToListAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Folders.Where(f => f.StationId == stationId).ToListAsync();
         }
 
         public async Task<Folder?> GetFolderByIdAsync(int id)
         {
-            return await _context.Folders.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Folders.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
         }
 
         public async Task AddFolderAsync(Folder folder)
         {
-            _context.Folders.Add(folder);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.Folders.Add(folder);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteFolderAsync(Folder folder)
         {
-            _context.Folders.Remove(folder);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.Folders.Remove(folder);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateAudioMetadataAsync(AudioMetadata audioMetadata)
         {
-            _context.AudioFiles.Update(audioMetadata);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.AudioFiles.Update(audioMetadata);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateMusicGridItemAsync(MusicGridItem musicGridItem)
         {
-            _context.MusicGridItems.Update(musicGridItem);
-            await _context.SaveChangesAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            context.MusicGridItems.Update(musicGridItem);
+            await context.SaveChangesAsync();
         }
+
         public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
         {
-            return await _context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
         }
+
         public async Task<AppSettings> GetAppSettingsDataPathAsync()
         {
-            return await _context.AppSettings.FirstOrDefaultAsync();
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AppSettings.FirstOrDefaultAsync();
         }
+        public async Task<ProgramLogItem?> GetProgramLogItemAsync(Guid stationId, int logOrderID)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Log
+                .AsNoTracking()
+                .FirstOrDefaultAsync(log => log.StationId == stationId && log.LogOrderID == logOrderID);
+        }
+
     }
 }

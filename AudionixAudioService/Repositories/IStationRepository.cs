@@ -34,5 +34,11 @@ namespace AudionixAudioServer.Repositories
         Task UpdateMusicGridItemAsync(MusicGridItem musicGridItem);
         Task<AppSettings> GetAppSettingsDataPathAsync();
         Task<AudioMetadata> GetAudioFileByFilenameAsync(string filename);
+        Task<ProgramLogItem?> GetProgramLogItemAsync(Guid stationId, int logOrderID);
+
+    }
+    public interface IAudioMetadataRepository
+    {
+        Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename);
     }
 }

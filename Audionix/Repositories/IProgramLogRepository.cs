@@ -9,5 +9,7 @@ namespace Audionix.Repositories
         Task AddProgramLogItemAsync(ProgramLogItem logItem);
         Task RemoveProgramLogItemAsync(ProgramLogItem logItem);
         Task AddNewDayLogToDbLogAsync(List<ProgramLogItem> newDaysLog);
+        Task ShiftLogItemsDownAsync(Guid stationId, int startIndex);
+        Task ShiftLogItemsUpAsync(Guid stationId, int startIndex);
     }
 }

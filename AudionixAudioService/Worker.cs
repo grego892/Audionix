@@ -27,10 +27,14 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        Log.Debug("---- AudioService.cs -- ExecuteAsync() -  ExecuteAsync starting.");
         while (!stoppingToken.IsCancellationRequested)
         {
+            Log.Debug("---- AudioService.cs -- ExecuteAsync() -  while (!stoppingToken.IsCancellationRequested)");
             using (var scope = _serviceProvider.CreateScope())
             {
+                Log.Debug("---- AudioService.cs -- ExecuteAsync() -  using (var scope = _serviceProvider.CreateScope())");
+
                 var stationRepository = scope.ServiceProvider.GetRequiredService<IStationRepository>();
                 var audioService = scope.ServiceProvider.GetRequiredService<AudioService>();
 
@@ -40,11 +44,10 @@ public class Worker : BackgroundService
 
                 foreach (var station in stations)
                 {
-                    Log.Debug("---- AudioService.cs -- PlayAudioAsync() -  BEFORE tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken)");
+                    Log.Debug("--- AudioService.cs -- PlayAudioAsync() - BEFORE tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken)");
                     tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken));
-                    Log.Debug("---- AudioService.cs -- PlayAudioAsync() -  AFTER tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken)");
-
-                    Log.Debug($"=================  TASKS: {tasks.Count.ToString()}");
+                    Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - AFTER tasks.Add(audioService.PlayAudioAsync(station.StationId, stoppingToken) == station.StationId: {station.StationId}");
+                    Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - TASKS: {tasks.Count.ToString()}");
                 }
 
                 await Task.WhenAll(tasks);
