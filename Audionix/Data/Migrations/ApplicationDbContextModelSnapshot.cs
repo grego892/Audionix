@@ -145,6 +145,12 @@ namespace Audionix.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("AudioType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
                     b.Property<double>("Duration")
                         .HasColumnType("double precision");
 
@@ -175,9 +181,6 @@ namespace Audionix.Data.Migrations
 
                     b.Property<double>("SegueSeconds")
                         .HasColumnType("double precision");
-
-                    b.Property<string>("SelectedCategory")
-                        .HasColumnType("text");
 
                     b.Property<int>("StartDate")
                         .HasColumnType("integer");
@@ -416,8 +419,8 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("Segue")
                         .HasColumnType("text");
 
-                    b.Property<string>("States")
-                        .HasColumnType("text");
+                    b.Property<int?>("States")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("StationId")
                         .HasColumnType("uuid");

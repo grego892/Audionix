@@ -123,7 +123,7 @@ namespace Audionix.Services
         }
 
 
-        public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, Action getFolderFileList)
+        public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, Func<Task> getFolderFileList)
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
             File.Delete(Path.Combine(dataPath, "Stations", selectedStation, "Audio", audioMetadata.Filename));
@@ -135,9 +135,10 @@ namespace Audionix.Services
                 await _audioMetadataRepository.DeleteAudioFileAsync(audioMetadataForDb);
             }
 
-            getFolderFileList();
+            await getFolderFileList();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
+
 
         public async Task AddFolder(Folder newFolder, Station selectedStation, ISnackbar snackbar)
         {

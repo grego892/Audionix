@@ -22,7 +22,9 @@ namespace Audionix.Components.Pages.FileManager
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<string>? folders;
         private List<Category>? categories;
+        private List<AudioType>? audioTypes;
         private bool isSongdataEnabled = false;
+        private bool editorEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
         [Inject] public IAppSettingsRepository? AppSettingsRepository { get; set; }
@@ -48,6 +50,7 @@ namespace Audionix.Components.Pages.FileManager
             {
                 folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
                 categories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
+                audioTypes = Enum.GetValues(typeof(AudioType)).Cast<AudioType>().ToList();
                 AppStateService.OnStationChanged += HandleStationChanged;
             }
         }
@@ -101,9 +104,19 @@ namespace Audionix.Components.Pages.FileManager
         {
             if (AudioMetadataRepository != null)
             {
-                audioMetadata.SelectedCategory = newCategory;
+                audioMetadata.Category = newCategory;
                 await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 Snackbar?.Add("Category updated successfully", Severity.Success);
+            }
+        }
+
+        private async Task SongAudioTypeChanged(AudioMetadata audioMetadata, AudioType audioType)
+        {
+            if (AudioMetadataRepository != null)
+            {
+                audioMetadata.AudioType = audioType;
+                await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
+                Snackbar?.Add("Audio Type updated successfully", Severity.Success);
             }
         }
 
@@ -111,7 +124,9 @@ namespace Audionix.Components.Pages.FileManager
         {
             if (FileManagerSvc != null && AppStateService?.station != null)
             {
-                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, AppSettingsRepository?.GetAppSettingsAsync().Result.DataPath ?? string.Empty, async () => await GetFolderFileList(SelectedFolder));
+                var appSettings = await AppSettingsRepository?.GetAppSettingsAsync();
+                var dataPath = appSettings?.DataPath ?? string.Empty;
+                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, dataPath, async () => await GetFolderFileList(SelectedFolder));
             }
         }
 

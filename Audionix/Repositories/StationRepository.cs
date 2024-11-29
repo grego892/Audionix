@@ -23,8 +23,12 @@ namespace Audionix.Repositories
         public async Task<Station?> GetStationByIdAsync(Guid stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            return await context.Stations.FindAsync(stationId);
+            return await context.Stations
+                                .Where(s => s.StationId == stationId)
+                                .OrderBy(s => s.StationId)
+                                .FirstOrDefaultAsync();
         }
+
 
         public async Task AddStationAsync(Station station)
         {

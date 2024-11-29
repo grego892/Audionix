@@ -288,7 +288,8 @@ namespace Audionix.Data.Migrations
                     Duration = table.Column<double>(type: "double precision", nullable: false),
                     StationId = table.Column<Guid>(type: "uuid", nullable: false),
                     Folder = table.Column<string>(type: "text", nullable: true),
-                    SelectedCategory = table.Column<string>(type: "text", nullable: true)
+                    Category = table.Column<string>(type: "text", nullable: true),
+                    AudioType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -345,7 +346,7 @@ namespace Audionix.Data.Migrations
                     From = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Passthrough = table.Column<string>(type: "text", nullable: true),
-                    States = table.Column<string>(type: "text", nullable: true),
+                    States = table.Column<int>(type: "integer", nullable: true),
                     Device = table.Column<int>(type: "integer", nullable: true),
                     sID = table.Column<int>(type: "integer", nullable: true),
                     Progress = table.Column<double>(type: "double precision", nullable: false),

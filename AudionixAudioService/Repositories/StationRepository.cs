@@ -132,7 +132,7 @@ namespace AudionixAudioServer.Repositories
             foreach (var category in categories)
             {
                 var audioFiles = await context.AudioFiles
-                    .Where(af => af.SelectedCategory == category.CategoryName)
+                    .Where(af => af.Category == category.CategoryName)
                     .ToListAsync();
 
                 if (audioFiles.Any())

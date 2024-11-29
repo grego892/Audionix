@@ -57,7 +57,8 @@ namespace Audionix.Components.Pages.MusicSchedule
                     Name = song.Filename,
                     Length = song.Duration.ToString(),
                     Segue = "0",
-                    StationId = AppStateService.station.StationId
+                    StationId = AppStateService.station.StationId,
+                    States = StatesType.notPlayed
                 };
 
                 newDaysLog.Add(newLogItem);

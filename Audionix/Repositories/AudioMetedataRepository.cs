@@ -57,7 +57,7 @@ namespace Audionix.Repositories
             {
                 var audioFiles = await context.AudioFiles
                     .AsNoTracking()
-                    .Where(af => af.SelectedCategory == category.CategoryName)
+                    .Where(af => af.Category == category.CategoryName)
                     .ToListAsync();
 
                 if (audioFiles.Any())

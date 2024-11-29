@@ -117,18 +117,6 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
-        private static Func<ProgramLogItem, int, string> RowStyleFunc => (x, i) =>
-        {
-            if (x.Progress > 0 && x.Progress <= 100)
-            {
-                return $"background: linear-gradient(to right, #4caf50 {x.Progress}%, transparent {x.Progress}%);";
-            }
-
-            return "";
-
-        };
-
-
         private async Task SelectAudioFile(AudioMetadata audioFile)
         {
             selectedAudioFile = audioFile;
@@ -156,11 +144,6 @@ namespace Audionix.Components.Pages.Studio
 
         private bool IsAudioFileSelected => selectedAudioFile != null;
 
-        private void SelectLogItem(ProgramLogItem logItem)
-        {
-            selectedLogItem = logItem;
-        }
-
         public async Task AddSelectedAudioToLog(int index, ProgramLogItem logItem)
         {
             if (selectedAudioFile != null && ProgramLogRepository != null && AppStateService?.station != null)
@@ -174,13 +157,14 @@ namespace Audionix.Components.Pages.Studio
                     Artist = selectedAudioFile.Artist,
                     Name = selectedAudioFile.Filename,
                     Description = selectedAudioFile.Artist,
-                    Category = "AUDIO",
+                    Category = selectedAudioFile.Category,
                     Progress = 0.0,
                     TimeScheduled = TimeOnly.FromDateTime(DateTime.Now),
                     TimePlayed = TimeOnly.FromDateTime(DateTime.Now),
-                    Status = "PLAYING",
+                    Status = "ready",
                     StationId = logItem.StationId,
-                    LogOrderID = index
+                    LogOrderID = index,
+                    States = StatesType.notPlayed
                 };
 
                 await ProgramLogRepository.AddProgramLogItemAsync(newLogItem);

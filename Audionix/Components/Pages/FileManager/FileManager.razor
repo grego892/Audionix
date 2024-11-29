@@ -28,9 +28,9 @@
                 </MudFileUpload>
             </MudPaper>
             <MudPaper Class="ma-1" Width="calc(99% - 350px)">
-                @if (isUploading)
+                @if (isUploading && progress < 99)
                 {
-                    <div class="progress-container">
+                    <MudStack Row="true">
                         <MudProgressLinear Class="mt-3"
                                            Value="@progress"
                                            Max="100"
@@ -38,8 +38,8 @@
                                            Rounded="true"
                                            Color="Color.Primary"
                                            Buffer="false" />
-                        <div class="progress-text">@($"{progress}%")</div>
-                    </div>
+                    <MudText Class="mt-3">@($"{progress}%")</MudText>
+                    </MudStack>
                 }
             </MudPaper>
             <MudSpacer />
@@ -74,10 +74,20 @@
                     {
                         <TemplateColumn>
                             <CellTemplate>
-                                <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="context.Item.SelectedCategory" ValueChanged="@(async (e) => await SongCategoryChanged(context.Item, e))" Variant="Variant.Outlined">
+                                <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="context.Item.Category" ValueChanged="@(async (e) => await SongCategoryChanged(context.Item, e))" Variant="Variant.Outlined">
                                     @foreach (var category in categories ?? Enumerable.Empty<Category>())
                                     {
                                         <MudSelectItem Value="@category.CategoryName" />
+                                    }
+                                </MudSelect>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn>
+                            <CellTemplate>
+                                <MudSelect Margin="Margin.Dense" T="AudioType" Label="Audio Type" Value="context.Item.AudioType" ValueChanged="@(async (e) => await SongAudioTypeChanged(context.Item, e))" Variant="Variant.Outlined">
+                                    @foreach (var audioType in audioTypes ?? Enumerable.Empty<AudioType>())
+                                    {
+                                        <MudSelectItem Value="@audioType">@audioType.ToString()</MudSelectItem>
                                     }
                                 </MudSelect>
                             </CellTemplate>
@@ -116,34 +126,38 @@
                 </Columns>
             </MudDataGrid>
         </MudPaper>
-        <MudPaper Class="border-solid border-2 mud-border-primary ma-1">
-            <MudStack>
-                <MudStack Row="true" Class="mt-1">
-                    <MudTextField FullWidth="false" @bind-Value="@EditorTitle" Label="Artist" Margin="Margin.Dense" Style="width:200px;" Variant="Variant.Outlined"></MudTextField>
-                    <MudTextField FullWidth="false" @bind-Value="@EditorArtist" Label="Artist" Margin="Margin.Dense" Style="width:200px;" Variant="Variant.Outlined"></MudTextField>
-                    <MudTextField FullWidth="false" ShrinkLabel @bind-Value="@WavePlayerCurrentPosition" Format="hh\:mm\:ss\.f" Label="Postition" Margin="Margin.Dense" Variant="Variant.Outlined" Style="width:120px;"></MudTextField>
-                    <MudTextField FullWidth="false" ShrinkLabel @bind-Value="@RoundedEditorIntro" Label="Intro" Margin="Margin.Dense" Variant="Variant.Outlined" Style="width:75px;"></MudTextField>
-                    <MudTextField FullWidth="false" ShrinkLabel @bind-Value="@RoundedEditorSegue" Label="Segue" Margin="Margin.Dense" Variant="Variant.Outlined" Style="width:75px;"></MudTextField>
-                    <MudSlider Value="@WavePlayerZoom" Immediate="true" Class="pmla-50" ValueChanged="@(async (double value) => await SetWavePlayerZoom(value))">Zoom: @WavePlayerZoom.ToString()</MudSlider>
-                    <MudSlider Value="@WavePlayerVolume" Immediate="true" ValueChanged="@(async (double value) => await SetWavePlayerVolume(value))">Volume: @WavePlayerVolume.ToString()</MudSlider>
-                    <MudIconButton OnClick="WavePlayerMute" Icon="@Icons.Material.Filled.VolumeMute" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" />
+
+        @if (editorEnabled == true)
+        {
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-1">
+                <MudStack>
+                    <MudStack Row="true" Class="mt-1">
+                        <MudTextField FullWidth="false" @bind-Value="@EditorTitle" Label="Artist" Margin="Margin.Dense" Style="width:200px;" Variant="Variant.Outlined"></MudTextField>
+                        <MudTextField FullWidth="false" @bind-Value="@EditorArtist" Label="Artist" Margin="Margin.Dense" Style="width:200px;" Variant="Variant.Outlined"></MudTextField>
+                        <MudTextField FullWidth="false" ShrinkLabel @bind-Value="@WavePlayerCurrentPosition" Format="hh\:mm\:ss\.f" Label="Postition" Margin="Margin.Dense" Variant="Variant.Outlined" Style="width:120px;"></MudTextField>
+                        <MudTextField FullWidth="false" ShrinkLabel @bind-Value="@RoundedEditorIntro" Label="Intro" Margin="Margin.Dense" Variant="Variant.Outlined" Style="width:75px;"></MudTextField>
+                        <MudTextField FullWidth="false" ShrinkLabel @bind-Value="@RoundedEditorSegue" Label="Segue" Margin="Margin.Dense" Variant="Variant.Outlined" Style="width:75px;"></MudTextField>
+                        <MudSlider Value="@WavePlayerZoom" Immediate="true" Class="pmla-50" ValueChanged="@(async (double value) => await SetWavePlayerZoom(value))">Zoom: @WavePlayerZoom.ToString()</MudSlider>
+                        <MudSlider Value="@WavePlayerVolume" Immediate="true" ValueChanged="@(async (double value) => await SetWavePlayerVolume(value))">Volume: @WavePlayerVolume.ToString()</MudSlider>
+                        <MudIconButton OnClick="WavePlayerMute" Icon="@Icons.Material.Filled.VolumeMute" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" />
+                    </MudStack>
+                    <WavesurferPlayer ShowTimeline="false"
+                                      ShowMinimap="false"
+                                      OnLoading="WaveLoading"
+                                      OnAudioProcess="GetWavePlayerCurrentPosition"
+                                      OnSeek="GetWavePlayerCurrentPosition"
+                                      @ref="wavePlayer">
+                    </WavesurferPlayer>
+                    <MudStack Row="true" Class="ma-1" wavesurfer-bottom-button-row>
+                        <MudIconButton OnClick="GotoBeginning" Icon="@Icons.Material.Filled.FirstPage" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small"></MudIconButton>
+                        <MudIconButton OnClick="WavePlayerPlay" Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Play</MudIconButton>
+                        <MudIconButton OnClick="WavePlayerPause" Icon="@Icons.Material.Filled.Pause" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Pause</MudIconButton>
+                        <MudIconButton OnClick="WavePlayerStop" Icon="@Icons.Material.Filled.Stop" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Stop</MudIconButton>
+                        <MudButton OnClick="SetIntro" FullWidth="true" StartIcon="@Icons.Material.Filled.SwipeLeftAlt" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Style="width:150px;">Set Intro</MudButton>
+                        <MudButton OnClick="SetSegue" FullWidth="true" EndIcon="@Icons.Material.Filled.SwipeRightAlt" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Style="width:150px;">Set Segue</MudButton>
+                    </MudStack>
                 </MudStack>
-                <WavesurferPlayer ShowTimeline="false"
-                                  ShowMinimap="false"
-                                  OnLoading="WaveLoading"
-                                  OnAudioProcess="GetWavePlayerCurrentPosition"
-                                  OnSeek="GetWavePlayerCurrentPosition"
-                                  @ref="wavePlayer">
-                </WavesurferPlayer>
-                <MudStack Row="true" Class="ma-1" wavesurfer-bottom-button-row>
-                    <MudIconButton OnClick="GotoBeginning" Icon="@Icons.Material.Filled.FirstPage" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small"></MudIconButton>
-                    <MudIconButton OnClick="WavePlayerPlay" Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Play</MudIconButton>
-                    <MudIconButton OnClick="WavePlayerPause" Icon="@Icons.Material.Filled.Pause" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Pause</MudIconButton>
-                    <MudIconButton OnClick="WavePlayerStop" Icon="@Icons.Material.Filled.Stop" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Stop</MudIconButton>
-                    <MudButton OnClick="SetIntro" FullWidth="true" StartIcon="@Icons.Material.Filled.SwipeLeftAlt" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Style="width:150px;">Set Intro</MudButton>
-                    <MudButton OnClick="SetSegue" FullWidth="true" EndIcon="@Icons.Material.Filled.SwipeRightAlt" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Style="width:150px;">Set Segue</MudButton>
-                </MudStack>
-            </MudStack>
-        </MudPaper>
+            </MudPaper>
+        }
     }
     </MudPaper>

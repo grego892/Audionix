@@ -18,6 +18,7 @@ namespace Audionix.Components.Pages.FileManager
         private async Task EditAudio(AudioMetadata audioMetadata)
         {
             isUploading = true;
+            editorEnabled = true;
             progress = 0;
             Log.Information("--- FileManager - EditAudio() -- EditAudio() START** -aidofile: " + audioMetadata.Filename);
 

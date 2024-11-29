@@ -32,7 +32,7 @@ namespace Audionix.Models
         public string? From { get; set; }
         public string? Description { get; set; }
         public string? Passthrough { get; set; }
-        public string? States { get; set; }
+        public StatesType? States { get; set; }
         public int? Device { get; set; }
         public int? sID { get; set; }
         public double Progress { get; set; }
@@ -42,7 +42,7 @@ namespace Audionix.Models
         public Station? Station { get; set; }
     }
 
-    enum CategoryType
+    public enum CategoryType
     {
         SONG,
         SPOT,
@@ -56,7 +56,7 @@ namespace Audionix.Models
         CART
     }
 
-    enum CueType
+    public enum CueType
     {
         Stop,
         AutoStart,
@@ -64,14 +64,16 @@ namespace Audionix.Models
         TimeNext
     }
 
-    enum FromType
+    public enum FromType
     {
         CLOCKS,
         TRAFFIC
     }
 
-    enum StatesType
+    public enum StatesType
     {
-        isReady
+        notPlayed,
+        isPlaying,
+        hasPlayed
     }
 }

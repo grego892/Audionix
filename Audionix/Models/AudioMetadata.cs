@@ -19,7 +19,15 @@
         public Guid StationId { get; set; }
         public Station? Station { get; set; }
         public string? Folder { get; set; }
-
-        public string? SelectedCategory { get; set; }
+        public string? Category { get; set; }
+        public AudioType AudioType { get; set; }
+    }
+    public enum AudioType
+    {
+        song,
+        liner,
+        promo,
+        spot,
+        macro
     }
 }
