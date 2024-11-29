@@ -31,6 +31,12 @@ namespace AudionixAudioServer.Services
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
 
+            // Register the handler for ReceiveProgress
+            _hubConnection.On<int, double, double>("ReceiveProgress", (logOrderID, currentTime, totalTime) =>
+            {
+                Log.Information("Received progress update: LogOrderID: {LogOrderID}, CurrentTime: {CurrentTime}, TotalTime: {TotalTime}", logOrderID, currentTime, totalTime);
+            });
+
             // Handle reconnection events
             _hubConnection.Reconnecting += error =>
             {
@@ -47,11 +53,29 @@ namespace AudionixAudioServer.Services
             _hubConnection.Closed += async error =>
             {
                 Log.Error("Connection closed. Trying to restart the connection...");
-                await Task.Delay(new Random().Next(0, 5) * 1000);
-                await _hubConnection.StartAsync();
+                _ = RetryConnectionAsync();
             };
 
-            _hubConnection.StartAsync().Wait();
+            _ = RetryConnectionAsync();
+        }
+
+
+        private async Task RetryConnectionAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    await _hubConnection.StartAsync();
+                    Log.Information("Connected to the server.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to connect to the server. Retrying in 5 seconds... Error: {Error}", ex.Message);
+                    await Task.Delay(5000);
+                }
+            }
         }
 
         public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
@@ -84,8 +108,10 @@ namespace AudionixAudioServer.Services
                     if (logItem == null)
                     {
                         Log.Error("+++ AudioService.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {LogOrderID}", station.NextPlay);
-                        await Task.Delay(10000, stoppingToken);
-                        return;
+                        station.NextPlay += 1;
+                        await _stationRepository.UpdateStationAsync(station);
+                        await _unitOfWork.CompleteAsync();
+                        continue;
                     }
 
                     if (!string.IsNullOrEmpty(logItem.Name))
@@ -134,8 +160,14 @@ namespace AudionixAudioServer.Services
                                     // Update song progress
                                     double currentTime = audioFile.CurrentTime.TotalMilliseconds;
                                     double totalTime = audioFile.TotalTime.TotalMilliseconds;
-                                    //var progress = (int)(audioFile.CurrentTime.TotalSeconds / audioFile.TotalTime.TotalSeconds * 100);
-                                    await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, currentTime, totalTime);
+                                    try
+                                    {
+                                        await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, currentTime, totalTime);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Warning("Failed to update progress. Error: {Error}", ex.Message);
+                                    }
 
                                     // Check if segue is reached
                                     if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null)

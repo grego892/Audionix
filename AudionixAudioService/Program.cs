@@ -3,18 +3,18 @@ using AudionixAudioServer.DataAccess;
 using AudionixAudioServer.Repositories;
 using AudionixAudioServer.Services;
 using Microsoft.EntityFrameworkCore;
-using Serilog.Settings.Configuration;
 using Serilog;
+using Serilog.Settings.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // LOGGING
-string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
+string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
 var configuration = builder.Configuration;
 var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration, options)
-    .WriteTo.File(Path.Combine(_logPath), rollingInterval: RollingInterval.Day)
+    .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
     .WriteTo.Console()
     .CreateLogger();
 
