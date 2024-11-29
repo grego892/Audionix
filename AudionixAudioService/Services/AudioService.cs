@@ -31,21 +31,6 @@ namespace AudionixAudioServer.Services
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
 
-
-            var hubConnection = new HubConnectionBuilder()
-    .WithUrl("https://localhost:7184/clienthub", options =>
-    {
-        options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
-    })
-    .WithAutomaticReconnect()
-    .ConfigureLogging(logging =>
-    {
-        logging.AddConsole();
-        // This will set ALL logging to Debug level
-        logging.SetMinimumLevel(LogLevel.Debug);
-    })
-    .Build();
-
             // Handle reconnection events
             _hubConnection.Reconnecting += error =>
             {
@@ -147,8 +132,10 @@ namespace AudionixAudioServer.Services
                                 while (outputDevice.PlaybackState == PlaybackState.Playing)
                                 {
                                     // Update song progress
-                                    var progress = (int)(audioFile.CurrentTime.TotalSeconds / audioFile.TotalTime.TotalSeconds * 100);
-                                    await _hubConnection.InvokeAsync("UpdateProgress", progress);
+                                    double currentTime = audioFile.CurrentTime.TotalMilliseconds;
+                                    double totalTime = audioFile.TotalTime.TotalMilliseconds;
+                                    //var progress = (int)(audioFile.CurrentTime.TotalSeconds / audioFile.TotalTime.TotalSeconds * 100);
+                                    await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, currentTime, totalTime);
 
                                     // Check if segue is reached
                                     if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null)

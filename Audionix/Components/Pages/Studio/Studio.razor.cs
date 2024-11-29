@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using MudBlazor;
 using Serilog;
+using static MudBlazor.CategoryTypes;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -15,7 +16,6 @@ namespace Audionix.Components.Pages.Studio
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
         private string? _selectedAudioFolder;
-        private int songProgress;
         private HubConnection _hubConnection;
 
         public List<ProgramLogItem> ProgramLog = new();
@@ -44,10 +44,14 @@ namespace Audionix.Components.Pages.Studio
                 .WithUrl("http://localhost:5298/progressHub")
                 .Build();
 
-            _hubConnection.On<int>("ReceiveProgress", (progress) =>
+            _hubConnection.On<int, double, double>("ReceiveProgress", (logOrderId, currentTime, totalTime) =>
             {
-                songProgress = progress;
-                InvokeAsync(StateHasChanged);
+                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == logOrderId);
+                if (logItem != null)
+                {
+                    logItem.Progress = (currentTime / totalTime) * 100;
+                    InvokeAsync(StateHasChanged);
+                }
             });
 
             await _hubConnection.StartAsync();
@@ -115,15 +119,15 @@ namespace Audionix.Components.Pages.Studio
 
         private static Func<ProgramLogItem, int, string> RowStyleFunc => (x, i) =>
         {
-            return x.Category switch
+            if (x.Progress > 0 && x.Progress <= 100)
             {
-                "SONG" => ($"background: {Colors.Indigo.Lighten1}; "),
-                "AUDIO" => ($"background: {Colors.Blue.Lighten1}; "),
-                "MACRO" => ($"background: {Colors.BlueGray.Lighten1}; "),
-                "SPOT" => ($"background: {Colors.Green.Lighten1}; "),
-                _ => "background-image: #000000)",
-            };
+                return $"background: linear-gradient(to right, #4caf50 {x.Progress}%, transparent {x.Progress}%);";
+            }
+
+            return "";
+
         };
+
 
         private async Task SelectAudioFile(AudioMetadata audioFile)
         {
