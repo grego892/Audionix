@@ -35,6 +35,7 @@ namespace AudionixAudioServer.Repositories
         Task<AppSettings> GetAppSettingsDataPathAsync();
         Task<AudioMetadata> GetAudioFileByFilenameAsync(string filename);
         Task<ProgramLogItem?> GetProgramLogItemAsync(Guid stationId, int logOrderID);
+        Task UpdateProgramLogItemAsync(ProgramLogItem logItem);
 
     }
     public interface IAudioMetadataRepository

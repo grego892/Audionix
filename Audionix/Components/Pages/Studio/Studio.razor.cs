@@ -11,12 +11,13 @@ namespace Audionix.Components.Pages.Studio
 {
     public partial class Studio : IDisposable
     {
-        private bool _open = false;
-        private bool _delete = false;
+        private bool _openMakenextDrawer = false;
+        private bool _openInsertDrawer = false;
+        private bool _openDeleteDrawer = false;
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
         private string? _selectedAudioFolder;
-        private HubConnection _hubConnection;
+        private HubConnection? _hubConnection;
 
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
@@ -50,11 +51,28 @@ namespace Audionix.Components.Pages.Studio
                 if (logItem != null)
                 {
                     logItem.Progress = (currentTime / totalTime) * 100;
+                    if (currentTime == totalTime)
+                    {
+                        logItem.States = StatesType.hasPlayed;
+                    }
+                    InvokeAsync(StateHasChanged);
+                }
+            });
+
+            // Add handler for SongStopped event
+            _hubConnection.On<int>("SongStopped", (logOrderId) =>
+            {
+                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == logOrderId);
+                if (logItem != null)
+                {
+                    logItem.States = StatesType.hasPlayed;
+                    Log.Information("--- Studio - OnInitializedAsync() -- SongStopped received for LogOrderID: {LogOrderID}", logOrderId);
                     InvokeAsync(StateHasChanged);
                 }
             });
 
             await _hubConnection.StartAsync();
+
         }
 
         private async void HandleStationChanged(object? sender, EventArgs e)
@@ -67,14 +85,35 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
-        private void ToggleInsertDrawer()
+        private async void PlayNext()
         {
-            _open = !_open;
+            if (_hubConnection != null)
+            {
+                await _hubConnection.InvokeAsync("PlayNextAudio", AppStateService?.station?.StationId ?? Guid.Empty);
+            }
         }
 
-        private void ToggleDelete()
+        private void ToggleMakeNextDrawer()
         {
-            _delete = !_delete;
+            _openMakenextDrawer = !_openMakenextDrawer;
+        }
+
+        private async void StopAudio()
+        {
+            if (_hubConnection != null)
+            {
+                await _hubConnection.InvokeAsync("StopAudio", AppStateService?.station?.StationId ?? Guid.Empty);
+            }
+        }
+
+        private void ToggleInsertDrawer()
+        {
+            _openInsertDrawer = !_openInsertDrawer;
+        }
+
+        private void ToggleDeleteDrawer()
+        {
+            _openDeleteDrawer = !_openDeleteDrawer;
         }
 
         private async Task LoadFolders()
@@ -120,7 +159,7 @@ namespace Audionix.Components.Pages.Studio
         private async Task SelectAudioFile(AudioMetadata audioFile)
         {
             selectedAudioFile = audioFile;
-            _open = false;
+            _openInsertDrawer = false;
 
             if (AppStateService?.station != null && ProgramLogRepository != null)
             {
@@ -176,6 +215,21 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
+        public async Task MakeNextSelectedLogItem(ProgramLogItem logItem)
+        {
+            await Task.Delay(1);
+        }
+
+        public async Task StopSelectedLogItem(ProgramLogItem logItem)
+        {
+            await Task.Delay(1);
+        }
+
+        public async Task InsertSelectedLogItem(ProgramLogItem logItem)
+        {
+
+        }
+
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)
         {
             if (ProgramLogRepository != null)
@@ -183,7 +237,7 @@ namespace Audionix.Components.Pages.Studio
                 await ProgramLogRepository.RemoveProgramLogItemAsync(logItem);
                 await ProgramLogRepository.ShiftLogItemsUpAsync(logItem.StationId, logItem.LogOrderID);
                 ProgramLog.Remove(logItem);
-                _delete = false;
+                _openDeleteDrawer = false;
             }
         }
 

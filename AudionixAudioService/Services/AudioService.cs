@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
 using Serilog;
+using AudionixAudioServer.Models;
 
 namespace AudionixAudioServer.Services
 {
@@ -11,8 +12,9 @@ namespace AudionixAudioServer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStationRepository _stationRepository;
-        private int fadeTime = 2000;
+        private int fadeTime = 1000;
         private HubConnection _hubConnection;
+        private bool _isPlayNextTriggered = false;
 
         public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository)
         {
@@ -25,7 +27,7 @@ namespace AudionixAudioServer.Services
                 })
                 .ConfigureLogging(logging =>
                 {
-                    logging.SetMinimumLevel(LogLevel.Debug);
+                    logging.SetMinimumLevel(LogLevel.Information);
                     logging.AddConsole();
                 })
                 .WithAutomaticReconnect() // Enable automatic reconnection
@@ -34,7 +36,7 @@ namespace AudionixAudioServer.Services
             // Register the handler for ReceiveProgress
             _hubConnection.On<int, double, double>("ReceiveProgress", (logOrderID, currentTime, totalTime) =>
             {
-                Log.Information("Received progress update: LogOrderID: {LogOrderID}, CurrentTime: {CurrentTime}, TotalTime: {TotalTime}", logOrderID, currentTime, totalTime);
+                //Log.Debug("Received progress update: LogOrderID: {LogOrderID}, CurrentTime: {CurrentTime}, TotalTime: {TotalTime}", logOrderID, currentTime, totalTime);
             });
 
             // Handle reconnection events
@@ -55,6 +57,16 @@ namespace AudionixAudioServer.Services
                 Log.Error("Connection closed. Trying to restart the connection...");
                 _ = RetryConnectionAsync();
             };
+
+            _hubConnection.On<Guid>("PlayNextAudio", async (stationId) =>
+            {
+                await PlayNextAudioAsync(stationId);
+            });
+
+            _hubConnection.On<Guid>("StopAudio", async (stationId) =>
+            {
+                await StopAudioAsync(stationId);
+            });
 
             _ = RetryConnectionAsync();
         }
@@ -140,6 +152,9 @@ namespace AudionixAudioServer.Services
 
                                 Log.Information("--- AudioService.cs -- PlayAudioAsync() - Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                 outputDevice.Play();
+                                logItem.States = StatesType.isPlaying;
+                                await _stationRepository.UpdateProgramLogItemAsync(logItem);
+                                await _unitOfWork.CompleteAsync();
 
                                 // Update the station's CurrentPlaying and NextPlay properties
                                 Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: {station.CurrentPlaying}");
@@ -166,14 +181,34 @@ namespace AudionixAudioServer.Services
                                     }
                                     catch (Exception ex)
                                     {
-                                        Log.Warning("Failed to update progress. Error: {Error}", ex.Message);
+                                        Log.Warning("+++ AudioService.cs -- PlayAudioAsync() - Failed to update progress. Error: {Error}", ex.Message);
                                     }
 
                                     // Check if segue is reached
-                                    if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null)
+                                    if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null || _isPlayNextTriggered == true)
                                     {
+                                        _isPlayNextTriggered = false;
                                         Log.Information("--- AudioService.cs -- PlayAudioAsync() - Reached segue point for audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                         fadeOutProvider.BeginFadeOut(fadeTime);
+
+                                        // Start a task to stop the output device after fadeTime
+                                        _ = Task.Run(async () =>
+                                        {
+                                            await Task.Delay(fadeTime);
+                                            outputDevice.Stop();
+                                            Log.Information("--- AudioService.cs -- PlayAudioAsync() - Stopped audio: {title} by {artist}", logItem.Title, logItem.Artist);
+
+                                            // Send a SignalR message to the hub indicating the song has stopped
+                                            try
+                                            {
+                                                await _hubConnection.InvokeAsync("SongStopped", logItem.LogOrderID);
+                                                Log.Information("--- AudioService.cs -- PlayAudioAsync() - Sent SongStopped message for LogOrderID: {LogOrderID}", logItem.LogOrderID);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Log.Error("+++ AudioService.cs -- PlayAudioAsync() - Failed to send SongStopped message. Error: {Error}", ex.Message);
+                                            }
+                                        });
 
                                         // Start playing the next audio
                                         Log.Information("--- AudioService.cs -- PlayAudioAsync() - Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
@@ -183,7 +218,12 @@ namespace AudionixAudioServer.Services
                                 }
 
                                 outputDevice.Stop();
-                                Log.Information("Stopped audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                                Log.Information("--- AudioService.cs -- PlayAudioAsync() - Stopped audio: {title} by {artist}", logItem.Title, logItem.Artist);
+
+                                // Update the log item state to hasPlayed
+                                logItem.States = StatesType.hasPlayed;
+                                await _stationRepository.UpdateProgramLogItemAsync(logItem);
+                                await _unitOfWork.CompleteAsync();
 
                                 // Wait for the next audio task to complete if it was started
                                 if (nextAudioTask != null)
@@ -194,11 +234,11 @@ namespace AudionixAudioServer.Services
                                 }
                             }
 
-                            Log.Information("Playing audio: {title} by {artist}", logItem.Title, logItem.Artist);
+                            Log.Information("--- AudioService.cs -- PlayAudioAsync() - Playing audio: {title} by {artist}", logItem.Title, logItem.Artist);
                         }
                         else
                         {
-                            Log.Warning("--- AudioService.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {Name}", logItem.Name);
+                            Log.Warning("+++ AudioService.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {Name}", logItem.Name);
                         }
                     }
                     else
@@ -207,6 +247,17 @@ namespace AudionixAudioServer.Services
                     }
                 }
             }, stoppingToken);
+        }
+        public async Task PlayNextAudioAsync(Guid stationId)
+        {
+            _isPlayNextTriggered = true;
+            Log.Information($"--- AudioService -- PlayNextAudioAsync() - Playing next audio for station: {stationId}");
+        }
+
+        public async Task StopAudioAsync(Guid stationId)
+        {
+            Log.Information($"--- AudioService -- StopAudioAsync() - Stopping audio for station: {stationId}");
+            await Task.Delay(1);
         }
     }
 }

@@ -306,6 +306,11 @@ namespace AudionixAudioServer.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(log => log.StationId == stationId && log.LogOrderID == logOrderID);
         }
-
+        public async Task UpdateProgramLogItemAsync(ProgramLogItem logItem)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            context.Log.Update(logItem);
+            await context.SaveChangesAsync();
+        }
     }
 }

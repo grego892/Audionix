@@ -10,11 +10,11 @@
     <MudToolBar Dense="false" Variant="Variant.Outline">
         <MudPaper Class="mx-auto">
             <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
-                <MudButton Class="ma-1" Variant="Variant.Outlined">Play</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined">Pause</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined">Stop</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Play Next</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">MakeNext</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="StopAudio">Stop</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDelete">Delete</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDeleteDrawer">Delete</MudButton>
             </MudStack>
         </MudPaper>
     </MudToolBar>
@@ -22,7 +22,7 @@
 
 <MudPaper>
     <MudDrawerContainer>
-        <MudDrawer @bind-Open="@_open" Variant="DrawerVariant.Temporary" OverlayAutoClose="true" Width="400px" Anchor="Anchor.Right" Color="Color.Default">
+        <MudDrawer @bind-Open="@_openInsertDrawer" Variant="DrawerVariant.Temporary" OverlayAutoClose="true" Width="400px" Anchor="Anchor.Right" Color="Color.Default">
             <MudPaper>
                 <MudDrawerHeader>
                     <MudText Typo="Typo.h6">Add Audio</MudText>
@@ -70,8 +70,22 @@
             <PropertyColumn Property="x => x.Length" Sortable="false" CellStyle="width: 100px;" />
             <PropertyColumn Property="x => x.Date" Sortable="false" />
 
-
-
+            @if (_openMakenextDrawer)
+            {
+                <TemplateColumn Sortable="false">
+                    <CellTemplate Context="cellContext">
+                        <MudButton Variant="Variant.Outlined" OnClick="() => MakeNextSelectedLogItem(cellContext.Item)">Make Next</MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
+            @if (_openInsertDrawer)
+            {
+                <TemplateColumn Sortable="false">
+                    <CellTemplate Context="cellContext">
+                        <MudButton Variant="Variant.Outlined" OnClick="() => InsertSelectedLogItem(cellContext.Item)">Insert</MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
             @if (IsAudioFileSelected)
             {
                 <TemplateColumn Sortable="false">
@@ -80,7 +94,7 @@
                     </CellTemplate>
                 </TemplateColumn>
             }
-            @if (_delete)
+            @if (_openDeleteDrawer)
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
@@ -89,6 +103,5 @@
                 </TemplateColumn>
             }
         </Columns>
-
     </MudDataGrid>
 </MudPaper>

@@ -29,6 +29,7 @@ namespace Audionix.Models
         public string? Intro { get; set; }
         public string? Segue { get; set; }
         public string? Category { get; set; }
+        public AudioType? AudioType { get; set; }
         public string? From { get; set; }
         public string? Description { get; set; }
         public string? Passthrough { get; set; }
@@ -42,32 +43,12 @@ namespace Audionix.Models
         public Station? Station { get; set; }
     }
 
-    public enum CategoryType
-    {
-        SONG,
-        SPOT,
-        AUDIO,
-        MACRO,
-        VOICETRACK,
-        ERROR,
-        DONE,
-        PLAYING,
-        COMMENT,
-        CART
-    }
-
     public enum CueType
     {
-        Stop,
+        Wait,
         AutoStart,
         TimeImmediate,
         TimeNext
-    }
-
-    public enum FromType
-    {
-        CLOCKS,
-        TRAFFIC
     }
 
     public enum StatesType

@@ -1,5 +1,3 @@
-
-
 using Audionix.Models;
 using MudBlazor;
 
@@ -9,23 +7,28 @@ namespace Audionix.Components.Pages.Studio
     {
         private static Func<ProgramLogItem, int, string> RowStyleFunc => (x, i) =>
         {
-
-            if (x.Progress > 0 && x.Progress <= 100)
+            if (x.States == StatesType.hasPlayed)
             {
-                return $"background: linear-gradient(to right, #4caf50 {x.Progress}%, #ebebeb {x.Progress}%);";
+                return "background: #969696;";
             }
 
-            return x.Category switch
+            string progressBackground = "";
+            if (x.Progress > 0 && x.Progress <= 100)
             {
-                "SONG" => ($"background: {Colors.Indigo.Lighten1}; "),
-                "AUDIO" => ($"background: {Colors.Blue.Lighten1}; "),
-                "MACRO" => ($"background: {Colors.BlueGray.Lighten1}; "),
-                "SPOT" => ($"background: {Colors.Green.Lighten1}; "),
-                _ => "background-image: #000000)",
+                progressBackground = $"background: linear-gradient(to right, #4caf50 {x.Progress}%, transparent {x.Progress}%);";
+            }
+
+            string audioTypeBackground = x.AudioType switch
+            {
+                AudioType.song => $"background: {Colors.Indigo.Lighten1};",
+                AudioType.promo => $"background: {Colors.Indigo.Lighten2};",
+                AudioType.liner => $"background: {Colors.Blue.Lighten1};",
+                AudioType.macro => $"background: {Colors.BlueGray.Lighten1};",
+                AudioType.spot => $"background: {Colors.Green.Lighten1};",
+                _ => "background: #000000;"
             };
 
-            return "";
-
-        };        
+            return $"{audioTypeBackground} {progressBackground}";
+        };
     }
 }
