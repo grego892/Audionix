@@ -91,11 +91,18 @@ namespace Audionix.Components.Pages.Studio
             {
                 await _hubConnection.InvokeAsync("PlayNextAudio", AppStateService?.station?.StationId ?? Guid.Empty);
             }
+            _openMakenextDrawer = false;
+            _openInsertDrawer = false;
+            _openDeleteDrawer = false;
+            selectedAudioFile = null;
         }
 
         private void ToggleMakeNextDrawer()
         {
             _openMakenextDrawer = !_openMakenextDrawer;
+            _openInsertDrawer = false;
+            _openDeleteDrawer = false;
+            selectedAudioFile = null;
         }
 
         private async void StopAudio()
@@ -104,16 +111,26 @@ namespace Audionix.Components.Pages.Studio
             {
                 await _hubConnection.InvokeAsync("StopAudio", AppStateService?.station?.StationId ?? Guid.Empty);
             }
+            _openMakenextDrawer = false;
+            _openInsertDrawer = false;
+            _openDeleteDrawer = false;
+            selectedAudioFile = null;
         }
 
         private void ToggleInsertDrawer()
         {
             _openInsertDrawer = !_openInsertDrawer;
+            _openMakenextDrawer = false;
+            _openDeleteDrawer = false;
+            selectedAudioFile = null;
         }
 
         private void ToggleDeleteDrawer()
         {
             _openDeleteDrawer = !_openDeleteDrawer;
+            _openMakenextDrawer = false;
+            _openInsertDrawer = false;
+            selectedAudioFile = null;
         }
 
         private async Task LoadFolders()
