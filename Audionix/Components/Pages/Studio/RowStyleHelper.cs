@@ -11,24 +11,24 @@ namespace Audionix.Components.Pages.Studio
             {
                 return "background: #969696;";
             }
-
-            string progressBackground = "";
-            if (x.Progress > 0 && x.Progress <= 100)
+            else if (x.States == StatesType.isPlaying)
             {
-                progressBackground = $"background: linear-gradient(to right, #4caf50 {x.Progress}%, transparent {x.Progress}%);";
+                return $"background: linear-gradient(to right, #4caf50 {x.Progress}%, transparent {x.Progress}%);";
+            }
+            else if (x.States == StatesType.notPlayed)
+            {
+                return x.AudioType switch
+                {
+                    AudioType.song => $"background: {Colors.Indigo.Lighten1};",
+                    AudioType.promo => $"background: {Colors.Indigo.Lighten2};",
+                    AudioType.liner => $"background: {Colors.Blue.Lighten1};",
+                    AudioType.macro => $"background: {Colors.BlueGray.Lighten1};",
+                    AudioType.spot => $"background: {Colors.Green.Lighten1};",
+                    _ => "background: #000000;"
+                };
             }
 
-            string audioTypeBackground = x.AudioType switch
-            {
-                AudioType.song => $"background: {Colors.Indigo.Lighten1};",
-                AudioType.promo => $"background: {Colors.Indigo.Lighten2};",
-                AudioType.liner => $"background: {Colors.Blue.Lighten1};",
-                AudioType.macro => $"background: {Colors.BlueGray.Lighten1};",
-                AudioType.spot => $"background: {Colors.Green.Lighten1};",
-                _ => "background: #000000;"
-            };
-
-            return $"{audioTypeBackground} {progressBackground}";
+            return "background: #000000;";
         };
     }
 }

@@ -155,6 +155,11 @@ namespace AudionixAudioServer.Services
                                 logItem.States = StatesType.isPlaying;
                                 await _stationRepository.UpdateProgramLogItemAsync(logItem);
                                 await _unitOfWork.CompleteAsync();
+                                // Notify clients about the state change
+                                await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
+
+                                await _stationRepository.UpdateProgramLogItemAsync(logItem);
+                                await _unitOfWork.CompleteAsync();
 
                                 // Update the station's CurrentPlaying and NextPlay properties
                                 Log.Debug($"--- AudioService.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: {station.CurrentPlaying}");
@@ -197,22 +202,11 @@ namespace AudionixAudioServer.Services
                                             await Task.Delay(fadeTime);
                                             outputDevice.Stop();
                                             Log.Information("--- AudioService.cs -- PlayAudioAsync() - Stopped audio: {title} by {artist}", logItem.Title, logItem.Artist);
-
-                                            // Send a SignalR message to the hub indicating the song has stopped
-                                            try
-                                            {
-                                                await _hubConnection.InvokeAsync("SongStopped", logItem.LogOrderID);
-                                                Log.Information("--- AudioService.cs -- PlayAudioAsync() - Sent SongStopped message for LogOrderID: {LogOrderID}", logItem.LogOrderID);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Log.Error("+++ AudioService.cs -- PlayAudioAsync() - Failed to send SongStopped message. Error: {Error}", ex.Message);
-                                            }
                                         });
 
                                         // Start playing the next audio
-                                        Log.Information("--- AudioService.cs -- PlayAudioAsync() - Starting audio: {title} by {artist}", logItem.Title, logItem.Artist);
                                         nextAudioTask = PlayAudioAsync(stationId, stoppingToken);
+                                        Log.Information("--- AudioService.cs -- PlayAudioAsync() - Starting nextAudioTask");
                                     }
                                     await Task.Delay(100, stoppingToken);
                                 }
@@ -222,6 +216,7 @@ namespace AudionixAudioServer.Services
 
                                 // Update the log item state to hasPlayed
                                 logItem.States = StatesType.hasPlayed;
+                                await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
                                 await _stationRepository.UpdateProgramLogItemAsync(logItem);
                                 await _unitOfWork.CompleteAsync();
 

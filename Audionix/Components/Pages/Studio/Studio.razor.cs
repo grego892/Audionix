@@ -59,14 +59,13 @@ namespace Audionix.Components.Pages.Studio
                 }
             });
 
-            // Add handler for SongStopped event
-            _hubConnection.On<int>("SongStopped", (logOrderId) =>
+            _hubConnection.On<ProgramLogItem>("UpdateLogItemState", (updatedLogItem) =>
             {
-                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == logOrderId);
+                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == updatedLogItem.LogOrderID);
                 if (logItem != null)
                 {
-                    logItem.States = StatesType.hasPlayed;
-                    Log.Information("--- Studio - OnInitializedAsync() -- SongStopped received for LogOrderID: {LogOrderID}", logOrderId);
+                    logItem.States = updatedLogItem.States;
+                    logItem.Progress = updatedLogItem.Progress;
                     InvokeAsync(StateHasChanged);
                 }
             });
