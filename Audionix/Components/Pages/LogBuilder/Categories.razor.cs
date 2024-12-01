@@ -4,7 +4,7 @@ using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audionix.Components.Pages.MusicSchedule
+namespace Audionix.Components.Pages.LogBuilder
 {
     public partial class Categories : IDisposable
     {

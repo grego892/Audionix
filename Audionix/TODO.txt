@@ -1,12 +1,12 @@
 TODO:
 
 - Merge
+	- load log items when day selected.
+	- Import music log?
+	- Import Spots log?
 
 
-- Import music log?
-- Import Spots log?
 
-- traffic load current day
 
 
 

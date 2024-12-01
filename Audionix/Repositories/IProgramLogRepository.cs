@@ -5,6 +5,7 @@ namespace Audionix.Repositories
     public interface IProgramLogRepository
     {
         Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId);
+        Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly logDate);
         Task<bool> HasLogEntriesAsync(Guid stationId);
         Task AddProgramLogItemAsync(ProgramLogItem logItem);
         Task RemoveProgramLogItemAsync(ProgramLogItem logItem);

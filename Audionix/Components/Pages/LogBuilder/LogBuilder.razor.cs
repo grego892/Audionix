@@ -3,13 +3,14 @@ using Audionix.Models.MusicSchedule;
 using Audionix.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using Serilog;
 
-namespace Audionix.Components.Pages.MusicSchedule
+namespace Audionix.Components.Pages.LogBuilder
 {
-    public partial class MusicSchedule
+    public partial class LogBuilder
     {
-        public DateTime? MusicLogDate { get; set; } = DateTime.Now.Date.AddDays(1);
+        public DateTime? LogBuilderLogDate { get; set; } = DateTime.Now.Date.AddDays(1);
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
@@ -18,23 +19,51 @@ namespace Audionix.Components.Pages.MusicSchedule
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
 
 
+        private MudDatePicker _logBuilderPicker;
         private List<Guid> musicPatterns = new();
         private List<Category> categoryList = new();
         private List<AudioMetadata> scheduledSongs = new();
+        private List<ProgramLogItem> log = new();
         private Dictionary<string, int> categoryRotationIndex = new();
         private List<ProgramLogItem> newDaysLog = new();
 
+
         private async Task SchedulePressed()
         {
-            if (MusicLogDate.HasValue && StationRepository != null && AppStateService?.station != null)
+            if (LogBuilderLogDate.HasValue && StationRepository != null && AppStateService?.station != null)
             {
-                var dayOfWeek = MusicLogDate.Value.DayOfWeek;
+                var dayOfWeek = LogBuilderLogDate.Value.DayOfWeek;
                 var stationId = AppStateService.station.StationId;
                 musicPatterns = await MusicPatternRepository.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
                 categoryList = await CategoryRepository.GetCategoriesForPatternsAsync(musicPatterns);
                 scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
+            }
+        }
+
+        private void LogBuilderPickerSetToday()
+        {
+            if (_logBuilderPicker != null)
+            {
+                LogBuilderLogDate = DateTime.Today;
+            }
+        }
+
+        private void LogBuilderPickerSetTomorrow()
+        {
+            if (_logBuilderPicker != null)
+            {
+                LogBuilderLogDate = DateTime.Now.AddDays(1);
+            }
+        }
+
+        private async Task LogBuilderPickerOk()
+        {
+            await _logBuilderPicker.CloseAsync();
+            if (AppStateService?.station != null && LogBuilderLogDate.HasValue)
+            {
+                log = await ProgramLogRepository.GetProgramLogItemsAsync(AppStateService.station.StationId, DateOnly.FromDateTime(LogBuilderLogDate.Value));
             }
         }
 
@@ -53,10 +82,11 @@ namespace Audionix.Components.Pages.MusicSchedule
                 {
                     Title = song.Title,
                     Artist = song.Artist,
-                    Date = DateOnly.FromDateTime(MusicLogDate ?? DateTime.Now),
+                    Date = DateOnly.FromDateTime(LogBuilderLogDate ?? DateTime.Now),
                     Name = song.Filename,
                     Length = song.Duration.ToString(),
-                    Segue = "0",
+                    Intro = song.Intro,
+                    Segue = song.Segue,
                     StationId = AppStateService.station.StationId,
                     States = StatesType.notPlayed,
                     AudioType = song.AudioType
@@ -66,6 +96,14 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
 
             return newDaysLog;
+        }
+        private async Task LoadMusicFromFile()
+        {
+            await Task.CompletedTask;
+        }
+        private async Task LoadTrafficFromFile()
+        {
+            await Task.CompletedTask;
         }
     }
 }

@@ -1,0 +1,50 @@
+﻿@page "/logbuilder"
+@using Audionix.Models
+@inject ILogger<Home> Logger
+@inject IHostEnvironment Environment
+@inject NavigationManager _nav
+
+<PageTitle>Log Buider</PageTitle>
+
+<MudPaper>
+    <h2 Class="ptb-2 ml-2">Log Buider</h2>
+</MudPaper>
+
+<MudPaper Class="ma-1" Elevation="8">
+    <MudStack Row="true">
+        <MudPaper >
+            <MudStack Row="true">
+                <MudDatePicker @ref="_logBuilderPicker" @bind-Date="LogBuilderLogDate" Label="Date to Schedule" Margin="Margin.Dense" Variant="Variant.Outlined">
+                    <PickerActions>
+                        <MudButton Class="mr-auto align-self-start" OnClick="LogBuilderPickerSetToday">Today</MudButton>
+                        <MudButton Class="mr-auto align-self-start" OnClick="LogBuilderPickerSetTomorrow">Tomorrow</MudButton>
+                        <MudButton OnClick="@(() => _logBuilderPicker.CloseAsync(false))">Cancel</MudButton>
+                        <MudButton Color="Color.Primary" OnClick="LogBuilderPickerOk">Ok</MudButton>
+                    </PickerActions>
+                </MudDatePicker>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" OnClick="SchedulePressed">Schedule music from clock</MudButton>
+                <MudButtonGroup Color="Color.Primary" Size="Size.Small" Variant="Variant.Outlined">
+                    <MudButton OnClick="LoadMusicFromFile">Load music from file</MudButton>
+                    <MudButton OnClick="LoadTrafficFromFile">Load traffic from file</MudButton>
+                </MudButtonGroup>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+</MudPaper>
+
+<MudPaper Style="min-height:calc(100vh - 160px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
+    <MudPaper>
+        <MudStack Row="true">
+            <MudTable Items="log" Hover="true">
+                <HeaderContent>
+                    <MudTh>Title</MudTh>
+                    <MudTh>Artist</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                     <MudTd DataLabel="Title">@context.Title</MudTd>
+                    <MudTd DataLabel="Artist">@context.Artist</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudStack>
+    </MudPaper>
+</MudPaper>

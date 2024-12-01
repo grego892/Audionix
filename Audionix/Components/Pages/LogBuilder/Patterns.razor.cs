@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
-namespace Audionix.Components.Pages.MusicSchedule
+namespace Audionix.Components.Pages.LogBuilder
 {
     public partial class Patterns : IDisposable
     {

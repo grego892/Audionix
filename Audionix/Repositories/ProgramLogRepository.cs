@@ -23,6 +23,15 @@ namespace Audionix.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly logDate)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.Log
+                .Where(log => log.StationId == stationId && log.Date == logDate)
+                .OrderBy(log => log.LogOrderID)
+                .ToListAsync();
+        }
+
         public async Task<bool> HasLogEntriesAsync(Guid stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();

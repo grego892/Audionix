@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241129195229_AddAudiotypeToLogitem")]
-    partial class AddAudiotypeToLogitem
+    [Migration("20241201185453_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -404,8 +404,8 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("From")
                         .HasColumnType("text");
 
-                    b.Property<string>("Intro")
-                        .HasColumnType("text");
+                    b.Property<short>("Intro")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Length")
                         .HasColumnType("text");
@@ -422,8 +422,8 @@ namespace Audionix.Data.Migrations
                     b.Property<double>("Progress")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("Segue")
-                        .HasColumnType("text");
+                    b.Property<short>("Segue")
+                        .HasColumnType("smallint");
 
                     b.Property<int?>("States")
                         .HasColumnType("integer");
