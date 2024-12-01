@@ -2,6 +2,7 @@
 using Audionix.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
+using static ATL.Logging.Log;
 
 namespace Audionix.Repositories
 {
@@ -58,6 +59,17 @@ namespace Audionix.Repositories
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Folders.Where(f => f.StationId == stationId).ToListAsync();
+        }
+        public async Task UpdateStationNextPlayAsync(Guid stationId, int logOrderID)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            var station = await context.Stations.FirstOrDefaultAsync(s => s.StationId == stationId);
+            if (station != null)
+            {
+                station.NextPlay = logOrderID;
+                context.Stations.Update(station);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

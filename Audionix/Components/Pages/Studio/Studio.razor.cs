@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using MudBlazor;
 using Serilog;
+using static ATL.Logging.Log;
 using static MudBlazor.CategoryTypes;
 
 namespace Audionix.Components.Pages.Studio
@@ -104,17 +105,17 @@ namespace Audionix.Components.Pages.Studio
             selectedAudioFile = null;
         }
 
-        private async void StopAudio()
-        {
-            if (_hubConnection != null)
-            {
-                await _hubConnection.InvokeAsync("StopAudio", AppStateService?.station?.StationId ?? Guid.Empty);
-            }
-            _openMakenextDrawer = false;
-            _openInsertDrawer = false;
-            _openDeleteDrawer = false;
-            selectedAudioFile = null;
-        }
+        //private async void StopAudio()
+        //{
+        //    if (_hubConnection != null)
+        //    {
+        //        await _hubConnection.InvokeAsync("StopAudio", AppStateService?.station?.StationId ?? Guid.Empty);
+        //    }
+        //    _openMakenextDrawer = false;
+        //    _openInsertDrawer = false;
+        //    _openDeleteDrawer = false;
+        //    selectedAudioFile = null;
+        //}
 
         private void ToggleInsertDrawer()
         {
@@ -231,19 +232,18 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
-        public async Task MakeNextSelectedLogItem(ProgramLogItem logItem)
+        public async Task MakeNextSelectedLogItem(int logOrderID)
         {
-            await Task.Delay(1);
-        }
-
-        public async Task StopSelectedLogItem(ProgramLogItem logItem)
-        {
-            await Task.Delay(1);
+            if (AppStateService?.station != null && StationRepository != null)
+            {
+                await StationRepository.UpdateStationNextPlayAsync(AppStateService.station.StationId, logOrderID);
+            }
+            _openMakenextDrawer = false;
         }
 
         public async Task InsertSelectedLogItem(ProgramLogItem logItem)
         {
-
+            throw new NotImplementedException();
         }
 
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)

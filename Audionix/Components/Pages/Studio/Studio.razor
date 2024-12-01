@@ -12,7 +12,6 @@
             <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Play Next</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">MakeNext</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="StopAudio">Stop</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDeleteDrawer">Delete</MudButton>
             </MudStack>
@@ -74,7 +73,7 @@
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
-                        <MudButton Variant="Variant.Outlined" OnClick="() => MakeNextSelectedLogItem(cellContext.Item)">Make Next</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => MakeNextSelectedLogItem(cellContext.Item.LogOrderID)">Make Next</MudButton>
                     </CellTemplate>
                 </TemplateColumn>
             }
@@ -82,7 +81,7 @@
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
-                        <MudButton Variant="Variant.Outlined" OnClick="() => InsertSelectedLogItem(cellContext.Item)">Insert</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => InsertSelectedLogItem(cellContext.Item)">Insert</MudButton>
                     </CellTemplate>
                 </TemplateColumn>
             }
@@ -90,7 +89,7 @@
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
-                        <MudButton Variant="Variant.Outlined" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogOrderID, cellContext.Item)">Add</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogOrderID, cellContext.Item)">Add</MudButton>
                     </CellTemplate>
                 </TemplateColumn>
             }
@@ -98,7 +97,7 @@
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
-                        <MudButton Variant="Variant.Outlined" OnClick="() => DeleteSelectedLogItem(cellContext.Item)">Delete</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => DeleteSelectedLogItem(cellContext.Item)">Delete</MudButton>
                     </CellTemplate>
                 </TemplateColumn>
             }
