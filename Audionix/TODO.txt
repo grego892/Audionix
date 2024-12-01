@@ -1,0 +1,15 @@
+TODO:
+
+- Merge
+
+
+- Import music log?
+- Import Spots log?
+
+- traffic load current day
+
+
+
+
+QUESTIONS:
+- Should AS be capable of seperate machine?
