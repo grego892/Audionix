@@ -4,7 +4,6 @@ namespace Audionix.Models
 {
     public class ProgramLogItem
     {
-        public int Id { get; set; }
         public int LogOrderID { get; set; }
         public string? Status { get; set; }
         public string? Cue { get; set; }
@@ -12,7 +11,7 @@ namespace Audionix.Models
         public string? Artist { get; set; }
 
         [Column(TypeName = "date")]
-        public DateOnly? Date { get; set; }
+        public DateOnly Date { get; set; }
 
         [Column(TypeName = "time")]
         public TimeOnly TimeScheduled { get; set; }

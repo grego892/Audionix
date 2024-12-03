@@ -12,7 +12,7 @@ namespace AudionixAudioServer.Models
         public string? Artist { get; set; }
 
         [Column(TypeName = "date")]
-        public DateOnly? Date { get; set; }
+        public DateOnly Date { get; set; }
 
         [Column(TypeName = "time")]
         public TimeOnly TimeScheduled { get; set; }

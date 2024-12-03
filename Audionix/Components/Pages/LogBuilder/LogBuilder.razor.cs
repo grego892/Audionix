@@ -10,7 +10,7 @@ namespace Audionix.Components.Pages.LogBuilder
 {
     public partial class LogBuilder
     {
-        public DateTime? LogBuilderLogDate { get; set; } = DateTime.Now.Date.AddDays(1);
+        public DateTime? LogBuilderLogDate { get; set; } = null;
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
@@ -39,6 +39,7 @@ namespace Audionix.Components.Pages.LogBuilder
                 scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
+                await LogBuilderPickerOk();
             }
         }
 
@@ -75,11 +76,13 @@ namespace Audionix.Components.Pages.LogBuilder
             }
 
             var newDaysLog = new List<ProgramLogItem>();
+            int logOrderId = 1;
 
             foreach (var song in scheduledSongs)
             {
                 var newLogItem = new ProgramLogItem
                 {
+                    LogOrderID = logOrderId++,
                     Title = song.Title,
                     Artist = song.Artist,
                     Date = DateOnly.FromDateTime(LogBuilderLogDate ?? DateTime.Now),

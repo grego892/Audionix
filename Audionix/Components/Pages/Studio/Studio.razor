@@ -48,32 +48,26 @@
 
     <MudDataGrid Items="ProgramLog"
                  RowStyleFunc="@RowStyleFunc"
-                 SortMode="SortMode.Single"
+                 SortMode="SortMode.Multiple"
                  FixedHeader="true"
                  Virtualize="true"
                  ShowMenuIcon="false"
                  Dense="true"
-                 Height="86vh">
+                 Height="86vh"
+                 SortDefinitions="initialSorts">
         <Columns>
-            <PropertyColumn Title="ID" Property="x => x.LogOrderID" SortBy="@(x => x.LogOrderID)" CellStyle="width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" />
-            <PropertyColumn Property="x => x" Sortable="false" >
-                <CellTemplate Context="cellContext">
-                    <MudText Typo="Typo.subtitle1" Color="Color.Dark">
-                        <b>@cellContext.Item.Intro</b>
-                    </MudText>
-                </CellTemplate>
-            </PropertyColumn>
+            <PropertyColumn Title="ID" Property="x => x.LogOrderID" Sortable="false" CellStyle="width: 10px;" />
             <PropertyColumn Property="x => x.Title" Sortable="false" />
             <PropertyColumn Property="x => x.Artist" Sortable="false" />
-            <PropertyColumn Property="x => x.TimeScheduled" Sortable="false" CellStyle="width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" />
-            <PropertyColumn Property="x => x.Length" Sortable="false" CellStyle="width: 100px;" />
-            <PropertyColumn Property="x => x.Date" Sortable="false" />
+            <PropertyColumn Property="x => x.TimeScheduled" Sortable="false" />
+            <PropertyColumn Property="x => x.Length" Sortable="false" CellStyle="width: 10px;" />
+            <PropertyColumn Property="x => x.Date" SortBy="@(x => x.Date)" Sortable="false" />
 
             @if (_openMakenextDrawer)
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
-                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => MakeNextSelectedLogItem(cellContext.Item.LogOrderID)">Make Next</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => MakeNextSelectedLogItem(cellContext.Item.LogOrderID, cellContext.Item.Date)">Make Next</MudButton>
                     </CellTemplate>
                 </TemplateColumn>
             }

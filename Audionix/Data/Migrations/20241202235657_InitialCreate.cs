@@ -234,8 +234,10 @@ namespace Audionix.Data.Migrations
                     CallLetters = table.Column<string>(type: "text", nullable: true),
                     Slogan = table.Column<string>(type: "text", nullable: true),
                     AudioDeviceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CurrentPlaying = table.Column<int>(type: "integer", nullable: false),
-                    NextPlay = table.Column<int>(type: "integer", nullable: false)
+                    CurrentPlayingId = table.Column<int>(type: "integer", nullable: false),
+                    CurrentPlayingDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    NextPlayId = table.Column<int>(type: "integer", nullable: false),
+                    NextPlayDate = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -326,14 +328,12 @@ namespace Audionix.Data.Migrations
                 name: "Log",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LogOrderID = table.Column<int>(type: "integer", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: true),
                     Cue = table.Column<string>(type: "text", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Artist = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateOnly>(type: "date", nullable: true),
                     TimeScheduled = table.Column<TimeOnly>(type: "time", nullable: false),
                     TimeEstimated = table.Column<TimeOnly>(type: "time", nullable: false),
                     TimePlayed = table.Column<TimeOnly>(type: "time", nullable: false),
@@ -355,7 +355,7 @@ namespace Audionix.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Log", x => x.Id);
+                    table.PrimaryKey("PK_Log", x => new { x.Date, x.LogOrderID });
                     table.ForeignKey(
                         name: "FK_Log_Stations_StationId",
                         column: x => x.StationId,

@@ -14,15 +14,18 @@ namespace AudionixAudioServer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStationRepository _stationRepository;
+        private readonly IProgramLogRepository _programLogRepository;
         private readonly HubConnection _hubConnection;
         private readonly int fadeTime = 1500;
         private bool _isPlayNextTriggered = false;
+        private List<ProgramLogItem> _programLogItems = new();
 
-        public AudioPlayer(IUnitOfWork unitOfWork, IStationRepository stationRepository, HubConnection hubConnection)
+        public AudioPlayer(IUnitOfWork unitOfWork, IStationRepository stationRepository, HubConnection hubConnection, IProgramLogRepository programLogRepository)
         {
             _unitOfWork = unitOfWork;
             _stationRepository = stationRepository;
             _hubConnection = hubConnection;
+            _programLogRepository = programLogRepository;
         }
 
         public void TriggerPlayNext()
@@ -51,151 +54,166 @@ namespace AudionixAudioServer.Services
 
                     Log.Debug($"+++ AudioPlayer.cs -- PlayAudioAsync() - Station with ID {station.CallLetters} found.");
 
-                    var logItem = await _stationRepository.GetProgramLogItemAsync(stationId, station.NextPlay);
+                    _programLogItems = await _programLogRepository.GetProgramLogItemsAsync(stationId, station.NextPlayId, station.NextPlayDate);
 
-                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - LogItem: {logItem}");
+                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - _programLogItems: {_programLogItems}");
 
-                    if (logItem == null)
+                    if (_programLogItems == null || !_programLogItems.Any())
                     {
-                        Log.Error($"+++ AudioPlayer.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {station.NextPlay}");
-                        station.NextPlay += 1;
+                        Log.Error($"+++ AudioPlayer.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {station.NextPlayId}");
+                        station.NextPlayId += 1;
                         await _stationRepository.UpdateStationAsync(station);
                         await _unitOfWork.CompleteAsync();
                         continue;
                     }
 
-                    if (!string.IsNullOrEmpty(logItem.Name))
+                    foreach (var logItem in _programLogItems)
                     {
-                        var audioMetadata = await _stationRepository.GetAudioFileByFilenameAsync(logItem.Name);
-
-                        Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - AudioMetadata.Title: {audioMetadata?.Title}");
-
-                        if (audioMetadata != null)
+                        if (!string.IsNullOrEmpty(logItem.Name))
                         {
-                            var folderName = audioMetadata.Folder;
-                            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - foldername: {folderName}");
+                            var audioMetadata = await _stationRepository.GetAudioFileByFilenameAsync(logItem.Name);
 
-                            var appSettings = await _stationRepository.GetAppSettingsDataPathAsync();
-                            var filePath = Path.Combine(appSettings.DataPath ?? string.Empty, "Stations", station.CallLetters ?? string.Empty, "Audio", folderName ?? string.Empty, logItem.Name);
+                            Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - AudioMetadata.Title: {audioMetadata?.Title}");
 
-                            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - FilePath: {filePath}");
-
-                            using (var audioFile = new AudioFileReader(filePath))
-                            using (var outputDevice = new WaveOutEvent())
+                            if (audioMetadata != null)
                             {
-                                var fadeOutProvider = new FadeInOutSampleProvider(audioFile.ToSampleProvider(), true);
-                                outputDevice.Init(fadeOutProvider);
+                                var folderName = audioMetadata.Folder;
+                                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - foldername: {folderName}");
 
-                                fadeOutProvider.BeginFadeIn(.1);
+                                var appSettings = await _stationRepository.GetAppSettingsDataPathAsync();
+                                var filePath = Path.Combine(appSettings.DataPath ?? string.Empty, "Stations", station.CallLetters ?? string.Empty, "Audio", folderName ?? string.Empty, logItem.Name);
 
-                                Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Starting audio: {logItem.Title} by {logItem.Artist}");
-                                outputDevice.Play();
-                                logItem.States = StatesType.isPlaying;
+                                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - FilePath: {filePath}");
 
-                                // Notify clients about the state change
-                                try
+                                using (var audioFile = new AudioFileReader(filePath))
+                                using (var outputDevice = new WaveOutEvent())
                                 {
-                                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - {logItem.Name}");
-                                    await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
-                                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - {_hubConnection.State}");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to notify clients. Error: {ex.Message}");
-                                }
-                                await _stationRepository.UpdateProgramLogItemAsync(logItem);
-                                await _unitOfWork.CompleteAsync();
+                                    var fadeOutProvider = new FadeInOutSampleProvider(audioFile.ToSampleProvider(), true);
+                                    outputDevice.Init(fadeOutProvider);
 
-                                // Update the station's CurrentPlaying and NextPlay properties
-                                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: {station.CurrentPlaying}");
-                                station.CurrentPlaying = logItem.LogOrderID;
-                                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying ISNOW: {station.CurrentPlaying}");
-                                station.NextPlay += 1;
-                                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.NextPlay ISNOW: {station.NextPlay}");
-                                await _stationRepository.UpdateStationAsync(station);
-                                await _unitOfWork.CompleteAsync();
+                                    fadeOutProvider.BeginFadeIn(.1);
 
-                                var seguePosition = audioFile.TotalTime - TimeSpan.FromMilliseconds(audioMetadata.Segue);
-                                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - TotalTime: {audioFile.TotalTime} - {TimeSpan.FromMilliseconds(audioMetadata.Segue)} = seguePosition: {seguePosition}");
+                                    Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Starting audio: {logItem.Title} by {logItem.Artist}");
+                                    outputDevice.Play();
+                                    logItem.States = StatesType.isPlaying;
 
-                                Task? nextAudioTask = null;
-
-                                while (outputDevice.PlaybackState == PlaybackState.Playing)
-                                {
-                                    // Update song progress
-                                    double currentTime = audioFile.CurrentTime.TotalMilliseconds;
-                                    double totalTime = audioFile.TotalTime.TotalMilliseconds;
-
+                                    // Notify clients about the state change
                                     try
                                     {
-                                        if (_hubConnection.State == HubConnectionState.Connected)
-                                        {
-                                            await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, currentTime, totalTime);
-                                        }
+                                        Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - {logItem.Name}");
+                                        await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
+                                        Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - {_hubConnection.State}");
                                     }
                                     catch (Exception ex)
                                     {
-                                        Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to update progress. Error: {ex.Message}");
+                                        Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to notify clients. Error: {ex.Message}");
+                                    }
+                                    await _stationRepository.UpdateProgramLogItemAsync(logItem);
+                                    await _unitOfWork.CompleteAsync();
+
+                                    // Update the station's CurrentPlaying and NextPlay properties
+                                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: ID: {station.CurrentPlayingId} - Date: {station.CurrentPlayingDate}");
+                                    station.CurrentPlayingId = logItem.LogOrderID;
+                                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying ISNOW: ID: {station.CurrentPlayingId} - Date: {station.CurrentPlayingDate}");
+
+                                    // Check if NextPlay is the highest LogOrderID for the date
+                                    var highestLogOrderID = _programLogItems.Max(item => item.LogOrderID);
+                                    if (station.NextPlayId >= highestLogOrderID)
+                                    {
+                                        station.NextPlayDate = station.NextPlayDate.AddDays(1);
+                                        station.NextPlayId = 1;
+                                    }
+                                    else
+                                    {
+                                        station.NextPlayId += 1;
                                     }
 
-                                    // Check if segue is reached
-                                    if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null || _isPlayNextTriggered)
-                                    {
-                                        _isPlayNextTriggered = false;
-                                        Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Reached segue point for audio: {logItem.Title} by {logItem.Artist}");
-                                        fadeOutProvider.BeginFadeOut(fadeTime);
+                                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.NextPlay ISNOW: {station.NextPlayId}");
+                                    await _stationRepository.UpdateStationAsync(station);
+                                    await _unitOfWork.CompleteAsync();
 
-                                        // Start a task to stop the output device after fadeTime
-                                        _ = Task.Run(async () =>
+                                    var seguePosition = audioFile.TotalTime - TimeSpan.FromMilliseconds(audioMetadata.Segue);
+                                    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - TotalTime: {audioFile.TotalTime} - {TimeSpan.FromMilliseconds(audioMetadata.Segue)} = seguePosition: {seguePosition}");
+
+                                    Task? nextAudioTask = null;
+
+                                    while (outputDevice.PlaybackState == PlaybackState.Playing)
+                                    {
+                                        // Update song progress
+                                        double currentTime = audioFile.CurrentTime.TotalMilliseconds;
+                                        double totalTime = audioFile.TotalTime.TotalMilliseconds;
+
+                                        try
                                         {
-                                            await Task.Delay(fadeTime);
-                                            outputDevice.Stop();
-                                            Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Stopped audio: {logItem.Title} by {logItem.Artist}");
-                                        });
+                                            if (_hubConnection.State == HubConnectionState.Connected)
+                                            {
+                                                await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, currentTime, totalTime);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to update progress. Error: {ex.Message}");
+                                        }
 
-                                        // Start playing the next audio
-                                        nextAudioTask = PlayAudioAsync(stationId, stoppingToken);
-                                        Log.Information("--- AudioPlayer.cs -- PlayAudioAsync() - Starting nextAudioTask");
+                                        // Check if segue is reached
+                                        if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null || _isPlayNextTriggered)
+                                        {
+                                            _isPlayNextTriggered = false;
+                                            Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Reached segue point for audio: {logItem.Title} by {logItem.Artist}");
+                                            fadeOutProvider.BeginFadeOut(fadeTime);
+
+                                            // Start a task to stop the output device after fadeTime
+                                            _ = Task.Run(async () =>
+                                            {
+                                                await Task.Delay(fadeTime);
+                                                outputDevice.Stop();
+                                                Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Stopped audio: {logItem.Title} by {logItem.Artist}");
+                                            });
+
+                                            // Start playing the next audio
+                                            nextAudioTask = PlayAudioAsync(stationId, stoppingToken);
+                                            Log.Information("--- AudioPlayer.cs -- PlayAudioAsync() - Starting nextAudioTask");
+                                        }
+
+                                        if (outputDevice.PlaybackState == PlaybackState.Playing)
+                                        {
+                                            await Task.Delay(100, stoppingToken);
+                                        }
                                     }
 
-                                    if (outputDevice.PlaybackState == PlaybackState.Playing)
+                                    // Update the log item state to hasPlayed
+                                    logItem.States = StatesType.hasPlayed;
+                                    try
                                     {
-                                        await Task.Delay(100, stoppingToken);
+                                        await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to notify clients. Error: {ex.Message}");
+                                    }
+                                    await _stationRepository.UpdateProgramLogItemAsync(logItem);
+                                    await _unitOfWork.CompleteAsync();
+
+                                    // Wait for the next audio task to complete if it was started
+                                    if (nextAudioTask != null)
+                                    {
+                                        Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - nextAudioTask != null. About to await nextAudioTask");
+                                        await nextAudioTask;
+                                        Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Awaited nextAudioTask");
                                     }
                                 }
 
-                                // Update the log item state to hasPlayed
-                                logItem.States = StatesType.hasPlayed;
-                                try
-                                {
-                                    await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to notify clients. Error: {ex.Message}");
-                                }
-                                await _stationRepository.UpdateProgramLogItemAsync(logItem);
-                                await _unitOfWork.CompleteAsync();
-
-                                // Wait for the next audio task to complete if it was started
-                                if (nextAudioTask != null)
-                                {
-                                    Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - nextAudioTask != null. About to await nextAudioTask");
-                                    await nextAudioTask;
-                                    Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Awaited nextAudioTask");
-                                }
+                                Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Playing audio: {logItem.Title} by {logItem.Artist}");
                             }
-
-                            Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Playing audio: {logItem.Title} by {logItem.Artist}");
+                            else
+                            {
+                                Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {logItem.Name}");
+                            }
                         }
                         else
                         {
-                            Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {logItem.Name}");
+                            Log.Warning("--- AudioPlayer.cs -- PlayAudioAsync() - logItem Name is null or empty.");
                         }
-                    }
-                    else
-                    {
-                        Log.Warning("--- AudioPlayer.cs -- PlayAudioAsync() - LogItem Name is null or empty.");
                     }
                 }
             }, stoppingToken);

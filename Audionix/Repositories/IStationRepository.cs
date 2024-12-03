@@ -13,6 +13,6 @@ namespace Audionix.Repositories
         Task UpdateStationAsync(Station station);
         Task DeleteStationAsync(Guid stationId);
         Task<List<Folder>> GetFoldersForStationAsync(Guid stationId);
-        Task UpdateStationNextPlayAsync(Guid stationId, int LogOrderID);
+        Task UpdateStationNextPlayAsync(Guid stationId, int logOrderID, DateOnly Date);
     }
 }

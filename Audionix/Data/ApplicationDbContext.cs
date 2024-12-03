@@ -93,7 +93,10 @@ namespace Audionix.Data
                     IsDatapathSetup = false
                 }
             );
-        }
 
+            // Configure composite key for ProgramLogItem
+            modelBuilder.Entity<ProgramLogItem>()
+                .HasKey(pl => new { pl.Date, pl.LogOrderID });
+        }
     }
 }

@@ -75,6 +75,12 @@ namespace Audionix.Components.Pages.Studio
 
         }
 
+        private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()
+        {
+            { "Date", new SortDefinition<ProgramLogItem>("Date", false, 0, item => item.Date, null) },
+            { "LogOrderID", new SortDefinition<ProgramLogItem>("LogOrderID", false, 1, item => item.LogOrderID, null) }
+        };
+
         private async void HandleStationChanged(object? sender, EventArgs e)
         {
             if (AppStateService?.station != null)
@@ -165,7 +171,7 @@ namespace Audionix.Components.Pages.Studio
 
             if (AppStateService?.station != null && ProgramLogRepository != null)
             {
-                ProgramLog = await ProgramLogRepository.GetProgramLogItemsAsync(AppStateService.station.StationId);
+                ProgramLog = await ProgramLogRepository.GetFullProgramLogForStationAsync(AppStateService.station.StationId);
             }
             else
             {
@@ -232,11 +238,11 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
-        public async Task MakeNextSelectedLogItem(int logOrderID)
+        public async Task MakeNextSelectedLogItem(int logOrderID, DateOnly date)
         {
             if (AppStateService?.station != null && StationRepository != null)
             {
-                await StationRepository.UpdateStationNextPlayAsync(AppStateService.station.StationId, logOrderID);
+                await StationRepository.UpdateStationNextPlayAsync(AppStateService.station.StationId, logOrderID, date);
             }
             _openMakenextDrawer = false;
         }

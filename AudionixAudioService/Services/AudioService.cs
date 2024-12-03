@@ -10,13 +10,15 @@ namespace AudionixAudioServer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStationRepository _stationRepository;
+        private readonly IProgramLogRepository _programLogRepository;
         private readonly AudioPlayer _audioPlayer;
         private HubConnection _hubConnection;
 
-        public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository)
+        public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository, IProgramLogRepository programLogRepository)
         {
             _unitOfWork = unitOfWork;
             _stationRepository = stationRepository;
+            _programLogRepository = programLogRepository;
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5298/progressHub", options =>
                 {
@@ -30,7 +32,7 @@ namespace AudionixAudioServer.Services
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
 
-            _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection);
+            _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
             // Register the handler for ReceiveProgress
             _hubConnection.On<int, double, double>("ReceiveProgress", (logOrderID, currentTime, totalTime) =>

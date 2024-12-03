@@ -165,13 +165,8 @@ namespace AudionixAudioServer.Repositories
                 using var context = _dbContextFactory.CreateDbContext();
                 var newLogDate = newDaysLog.First().Date;
 
-                // Retrieve the maximum LogOrderID for the previous date in the log
-                int maxLogOrderIDForPreviousDate = await context.Log
-                    .Where(log => log.Date < newLogDate)
-                    .MaxAsync(log => (int?)log.LogOrderID) ?? 0;
-
-                // Assign LogOrderID to the new log items starting from the retrieved maximum LogOrderID
-                int currentLogOrderID = maxLogOrderIDForPreviousDate;
+                // Assign LogOrderID to the new log items starting from 1
+                int currentLogOrderID = 0;
                 foreach (var logItem in newDaysLog)
                 {
                     logItem.LogOrderID = ++currentLogOrderID;
@@ -179,22 +174,6 @@ namespace AudionixAudioServer.Repositories
 
                 // Insert the new log items into the database
                 await context.Log.AddRangeAsync(newDaysLog);
-                await context.SaveChangesAsync();
-
-                // Renumber all log items for dates after the new log items' date
-                var logsToRenumber = await context.Log
-                    .Where(log => log.Date > newLogDate)
-                    .OrderBy(log => log.Date)
-                    .ThenBy(log => log.LogOrderID)
-                    .ToListAsync();
-
-                currentLogOrderID = newDaysLog.Max(log => log.LogOrderID);
-                foreach (var logItem in logsToRenumber)
-                {
-                    logItem.LogOrderID = ++currentLogOrderID;
-                }
-
-                context.Log.UpdateRange(logsToRenumber);
                 await context.SaveChangesAsync();
             }
             else
@@ -299,13 +278,7 @@ namespace AudionixAudioServer.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             return await context.AppSettings.FirstOrDefaultAsync();
         }
-        public async Task<ProgramLogItem?> GetProgramLogItemAsync(Guid stationId, int logOrderID)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.Log
-                .AsNoTracking()
-                .FirstOrDefaultAsync(log => log.StationId == stationId && log.LogOrderID == logOrderID);
-        }
+
         public async Task UpdateProgramLogItemAsync(ProgramLogItem logItem)
         {
             using var context = _dbContextFactory.CreateDbContext();

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Audionix.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241201185453_InitialCreate")]
+    [Migration("20241202235657_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -371,11 +371,11 @@ namespace Audionix.Data.Migrations
 
             modelBuilder.Entity("Audionix.Models.ProgramLogItem", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int>("LogOrderID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Artist")
                         .HasColumnType("text");
@@ -392,9 +392,6 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("Cue")
                         .HasColumnType("text");
 
-                    b.Property<DateOnly?>("Date")
-                        .HasColumnType("date");
-
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -409,9 +406,6 @@ namespace Audionix.Data.Migrations
 
                     b.Property<string>("Length")
                         .HasColumnType("text");
-
-                    b.Property<int>("LogOrderID")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -449,7 +443,7 @@ namespace Audionix.Data.Migrations
                     b.Property<int?>("sID")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("Date", "LogOrderID");
 
                     b.HasIndex("StationId");
 
@@ -468,10 +462,16 @@ namespace Audionix.Data.Migrations
                     b.Property<string>("CallLetters")
                         .HasColumnType("text");
 
-                    b.Property<int>("CurrentPlaying")
+                    b.Property<DateOnly>("CurrentPlayingDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("CurrentPlayingId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NextPlay")
+                    b.Property<DateOnly>("NextPlayDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("NextPlayId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Slogan")

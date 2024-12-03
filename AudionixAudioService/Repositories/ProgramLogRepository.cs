@@ -1,10 +1,9 @@
-using Audionix.Data;
-using Audionix.Models;
-using Audionix.Services;
+using AudionixAudioServer.Data;
+using AudionixAudioServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-namespace Audionix.Repositories
+namespace AudionixAudioServer.Repositories
 {
     public class ProgramLogRepository : IProgramLogRepository
     {
@@ -15,24 +14,14 @@ namespace Audionix.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<List<ProgramLogItem>> GetFullProgramLogForStationAsync(Guid stationId)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.Log
-                .Where(log => log.StationId == stationId)
-                .OrderBy(log => log.LogOrderID)
-                .ToListAsync();
-        }
-
-
-        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly nextPlayDate)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.Log
-                .Where(log => log.StationId == stationId)
-                .OrderBy(log => log.LogOrderID)
-                .ToListAsync();
-        }
+        //public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly nextPlayDate)
+        //{
+        //    using var context = _dbContextFactory.CreateDbContext();
+        //    return await context.Log
+        //        .Where(log => log.StationId == stationId)
+        //        .OrderBy(log => log.LogOrderID)
+        //        .ToListAsync();
+        //}
 
         public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly nextPlayDate)
         {
