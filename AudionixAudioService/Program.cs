@@ -28,8 +28,12 @@ builder.Logging.AddDebug();
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register DbContextFactory
+builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
+
 // Register Repositories
 builder.Services.AddScoped<IStationRepository, StationRepository>();
+builder.Services.AddScoped<IProgramLogRepository, ProgramLogRepository>();
 
 // Register Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

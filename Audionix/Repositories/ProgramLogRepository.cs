@@ -24,12 +24,11 @@ namespace Audionix.Repositories
                 .ToListAsync();
         }
 
-
-        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly nextPlayDate)
+        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly date)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Log
-                .Where(log => log.StationId == stationId)
+                .Where(log => log.StationId == stationId && log.Date == date)
                 .OrderBy(log => log.LogOrderID)
                 .ToListAsync();
         }

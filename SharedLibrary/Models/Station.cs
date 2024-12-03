@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AudionixAudioServer.Models
+namespace Audionix.Models
 {
     public class Station
     {

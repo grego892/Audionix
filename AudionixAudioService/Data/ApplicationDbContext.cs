@@ -83,6 +83,10 @@ namespace AudionixAudioServer.Data
             modelBuilder.Entity<AppSettings>()
                 .HasIndex(a => a.Id)
                 .IsUnique();
+
+            // Configure composite key for ProgramLogItem
+            modelBuilder.Entity<ProgramLogItem>()
+                .HasKey(pl => new { pl.Date, pl.LogOrderID });
         }
     }
 }

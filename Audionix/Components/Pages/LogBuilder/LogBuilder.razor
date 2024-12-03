@@ -37,12 +37,18 @@
         <MudStack Row="true">
             <MudTable Items="log" Hover="true">
                 <HeaderContent>
+                    <MudTh>ID</MudTh>
                     <MudTh>Title</MudTh>
                     <MudTh>Artist</MudTh>
+                    <MudTh>Filename</MudTh>
+                    <MudTh>Date</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                     <MudTd DataLabel="Title">@context.Title</MudTd>
+                    <MudTd DataLabel="ID">@context.LogOrderID</MudTd>
+                    <MudTd DataLabel="Title">@context.Title</MudTd>
                     <MudTd DataLabel="Artist">@context.Artist</MudTd>
+                    <MudTd DataLabel="">@context.Name</MudTd>
+                    <MudTd DataLabel="">@context.Date</MudTd>
                 </RowTemplate>
             </MudTable>
         </MudStack>
