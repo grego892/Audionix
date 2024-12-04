@@ -1,6 +1,6 @@
 using Audionix.Components.Account;
 using Audionix.Components;
-using Audionix.Data;
+using SharedLibrary.Data;
 using Audionix.Services;
 using Audionix.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -15,6 +15,7 @@ using DataAccess.UnitOfWork;
 using Audionix.DataAccess;
 using Microsoft.AspNetCore.Authentication;
 using Audionix.Hubs;
+using SharedLibrary.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

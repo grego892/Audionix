@@ -1,4 +1,4 @@
-﻿using Audionix.Models;
+﻿using SharedLibrary.Models;
 
 namespace Audionix.Repositories
 {

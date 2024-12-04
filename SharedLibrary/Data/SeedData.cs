@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace Audionix.Data
+
+namespace SharedLibrary.Data
 {
     public static class SeedData
     {

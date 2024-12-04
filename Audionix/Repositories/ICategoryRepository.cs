@@ -1,4 +1,4 @@
-﻿using Audionix.Models.MusicSchedule;
+﻿using SharedLibrary.Models.MusicSchedule;
 
 namespace Audionix.Repositories
 {

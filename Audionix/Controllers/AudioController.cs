@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using Audionix;
-using Audionix.Models;
+using SharedLibrary.Models;
 
 [Route("api/[controller]")]
 [ApiController]

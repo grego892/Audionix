@@ -1,6 +1,6 @@
 using Audionix.Components.Account.Pages;
 using Audionix.Components.Account.Pages.Manage;
-using Audionix.Data;
+using SharedLibrary.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;

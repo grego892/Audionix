@@ -1,8 +1,8 @@
-﻿using Audionix.Data;
-using Audionix.DataAccess;
-using Audionix.Models;
+﻿using Audionix.DataAccess;
+using SharedLibrary.Models;
 using Audionix.Repositories;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Data;
 
 
 namespace DataAccess.UnitOfWork

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Audionix.Models
+namespace SharedLibrary.Models
 {
     public class Station
     {
@@ -12,10 +12,10 @@ namespace Audionix.Models
         public AudioDevice AudioDevice { get; set; } // Navigation property
         public int CurrentPlayingId { get; set; } = 1;
         [Column(TypeName = "date")]
-        public DateOnly CurrentPlayingDate { get; set; }
+        public DateOnly? CurrentPlayingDate { get; set; }
         public int NextPlayId { get; set; } = 1;
         [Column(TypeName = "date")]
-        public DateOnly NextPlayDate { get; set; }
+        public DateOnly? NextPlayDate { get; set; }
         public ICollection<AudioMetadata>? AudioFiles { get; set; }
         public ICollection<Folder>? Folders { get; set; }
         public ICollection<ProgramLogItem>? ProgramLogItems { get; set; } // Navigation property

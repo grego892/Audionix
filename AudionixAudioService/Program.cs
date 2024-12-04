@@ -1,10 +1,11 @@
-using AudionixAudioServer.Data;
+using SharedLibrary.Data;
 using AudionixAudioServer.DataAccess;
 using AudionixAudioServer.Repositories;
 using AudionixAudioServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Settings.Configuration;
+using SharedLibrary.Repositories;
 
 var builder = Host.CreateApplicationBuilder(args);
 

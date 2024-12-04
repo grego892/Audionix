@@ -1,5 +1,5 @@
-using Audionix.Models;
-using Audionix.Models.MusicSchedule;
+using SharedLibrary.Models;
+using SharedLibrary.Models.MusicSchedule;
 using System.Threading.Tasks;
 
 namespace Audionix.Repositories

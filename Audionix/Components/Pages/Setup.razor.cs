@@ -3,7 +3,7 @@ using Serilog;
 using Audionix.Services;
 using System.Diagnostics;
 using MudBlazor;
-using Audionix.Models;
+using SharedLibrary.Models;
 using NAudio.CoreAudioApi;
 using Audionix.Repositories;
 

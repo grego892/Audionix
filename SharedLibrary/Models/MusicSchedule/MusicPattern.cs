@@ -1,4 +1,4 @@
-﻿namespace Audionix.Models.MusicSchedule
+﻿namespace SharedLibrary.Models.MusicSchedule
 {
     public class MusicPattern
     {

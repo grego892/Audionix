@@ -1,6 +1,6 @@
-﻿using AudionixAudioServer.Data;
-using AudionixAudioServer.Models;
-using AudionixAudioServer.Models.MusicSchedule;
+﻿using SharedLibrary.Data;
+using SharedLibrary.Models;
+using SharedLibrary.Models.MusicSchedule;
 using AudionixAudioServer.Repositories;
 using Microsoft.EntityFrameworkCore;
 

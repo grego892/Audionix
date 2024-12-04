@@ -1,7 +1,9 @@
-using AudionixAudioServer.Data;
-using AudionixAudioServer.Models;
+using SharedLibrary.Data;
+using SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SharedLibrary.Repositories;
+
 
 namespace AudionixAudioServer.Repositories
 {
@@ -23,7 +25,7 @@ namespace AudionixAudioServer.Repositories
         //        .ToListAsync();
         //}
 
-        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly nextPlayDate)
+        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Log

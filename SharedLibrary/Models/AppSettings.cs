@@ -1,4 +1,4 @@
-﻿namespace Audionix.Models
+﻿namespace SharedLibrary.Models
 {
     public class AppSettings
     {

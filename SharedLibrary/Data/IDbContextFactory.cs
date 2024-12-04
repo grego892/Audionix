@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Data;
 
-namespace Audionix.Data
+namespace SharedLibrary.Data
 {
     public interface IDbContextFactory
     {

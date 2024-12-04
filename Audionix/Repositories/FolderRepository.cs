@@ -1,5 +1,5 @@
-using Audionix.Data;
-using Audionix.Models;
+using SharedLibrary.Data;
+using SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audionix.Repositories

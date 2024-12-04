@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.SignalR.Client;
 using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
 using Serilog;
-using AudionixAudioServer.Models;
+using SharedLibrary.Models;
 using System.Threading;
 using System.Threading.Tasks;
+using SharedLibrary.Repositories;
 
 namespace AudionixAudioServer.Services
 {
@@ -54,10 +55,21 @@ namespace AudionixAudioServer.Services
 
                     Log.Debug($"+++ AudioPlayer.cs -- PlayAudioAsync() - Station with ID {station.CallLetters} found.");
 
+                    // Check if NextPlayDate is null and set it to today's date if it is
+                    if (station.NextPlayDate == null)
+                    {
+                        station.NextPlayDate = DateOnly.FromDateTime(DateTime.Today);
+                        await _stationRepository.UpdateStationAsync(station);
+                        await _unitOfWork.CompleteAsync();
+                    }
+
                     _programLogItems = await _programLogRepository.GetProgramLogItemsAsync(stationId, station.NextPlayId, station.NextPlayDate);
 
                     Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - _programLogItems: {_programLogItems}");
 
+                    //  This happens if the log is null or empty
+                    /////////////////////////////////////
+ ////               ///  if the log is empty it will try every number forever.  Instead it needs to look at the next avalable event in the log and go straight to that.
                     if (_programLogItems == null || !_programLogItems.Any())
                     {
                         Log.Error($"+++ AudioPlayer.cs -- PlayAudioAsync() - No ProgramLogItem found with LogOrderID: {station.NextPlayId}");
@@ -114,13 +126,14 @@ namespace AudionixAudioServer.Services
                                     // Update the station's CurrentPlaying and NextPlay properties
                                     Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: ID: {station.CurrentPlayingId} - Date: {station.CurrentPlayingDate}");
                                     station.CurrentPlayingId = logItem.LogOrderID;
+                                    station.CurrentPlayingDate = logItem.Date;
                                     Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying ISNOW: ID: {station.CurrentPlayingId} - Date: {station.CurrentPlayingDate}");
 
                                     // Check if NextPlay is the highest LogOrderID for the date
                                     var highestLogOrderID = _programLogItems.Max(item => item.LogOrderID);
                                     if (station.NextPlayId >= highestLogOrderID)
                                     {
-                                        station.NextPlayDate = station.NextPlayDate.AddDays(1);
+                                        station.NextPlayDate = station.NextPlayDate.Value.AddDays(1);
                                         station.NextPlayId = 1;
                                     }
                                     else

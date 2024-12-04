@@ -1,10 +1,11 @@
-using AudionixAudioServer.Models.MusicSchedule;
-using AudionixAudioServer.Models;
+using SharedLibrary.Models.MusicSchedule;
+using SharedLibrary.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
+using SharedLibrary.Data;
 
-namespace AudionixAudioServer.Data
+namespace SharedLibrary.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
@@ -83,6 +84,16 @@ namespace AudionixAudioServer.Data
             modelBuilder.Entity<AppSettings>()
                 .HasIndex(a => a.Id)
                 .IsUnique();
+
+            // Seed data for AppSettings
+            modelBuilder.Entity<AppSettings>().HasData(
+                new AppSettings
+                {
+                    Id = 1,
+                    DataPath = "C:\\Program Files\\Audionix\\AudionixAudio",
+                    IsDatapathSetup = false
+                }
+            );
 
             // Configure composite key for ProgramLogItem
             modelBuilder.Entity<ProgramLogItem>()

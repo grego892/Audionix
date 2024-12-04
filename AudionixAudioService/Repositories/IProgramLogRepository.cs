@@ -1,11 +1,11 @@
-﻿using AudionixAudioServer.Models;
+﻿using SharedLibrary.Models;
 
-namespace AudionixAudioServer.Repositories
+namespace SharedLibrary.Repositories
 {
     public interface IProgramLogRepository
     {
-        //Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly nextPlayDate);
-        Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly nextPlayDate);
+        //Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly? nextPlayDate);
+        Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate);
         Task<bool> HasLogEntriesAsync(Guid stationId);
         Task AddProgramLogItemAsync(ProgramLogItem logItem);
         Task RemoveProgramLogItemAsync(ProgramLogItem logItem);

@@ -1,5 +1,5 @@
-﻿using AudionixAudioServer.Models;
-using AudionixAudioServer.Models.MusicSchedule;
+﻿using SharedLibrary.Models;
+using SharedLibrary.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 

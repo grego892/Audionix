@@ -1,5 +1,5 @@
-﻿using AudionixAudioServer.Data;
-using AudionixAudioServer.Models;
+﻿using SharedLibrary.Data;
+using SharedLibrary.Models;
 using AudionixAudioServer.Repositories;
 using Microsoft.EntityFrameworkCore;
 

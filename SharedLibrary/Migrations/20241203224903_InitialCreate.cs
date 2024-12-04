@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Audionix.Data.Migrations
+namespace SharedLibrary.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -235,9 +235,9 @@ namespace Audionix.Data.Migrations
                     Slogan = table.Column<string>(type: "text", nullable: true),
                     AudioDeviceId = table.Column<Guid>(type: "uuid", nullable: false),
                     CurrentPlayingId = table.Column<int>(type: "integer", nullable: false),
-                    CurrentPlayingDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    CurrentPlayingDate = table.Column<DateOnly>(type: "date", nullable: true),
                     NextPlayId = table.Column<int>(type: "integer", nullable: false),
-                    NextPlayDate = table.Column<DateOnly>(type: "date", nullable: false)
+                    NextPlayDate = table.Column<DateOnly>(type: "date", nullable: true)
                 },
                 constraints: table =>
                 {

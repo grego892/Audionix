@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Components.Forms;
 using Serilog;
 using WavesurferBlazorWrapper;
 using MudBlazor;
-using Audionix.Models;
-using Audionix.Models.MusicSchedule;
+using SharedLibrary.Models;
+using SharedLibrary.Models.MusicSchedule;
 using Audionix.Repositories;
 
 namespace Audionix.Components.Pages.FileManager

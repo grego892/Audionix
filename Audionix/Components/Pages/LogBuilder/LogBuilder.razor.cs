@@ -1,5 +1,5 @@
-﻿using Audionix.Models;
-using Audionix.Models.MusicSchedule;
+﻿using SharedLibrary.Models;
+using SharedLibrary.Models.MusicSchedule;
 using Audionix.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;

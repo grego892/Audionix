@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Serilog;
 using WavesurferBlazorWrapper;
-using Audionix.Models;
+using SharedLibrary.Models;
 using Audionix.Services;
 using Audionix.Repositories;
 

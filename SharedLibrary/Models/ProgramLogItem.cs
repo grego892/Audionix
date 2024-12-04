@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Audionix.Models
+namespace SharedLibrary.Models
 {
     public class ProgramLogItem
     {
