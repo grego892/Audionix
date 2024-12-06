@@ -16,22 +16,12 @@ namespace AudionixAudioServer.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        //public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly nextPlayDate)
-        //{
-        //    using var context = _dbContextFactory.CreateDbContext();
-        //    return await context.Log
-        //        .Where(log => log.StationId == stationId)
-        //        .OrderBy(log => log.LogOrderID)
-        //        .ToListAsync();
-        //}
-
-        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate)
+        public async Task<ProgramLogItem> GetProgramLogItemAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Log
-                .Where(log => log.StationId == stationId && log.Date == nextPlayDate)
-                .OrderBy(log => log.LogOrderID)
-                .ToListAsync();
+                .Where(log => log.StationId == stationId && log.Date == nextPlayDate && log.LogOrderID == nextPlayId)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<bool> HasLogEntriesAsync(Guid stationId)
@@ -109,6 +99,46 @@ namespace AudionixAudioServer.Repositories
             }
 
             context.Log.UpdateRange(itemsToShift);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task AdvanceLogNextPlayAsync(Guid stationId)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            var station = await context.Stations.FindAsync(stationId);
+            if (station == null) return;
+
+            var currentPlayingLogItem = await context.Log
+                .FirstOrDefaultAsync(log => log.StationId == stationId && log.LogOrderID == station.CurrentPlayingId && log.Date == station.CurrentPlayingDate);
+
+            if (currentPlayingLogItem == null) return;
+
+            // Order logs by Date and LogOrderID, then find the next log item after the current playing log item
+            var nextLogItem = await context.Log
+                .Where(log => log.StationId == stationId &&
+                              (log.Date > currentPlayingLogItem.Date ||
+                              (log.Date == currentPlayingLogItem.Date && log.LogOrderID > currentPlayingLogItem.LogOrderID)))
+                .OrderBy(log => log.Date)
+                .ThenBy(log => log.LogOrderID)
+                .FirstOrDefaultAsync();
+
+            if (nextLogItem != null)
+            {
+                station.NextPlayId = nextLogItem.LogOrderID;
+                station.NextPlayDate = nextLogItem.Date;
+                context.Stations.Update(station);
+                await context.SaveChangesAsync();
+            }
+        
+        }
+
+        public async Task CopyNextPlayToCurrentPlayingAsync(Guid stationId)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            var station = await context.Stations.FindAsync(stationId);
+            if (station == null) return;
+            station.CurrentPlayingId = station.NextPlayId;
+            station.CurrentPlayingDate = station.NextPlayDate;
             await context.SaveChangesAsync();
         }
     }
