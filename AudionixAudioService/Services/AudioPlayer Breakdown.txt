@@ -1,0 +1,42 @@
+
+
+- PlayAudioAsync()
+	- While not cancelled
+		- GetStationAsync()
+			- GetStationByIdAsync()
+			- If NexPlayDate is null then make it today.
+		- GetLogItemAsync()
+			- logItem = ......
+**			- AdvanceLogNextPlayAsync()============================================
+		- PlayLogItemAsync()
+			- get audioMetadata = GetAudioFileByFilenameAsync()
+			- get filePath = GetAudioFilePathAsync()
+				- get foldername
+				- get "DataPath" from appsettings
+				- Create "FilePath" from all of this.
+			- PlayAudioFileAsync()
+				- Fade In
+**				- outputDevice.Play();
+				- logItem state isPlaying
++				- NotifyClientsAsync()
+					- "UpdateLogItemState", logItem
+				- UpdateLogItemStateAsync()
+					- UpdateProgramLogItemAsync()
+					- CompleteAsync()
+				- UpdateStationCurrentPlayingAsync()
+					- CopyNextPlayToCurrentPlayingAsync()
+					- UpdateStationAsync()
+					- CompleteAsync()
+				- seguePosition = (calculate)
+				WHILE audio is playing
++					- UpdateProgressAsync()
+						- "UpdateProgress", logItem.LogOrderID, currentTime, totalTime
+					- if >= seguePosition
+						- fade
+						- delay (fadeTime)
+						- Stop playback
+**						- nextAudioTask = PlayAudioAsync()
+				- logItem state hasPlayede
++				- NotifyClientsAsync()
+					- "UpdateLogItemState", logItem
++				- UpdateLogItemStateAsync()
