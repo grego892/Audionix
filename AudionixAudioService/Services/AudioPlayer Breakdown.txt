@@ -24,7 +24,7 @@
 					- UpdateProgramLogItemAsync()
 					- CompleteAsync()
 				- UpdateStationCurrentPlayingAsync()
-					- CopyNextPlayToCurrentPlayingAsync()
+					- CopyNextPlayToCurrentPlayingAsync()------------------------------------------------------
 					- UpdateStationAsync()
 					- CompleteAsync()
 				- seguePosition = (calculate)

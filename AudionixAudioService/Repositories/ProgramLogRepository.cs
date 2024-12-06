@@ -104,16 +104,25 @@ namespace AudionixAudioServer.Repositories
 
         public async Task AdvanceLogNextPlayAsync(Guid stationId)
         {
+            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Starting.   StationId: {stationId}");
             using var context = _dbContextFactory.CreateDbContext();
             var station = await context.Stations.FindAsync(stationId);
             if (station == null) return;
 
+            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Station found.   StationId: {stationId}");
+
+            // Update the station's current playing log item
+            station.CurrentPlayingId = station.NextPlayId;
+            station.CurrentPlayingDate = station.NextPlayDate;
+
             var currentPlayingLogItem = await context.Log
                 .FirstOrDefaultAsync(log => log.StationId == stationId && log.LogOrderID == station.CurrentPlayingId && log.Date == station.CurrentPlayingDate);
 
+            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- CurrentPlayingLogItem found.   CurrentPlayingLogItem: ID: {currentPlayingLogItem.StationId} - {currentPlayingLogItem.Date} - {currentPlayingLogItem.Title} - {currentPlayingLogItem.Artist}");
+
             if (currentPlayingLogItem == null) return;
 
-            // Order logs by Date and LogOrderID, then find the next log item after the current playing log item
+            // Find the next log item
             var nextLogItem = await context.Log
                 .Where(log => log.StationId == stationId &&
                               (log.Date > currentPlayingLogItem.Date ||
@@ -122,24 +131,35 @@ namespace AudionixAudioServer.Repositories
                 .ThenBy(log => log.LogOrderID)
                 .FirstOrDefaultAsync();
 
+            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- NextLogItem found.   NextLogItem: {nextLogItem.LogOrderID} - {nextLogItem.Date} - {nextLogItem.Title} - {nextLogItem.Artist}");
+
             if (nextLogItem != null)
             {
                 station.NextPlayId = nextLogItem.LogOrderID;
                 station.NextPlayDate = nextLogItem.Date;
-                context.Stations.Update(station);
-                await context.SaveChangesAsync();
             }
-        
+            else
+            {
+                // If no next log item is found, reset the next play fields
+                station.NextPlayId = 0;
+                station.NextPlayDate = null;
+            }
+
+            context.Stations.Update(station);
+            await context.SaveChangesAsync();
+
+            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Ending.");
         }
 
-        public async Task CopyNextPlayToCurrentPlayingAsync(Guid stationId)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            var station = await context.Stations.FindAsync(stationId);
-            if (station == null) return;
-            station.CurrentPlayingId = station.NextPlayId;
-            station.CurrentPlayingDate = station.NextPlayDate;
-            await context.SaveChangesAsync();
-        }
+
+        //public async Task CopyNextPlayToCurrentPlayingAsync(Guid stationId)
+        //{
+        //    using var context = _dbContextFactory.CreateDbContext();
+        //    var station = await context.Stations.FindAsync(stationId);
+        //    if (station == null) return;
+        //    station.CurrentPlayingId = station.NextPlayId;
+        //    station.CurrentPlayingDate = station.NextPlayDate;
+        //    await context.SaveChangesAsync();
+        //}
     }
 }

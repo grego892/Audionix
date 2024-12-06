@@ -37,14 +37,17 @@ namespace AudionixAudioServer.Services
 
             return Task.Run(async () =>
             {
-                Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Inside Task.Run(async () =>)");
+                Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Starting Task.Run(async () =>)");
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Inside while (!stoppingToken.IsCancellationRequested)");
+                    Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Starting while NOT Cancelled");
                     var station = await GetStationAsync(stationId, stoppingToken);
                     if (station == null) continue;
 
                     ProgramLogItem logItem = await GetLogItemAsync(stationId, station, stoppingToken);
+
+                    Log.Debug($"======================= AudioPlayer.cs -- PlayAudioAsync() - logItem: {logItem.LogOrderID} - {logItem.Date} - {logItem.Title} - {logItem.Artist}");
+
                     if (logItem == null) continue;
 
                     await AdvanceLogNextPlayAsync(logItem);
@@ -59,16 +62,16 @@ namespace AudionixAudioServer.Services
             var station = await _unitOfWork.Stations.GetStationByIdAsync(stationId);
             if (station == null)
             {
-                Log.Error("+++ AudioPlayer.cs -- PlayAudioAsync() - station == null");
+                Log.Error("+++ AudioPlayer.cs -- GetStationAsync() - station == null");
                 await Task.Delay(10000, stoppingToken);
                 return null;
             }
 
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - Station with ID {station.CallLetters} found.");
+            Log.Debug($"--- AudioPlayer.cs -- GetStationAsync() - Station with ID {station.CallLetters} found.");
 
             if (station.NextPlayDate == null)
             {
-                Log.Warning("+++ AudioPlayer.cs -- PlayAudioAsync() - station.NextPlayDate == null");
+                Log.Warning("+++ AudioPlayer.cs -- GetStationAsync() - station.NextPlayDate == null");
                 station.NextPlayDate = DateOnly.FromDateTime(DateTime.Today);
                 await _unitOfWork.Stations.UpdateStationAsync(station);
                 await _unitOfWork.CompleteAsync();
@@ -80,14 +83,14 @@ namespace AudionixAudioServer.Services
         private async Task<ProgramLogItem?> GetLogItemAsync(Guid stationId, Station station, CancellationToken stoppingToken)
         {
             var logItem = await _programLogRepository.GetProgramLogItemAsync(stationId, station.NextPlayId, station.NextPlayDate);
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - Retrieved LogItem: {logItem?.LogOrderID} -- {logItem?.Date}");
+            Log.Debug($"--- AudioPlayer.cs -- GetLogItemAsync() - Retrieved LogItem: {logItem?.LogOrderID} -- {logItem?.Date}");
 
             return logItem;
         }
 
         private async Task<ProgramLogItem?> AdvanceLogNextPlayAsync(ProgramLogItem logItem)
         {
-            Log.Error($"+++ AudioPlayer.cs -- PlayAudioAsync() - No ProgramLogItem found. Advancing to next available log item.");
+            Log.Debug($"--- AudioPlayer.cs -- AdvanceLogNextPlayAsyn() - Method starting.");
             await _programLogRepository.AdvanceLogNextPlayAsync(logItem.StationId);
             return null;
         }
@@ -97,7 +100,7 @@ namespace AudionixAudioServer.Services
             if (!string.IsNullOrEmpty(logItem.Name))
             {
                 var audioMetadata = await _unitOfWork.Stations.GetAudioFileByFilenameAsync(logItem.Name);
-                Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Retrieved audioMetadata from log item: {audioMetadata?.Filename}");
+                Log.Information($"--- AudioPlayer.cs -- PlayLogItemAsync() - Retrieved audioMetadata from log item: {audioMetadata?.Filename}");
 
                 if (audioMetadata != null)
                 {
@@ -106,24 +109,24 @@ namespace AudionixAudioServer.Services
                 }
                 else
                 {
-                    Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - No AudioMetadata found for LogItem Name: {logItem.Name}");
+                    Log.Warning($"+++ AudioPlayer.cs -- PlayLogItemAsync() - No AudioMetadata found for LogItem Name: {logItem.Name}");
                 }
             }
             else
             {
-                Log.Warning("--- AudioPlayer.cs -- PlayAudioAsync() - LogItem Name is null or empty.");
+                Log.Warning("--- AudioPlayer.cs -- PlayLogItemAsync() - LogItem Name is null or empty.");
             }
         }
 
         private async Task<string> GetAudioFilePathAsync(Station station, AudioMetadata audioMetadata, ProgramLogItem logItem)
         {
             var folderName = audioMetadata.Folder;
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - foldername: {folderName}");
+            Log.Debug($"--- AudioPlayer.cs -- GetAudioFilePathAsync() - foldername: {folderName}");
 
             var appSettings = await _unitOfWork.GetAppSettingsDataPathAsync();
             var filePath = Path.Combine(appSettings.DataPath ?? string.Empty, "Stations", station.CallLetters ?? string.Empty, "Audio", folderName ?? string.Empty, logItem.Name);
 
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - FilePath: {filePath}");
+            Log.Debug($"--- AudioPlayer.cs -- GetAudioFilePathAsync() - FilePath: {filePath}");
             return filePath;
         }
 
@@ -137,17 +140,17 @@ namespace AudionixAudioServer.Services
 
                 fadeOutProvider.BeginFadeIn(.1);
 
-                Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Starting audio: {logItem.Title} by {logItem.Artist}");
+                Log.Information($"--- AudioPlayer.cs -- PlayAudioFileAsync() - Starting audio: {logItem.Title} by {logItem.Artist}");
                 outputDevice.Play();
                 logItem.States = StatesType.isPlaying;
 
                 await NotifyClientsAsync(logItem);
                 await UpdateLogItemStateAsync(logItem);
 
-                await UpdateStationCurrentPlayingAsync(stationId, station);
+                //await UpdateStationCurrentPlayingAsync(stationId, station);
 
                 var seguePosition = audioFile.TotalTime - TimeSpan.FromMilliseconds(audioMetadata.Segue);
-                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - TotalTime: {audioFile.TotalTime} - {TimeSpan.FromMilliseconds(audioMetadata.Segue)} = seguePosition: {seguePosition}");
+                Log.Debug($"--- AudioPlayer.cs -- PlayAudioFileAsync() - TotalTime: {audioFile.TotalTime} - {TimeSpan.FromMilliseconds(audioMetadata.Segue)} = seguePosition: {seguePosition}");
 
                 Task? nextAudioTask = null;
 
@@ -158,18 +161,18 @@ namespace AudionixAudioServer.Services
                     if (audioFile.CurrentTime >= seguePosition && nextAudioTask == null || _isPlayNextTriggered)
                     {
                         _isPlayNextTriggered = false;
-                        Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Reached segue point for audio: {logItem.Title} by {logItem.Artist}");
+                        Log.Information($"--- AudioPlayer.cs -- PlayAudioFileAsync() - Reached segue point for audio: {logItem.Title} by {logItem.Artist}");
                         fadeOutProvider.BeginFadeOut(fadeTime);
 
                         _ = Task.Run(async () =>
                         {
                             await Task.Delay(fadeTime);
                             outputDevice.Stop();
-                            Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Stopped audio: {logItem.Title} by {logItem.Artist}");
+                            Log.Information($"--- AudioPlayer.cs -- PlayAudioFileAsync() - Stopped audio: {logItem.Title} by {logItem.Artist}");
                         });
 
                         nextAudioTask = PlayAudioAsync(stationId, stoppingToken);
-                        Log.Information("--- AudioPlayer.cs -- PlayAudioAsync() - Starting nextAudioTask");
+                        Log.Information("--- AudioPlayer.cs -- PlayAudioFileAsync() - Starting nextAudioTask");
                     }
 
                     if (outputDevice.PlaybackState == PlaybackState.Playing)
@@ -184,13 +187,13 @@ namespace AudionixAudioServer.Services
 
                 if (nextAudioTask != null)
                 {
-                    Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - nextAudioTask != null. About to await nextAudioTask");
+                    Log.Debug("--- AudioPlayer.cs -- PlayAudioFileAsync() - nextAudioTask != null. About to await nextAudioTask");
                     await nextAudioTask;
-                    Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Awaited nextAudioTask");
+                    Log.Debug("--- AudioPlayer.cs -- PlayAudioFileAsync() - Awaited nextAudioTask");
                 }
             }
 
-            Log.Information($"--- AudioPlayer.cs -- PlayAudioAsync() - Playing audio: {logItem.Title} by {logItem.Artist}");
+            Log.Information($"--- AudioPlayer.cs -- PlayAudioFileAsync() - Playing audio: {logItem.Title} by {logItem.Artist}");
         }
 
         private async Task NotifyClientsAsync(ProgramLogItem logItem)
@@ -198,30 +201,31 @@ namespace AudionixAudioServer.Services
             try
             {
                 await _hubConnection.InvokeAsync("UpdateLogItemState", logItem);
-                Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - _hubConnection.State:{_hubConnection.State}");
+                Log.Debug($"--- AudioPlayer.cs -- NotifyClientsAsync() - _hubConnection.State:{_hubConnection.State}");
             }
             catch (Exception ex)
             {
-                Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to notify clients. Error: {ex.Message}");
+                Log.Warning($"+++ AudioPlayer.cs -- NotifyClientsAsync() - Failed to notify clients. Error: {ex.Message}");
             }
         }
 
         private async Task UpdateLogItemStateAsync(ProgramLogItem logItem)
         {
+            Log.Debug($"--- AudioPlayer.cs -- UpdateLogItemStateAsync()");
             await _unitOfWork.Stations.UpdateProgramLogItemAsync(logItem);
             await _unitOfWork.CompleteAsync();
         }
 
-        private async Task UpdateStationCurrentPlayingAsync(Guid stationId, Station station)
-        {
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: {station.CurrentPlayingId} - {station.CurrentPlayingDate}");
-            await _programLogRepository.CopyNextPlayToCurrentPlayingAsync(stationId);
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying ISNOW: {station.CurrentPlayingId} - {station.CurrentPlayingDate}");
+        //private async Task UpdateStationCurrentPlayingAsync(Guid stationId, Station station)
+        //{
+        //    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying WAS: {station.CurrentPlayingId} - {station.CurrentPlayingDate}");
+        //    await _programLogRepository.CopyNextPlayToCurrentPlayingAsync(stationId);
+        //    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.CurrentPlaying ISNOW: {station.CurrentPlayingId} - {station.CurrentPlayingDate}");
 
-            Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.NextPlay ISNOW: {station.NextPlayId} - {station.NextPlayDate}");
-            await _unitOfWork.Stations.UpdateStationAsync(station);
-            await _unitOfWork.CompleteAsync();
-        }
+        //    Log.Debug($"--- AudioPlayer.cs -- PlayAudioAsync() - station.NextPlay ISNOW: {station.NextPlayId} - {station.NextPlayDate}");
+        //    await _unitOfWork.Stations.UpdateStationAsync(station);
+        //    await _unitOfWork.CompleteAsync();
+        //}
 
         private async Task UpdateProgressAsync(ProgramLogItem logItem, AudioFileReader audioFile)
         {
@@ -237,7 +241,7 @@ namespace AudionixAudioServer.Services
             }
             catch (Exception ex)
             {
-                Log.Warning($"+++ AudioPlayer.cs -- PlayAudioAsync() - Failed to update progress. Error: {ex.Message}");
+                Log.Warning($"+++ AudioPlayer.cs -- UpdateProgressAsync() - Failed to update progress. Error: {ex.Message}");
             }
         }
     }

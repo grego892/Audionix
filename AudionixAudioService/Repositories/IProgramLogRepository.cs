@@ -12,6 +12,6 @@ namespace SharedLibrary.Repositories
         Task ShiftLogItemsDownAsync(Guid stationId, int startIndex);
         Task ShiftLogItemsUpAsync(Guid stationId, int startIndex);
         Task AdvanceLogNextPlayAsync(Guid stationId);
-        Task CopyNextPlayToCurrentPlayingAsync(Guid stationId);
+        //Task CopyNextPlayToCurrentPlayingAsync(Guid stationId);
     }
 }
