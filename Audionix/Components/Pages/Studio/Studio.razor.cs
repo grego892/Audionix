@@ -46,7 +46,7 @@ namespace Audionix.Components.Pages.Studio
                 .WithUrl("http://localhost:5298/progressHub")
                 .Build();
 
-            _hubConnection.On<int, double, double>("ReceiveProgress", (logOrderId, currentTime, totalTime) =>
+            _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderId, logOrderDate, currentTime, totalTime) =>
             {
                 var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == logOrderId);
                 if (logItem != null)
@@ -62,7 +62,7 @@ namespace Audionix.Components.Pages.Studio
 
             _hubConnection.On<ProgramLogItem>("UpdateLogItemState", (updatedLogItem) =>
             {
-                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == updatedLogItem.LogOrderID);
+                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == updatedLogItem.LogOrderID && item.Date == updatedLogItem.Date);
                 if (logItem != null)
                 {
                     logItem.States = updatedLogItem.States;

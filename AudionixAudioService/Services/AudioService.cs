@@ -36,10 +36,7 @@ namespace AudionixAudioServer.Services
             _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
             // Register the handler for ReceiveProgress
-            _hubConnection.On<int, double, double>("ReceiveProgress", (logOrderID, currentTime, totalTime) =>
-            {
-                //Log.Debug("Received progress update: LogOrderID: {LogOrderID}, CurrentTime: {CurrentTime}, TotalTime: {TotalTime}", logOrderID, currentTime, totalTime);
-            });
+            _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderID, logOrderDate, currentTime, totalTime) => {});
 
             _hubConnection.On<ProgramLogItem>("UpdateLogItemState", (logItem) =>
             {

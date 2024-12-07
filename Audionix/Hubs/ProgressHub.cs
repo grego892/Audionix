@@ -7,10 +7,9 @@ namespace Audionix.Hubs
 {
     public class ProgressHub : Hub
     {
-        public async Task UpdateProgress(int logOrderId, double currentTime, double totalTime)
+        public async Task UpdateProgress(int logOrderId, DateOnly logOrderDate, double currentTime, double totalTime)
         {
-            await Clients.All.SendAsync("ReceiveProgress", logOrderId, currentTime, totalTime);
-            //Log.Debug("Received progress update: LogOrderID: {LogOrderID}, CurrentTime: {CurrentTime}, TotalTime: {TotalTime}", logOrderId, currentTime, totalTime);
+            await Clients.All.SendAsync("ReceiveProgress", logOrderId, logOrderDate, currentTime, totalTime);
         }
 
         public async Task PlayNextAudio(Guid stationId)

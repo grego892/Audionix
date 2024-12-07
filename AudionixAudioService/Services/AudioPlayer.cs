@@ -236,7 +236,7 @@ namespace AudionixAudioServer.Services
             {
                 if (_hubConnection.State == HubConnectionState.Connected)
                 {
-                    await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, currentTime, totalTime);
+                    await _hubConnection.InvokeAsync("UpdateProgress", logItem.LogOrderID, logItem.Date,currentTime, totalTime);
                 }
             }
             catch (Exception ex)
