@@ -7,6 +7,7 @@ using MudBlazor;
 using Serilog;
 using static ATL.Logging.Log;
 using static MudBlazor.CategoryTypes;
+using MudBlazor.Services.Scroll;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -48,7 +49,7 @@ namespace Audionix.Components.Pages.Studio
 
             _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderId, logOrderDate, currentTime, totalTime) =>
             {
-                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == logOrderId);
+                var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == logOrderId && item.Date == logOrderDate);
                 if (logItem != null)
                 {
                     logItem.Progress = (currentTime / totalTime) * 100;
@@ -72,7 +73,6 @@ namespace Audionix.Components.Pages.Studio
             });
 
             await _hubConnection.StartAsync();
-
         }
 
         private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()

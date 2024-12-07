@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Settings.Configuration;
 using SharedLibrary.Repositories;
 
+
 var builder = Host.CreateApplicationBuilder(args);
 
 // LOGGING
@@ -43,6 +44,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AudioService>();
 
 builder.Services.AddHostedService<Worker>();
+
+// Register SignalR
+//builder.Services.AddSignalR();
 
 var host = builder.Build();
 

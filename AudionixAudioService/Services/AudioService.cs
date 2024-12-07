@@ -21,17 +21,15 @@ namespace AudionixAudioServer.Services
             _stationRepository = stationRepository;
             _programLogRepository = programLogRepository;
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:5298/progressHub", options =>
-                {
-                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
-                })
+                .WithUrl("http://localhost:5298/progressHub")
                 .ConfigureLogging(logging =>
                 {
-                    logging.SetMinimumLevel(LogLevel.Information);
+                    logging.SetMinimumLevel(LogLevel.Debug);
                     logging.AddConsole();
                 })
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
+
 
             _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
