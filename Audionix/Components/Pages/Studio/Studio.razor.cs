@@ -5,9 +5,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using MudBlazor;
 using Serilog;
-using static ATL.Logging.Log;
-using static MudBlazor.CategoryTypes;
-using MudBlazor.Services.Scroll;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -18,7 +15,6 @@ namespace Audionix.Components.Pages.Studio
         private bool _openDeleteDrawer = false;
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
-        private string? _selectedAudioFolder;
         private HubConnection? _hubConnection;
 
         public List<ProgramLogItem> ProgramLog = new();
@@ -69,10 +65,15 @@ namespace Audionix.Components.Pages.Studio
                     logItem.States = updatedLogItem.States;
                     logItem.Progress = updatedLogItem.Progress;
                     InvokeAsync(StateHasChanged);
+
+                    ScrollToCurrentPlayingItem();
+                    //InvokeAsync(ScrollToCurrentPlayingItem);
                 }
             });
 
             await _hubConnection.StartAsync();
+
+            ScrollToCurrentPlayingItem();
         }
 
         private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()
@@ -110,18 +111,6 @@ namespace Audionix.Components.Pages.Studio
             _openDeleteDrawer = false;
             selectedAudioFile = null;
         }
-
-        //private async void StopAudio()
-        //{
-        //    if (_hubConnection != null)
-        //    {
-        //        await _hubConnection.InvokeAsync("StopAudio", AppStateService?.station?.StationId ?? Guid.Empty);
-        //    }
-        //    _openMakenextDrawer = false;
-        //    _openInsertDrawer = false;
-        //    _openDeleteDrawer = false;
-        //    selectedAudioFile = null;
-        //}
 
         private void ToggleInsertDrawer()
         {
@@ -261,6 +250,46 @@ namespace Audionix.Components.Pages.Studio
                 ProgramLog.Remove(logItem);
                 _openDeleteDrawer = false;
             }
+        }
+
+        private async Task ScrollToCurrentPlayingItem()
+        {
+            var station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
+
+            var currentPlayingId = station.CurrentPlayingId;
+            var currentPlayingDate = station.CurrentPlayingDate;
+
+            // Order the ProgramLog by Date and LogOrderID
+            var orderedProgramLog = ProgramLog
+                .OrderBy(item => item.Date)
+                .ThenBy(item => item.LogOrderID)
+                .ToList();
+
+            // Find the index of the currently playing item
+            var index = orderedProgramLog.FindIndex(item => item.Date == currentPlayingDate && item.LogOrderID == currentPlayingId);
+
+            if (index >= 0)
+            {
+                index = index - 1;
+            }
+
+            int scrollTo = index * 33;
+
+
+
+            //var station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
+
+            //var currentPlayingId = station.CurrentPlayingId;
+            //var currentPlayingDate = station.CurrentPlayingDate;
+            //var ProgramLogCount = ProgramLog.Count();
+
+
+
+            //var index = ProgramLog.FindIndex(item => item.Date == currentPlayingDate && item.LogOrderID == currentPlayingId);
+
+            //await Task.Delay(1);
+            await ScrollManager.ScrollToAsync(".mud-table-container", 0, scrollTo, ScrollBehavior.Smooth);
+            Log.Debug($"--- Studio - ScrollToCurrentPlayingItem() -- Scrolling to CurrentPlayingItem - Index: {index} -- ScrollTo: {scrollTo}");
         }
 
         public void Dispose()

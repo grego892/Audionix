@@ -94,8 +94,8 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddSignalR();
 
     // Add logging configuration for SignalR
-    builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Trace);
-    builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Trace);
+    builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
+    builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
 
     // Add logging configuration for DevelopmentAuthenticationHandler
     builder.Logging.AddFilter("DevelopmentAuthenticationHandler", LogLevel.Information);

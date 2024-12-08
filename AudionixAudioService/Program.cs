@@ -23,8 +23,8 @@ Log.Logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Trace);
-builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Trace);
+builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
 
 // DATABASE
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>

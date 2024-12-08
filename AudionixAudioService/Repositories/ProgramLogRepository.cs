@@ -104,12 +104,12 @@ namespace AudionixAudioServer.Repositories
 
         public async Task AdvanceLogNextPlayAsync(Guid stationId)
         {
-            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Starting.   StationId: {stationId}");
+            Log.Debug($"--- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Starting.   StationId: {stationId}");
             using var context = _dbContextFactory.CreateDbContext();
             var station = await context.Stations.FindAsync(stationId);
             if (station == null) return;
 
-            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Station found.   StationId: {stationId}");
+            Log.Debug($"--- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Station found.   StationId: {stationId}");
 
             // Update the station's current playing log item
             station.CurrentPlayingId = station.NextPlayId;
@@ -118,7 +118,7 @@ namespace AudionixAudioServer.Repositories
             var currentPlayingLogItem = await context.Log
                 .FirstOrDefaultAsync(log => log.StationId == stationId && log.LogOrderID == station.CurrentPlayingId && log.Date == station.CurrentPlayingDate);
 
-            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- CurrentPlayingLogItem found.   CurrentPlayingLogItem: ID: {currentPlayingLogItem.StationId} - {currentPlayingLogItem.Date} - {currentPlayingLogItem.Title} - {currentPlayingLogItem.Artist}");
+            Log.Debug($"--- ProgramLogRepository - AdvanceLogNextPlayAsync() -- CurrentPlayingLogItem found.   CurrentPlayingLogItem: ID: {currentPlayingLogItem.StationId} - {currentPlayingLogItem.Date} - {currentPlayingLogItem.Title} - {currentPlayingLogItem.Artist}");
 
             if (currentPlayingLogItem == null) return;
 
@@ -131,7 +131,7 @@ namespace AudionixAudioServer.Repositories
                 .ThenBy(log => log.LogOrderID)
                 .FirstOrDefaultAsync();
 
-            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- NextLogItem found.   NextLogItem: {nextLogItem.LogOrderID} - {nextLogItem.Date} - {nextLogItem.Title} - {nextLogItem.Artist}");
+            Log.Debug($"--- ProgramLogRepository - AdvanceLogNextPlayAsync() -- NextLogItem found.   NextLogItem: {nextLogItem.LogOrderID} - {nextLogItem.Date} - {nextLogItem.Title} - {nextLogItem.Artist}");
 
             if (nextLogItem != null)
             {
@@ -148,7 +148,7 @@ namespace AudionixAudioServer.Repositories
             context.Stations.Update(station);
             await context.SaveChangesAsync();
 
-            Log.Debug($"---------------------- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Ending.");
+            Log.Debug($"--- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Ending.");
         }
 
 

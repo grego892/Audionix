@@ -3,13 +3,15 @@
 
 @using MudBlazor
 @using MudBlazor.Components
+@inject IScrollManager ScrollManager
 
 <PageTitle>Live Studio</PageTitle>
 
 <MudPaper>
-    <MudToolBar Dense="false" Variant="Variant.Outline">
+    <MudToolBar Dense="false" >
         <MudPaper Class="mx-auto">
             <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ScrollToCurrentPlayingItem">Home</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Play Next</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">MakeNext</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
@@ -47,14 +49,15 @@
     </MudDrawerContainer>
 
     <MudDataGrid Items="ProgramLog"
-                 RowStyleFunc="@RowStyleFunc"
-                 SortMode="SortMode.Multiple"
-                 FixedHeader="true"
-                 Virtualize="true"
-                 ShowMenuIcon="false"
-                 Dense="true"
-                 Height="86vh"
-                 SortDefinitions="initialSorts">
+        T="ProgramLogItem"
+        RowStyleFunc="@RowStyleFunc"
+        SortMode="SortMode.Multiple"
+        FixedHeader="true"
+        Virtualize="true"
+        ShowMenuIcon="false"
+        Dense="true"
+        Height="84vh"
+        SortDefinitions="initialSorts">
         <Columns>
             <PropertyColumn Title="ID" Property="x => x.LogOrderID" Sortable="false" CellStyle="width: 10px;" />
             <PropertyColumn Property="x => x.Title" Sortable="false" />
