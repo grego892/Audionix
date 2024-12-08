@@ -13,9 +13,15 @@
             <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ScrollToCurrentPlayingItem">Home</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Play Next</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">MakeNext</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">Make Next</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDeleteDrawer">Delete</MudButton>
+            </MudStack>
+        </MudPaper>
+        <MudSpacer />
+        <MudPaper Class="mx-auto">
+            <MudStack Row="true" Justify="Justify.FlexEnd" Align="right">
+                <MudText Class="pa-2 ma-2 border-solid border-2">@timeDifferenceFormatted</MudText>
             </MudStack>
         </MudPaper>
     </MudToolBar>

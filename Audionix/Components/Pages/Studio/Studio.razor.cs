@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using MudBlazor;
 using Serilog;
+using System.Text.RegularExpressions;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -16,6 +17,8 @@ namespace Audionix.Components.Pages.Studio
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
         private HubConnection? _hubConnection;
+        private string timeDifferenceFormatted;
+        private bool _isFirstRender = true;
 
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
@@ -53,6 +56,15 @@ namespace Audionix.Components.Pages.Studio
                     {
                         logItem.States = StatesType.hasPlayed;
                     }
+                    var timeDifference = (totalTime - currentTime); // Calculate the difference in milliseconds
+                    var timeSpan = TimeSpan.FromMilliseconds(timeDifference);
+                    timeDifferenceFormatted = timeSpan.ToString(@"hh\:mm\:ss\:ff");
+
+                    // Remove leading zeros and colons
+                    timeDifferenceFormatted = Regex.Replace(timeDifferenceFormatted, @"^0+(:0+)*", "").TrimStart(':');
+
+                    Log.Debug($"~~~~~ currentTime: {currentTime} -- totalTime: {totalTime} -- timeDifference: {timeDifference} -- timeSpan: {timeSpan} -- TimeDifference: {timeDifferenceFormatted}");
+
                     InvokeAsync(StateHasChanged);
                 }
             });
@@ -70,7 +82,21 @@ namespace Audionix.Components.Pages.Studio
             });
 
             await _hubConnection.StartAsync();
-            await ScrollToCurrentPlayingItem();
+
+
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await ScrollToCurrentPlayingItem();
+                _isFirstRender = false;
+            }
+            else
+            {
+                await ScrollToCurrentPlayingItem();
+            }
         }
 
         private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()
@@ -251,6 +277,8 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task ScrollToCurrentPlayingItem()
         {
+            if (_isFirstRender) return;
+
             Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
 
             // Order the ProgramLog by Date and LogOrderID
@@ -273,7 +301,6 @@ namespace Audionix.Components.Pages.Studio
             await ScrollManager.ScrollToAsync(".mud-table-container", 0, scrollTo, ScrollBehavior.Smooth);
             Log.Debug($"--- Studio - ScrollToCurrentPlayingItem() -- Scrolling to CurrentPlayingItem - Index: {index} -- ScrollTo: {scrollTo}");
         }
-
 
         public void Dispose()
         {
