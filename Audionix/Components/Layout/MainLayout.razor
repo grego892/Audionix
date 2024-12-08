@@ -20,10 +20,10 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudImage Src="Images/NavbarLogo.svg" Width="200" Height="60" />
         <MudSpacer />
-        <MudText>@userName</MudText>
         <MudSpacer />
-        <MudSwitch @bind-value="@_isDarkMode" Color="Color.Primary" Class="ma-2" T="bool" Label="Light/Dark Mode" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="ShowAboutSnackbar" />
+        <MudText Class="pa-2 ma-2 border-solid border-2">@userName</MudText>
+        <MudSwitch Class="mr-n2" @bind-Value="_isDarkMode" ThumbIcon="@(_isDarkMode==true ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode)" ThumbIconColor="@(_isDarkMode==true ? Color.Success : Color.Error)" />
+        <MudIconButton Class="ml-n2" Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="ShowAboutSnackbar" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />

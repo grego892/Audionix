@@ -65,15 +65,12 @@ namespace Audionix.Components.Pages.Studio
                     logItem.States = updatedLogItem.States;
                     logItem.Progress = updatedLogItem.Progress;
                     InvokeAsync(StateHasChanged);
-
-                    ScrollToCurrentPlayingItem();
-                    //InvokeAsync(ScrollToCurrentPlayingItem);
+                    InvokeAsync(ScrollToCurrentPlayingItem);
                 }
             });
 
             await _hubConnection.StartAsync();
-
-            ScrollToCurrentPlayingItem();
+            await ScrollToCurrentPlayingItem();
         }
 
         private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()
@@ -254,43 +251,29 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task ScrollToCurrentPlayingItem()
         {
-            var station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
-
-            var currentPlayingId = station.CurrentPlayingId;
-            var currentPlayingDate = station.CurrentPlayingDate;
+            Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
 
             // Order the ProgramLog by Date and LogOrderID
             var orderedProgramLog = ProgramLog
                 .OrderBy(item => item.Date)
-                .ThenBy(item => item.LogOrderID)
-                .ToList();
+                .ThenBy(item => item.LogOrderID);
 
             // Find the index of the currently playing item
-            var index = orderedProgramLog.FindIndex(item => item.Date == currentPlayingDate && item.LogOrderID == currentPlayingId);
+            var index = orderedProgramLog
+                .Select((item, idx) => new { item, idx })
+                .FirstOrDefault(x => x.item.Date == station.CurrentPlayingDate && x.item.LogOrderID == station.CurrentPlayingId)?.idx ?? -1;
 
             if (index >= 0)
             {
-                index = index - 1;
+                index--;
             }
 
             int scrollTo = index * 33;
 
-
-
-            //var station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
-
-            //var currentPlayingId = station.CurrentPlayingId;
-            //var currentPlayingDate = station.CurrentPlayingDate;
-            //var ProgramLogCount = ProgramLog.Count();
-
-
-
-            //var index = ProgramLog.FindIndex(item => item.Date == currentPlayingDate && item.LogOrderID == currentPlayingId);
-
-            //await Task.Delay(1);
             await ScrollManager.ScrollToAsync(".mud-table-container", 0, scrollTo, ScrollBehavior.Smooth);
             Log.Debug($"--- Studio - ScrollToCurrentPlayingItem() -- Scrolling to CurrentPlayingItem - Index: {index} -- ScrollTo: {scrollTo}");
         }
+
 
         public void Dispose()
         {

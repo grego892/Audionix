@@ -59,11 +59,11 @@
         Height="84vh"
         SortDefinitions="initialSorts">
         <Columns>
-            <PropertyColumn Title="ID" Property="x => x.LogOrderID" Sortable="false" CellStyle="width: 10px;" />
+            <PropertyColumn Title="ID" Property="x => x.LogOrderID" Sortable="false" />
             <PropertyColumn Property="x => x.Title" Sortable="false" />
             <PropertyColumn Property="x => x.Artist" Sortable="false" />
             <PropertyColumn Property="x => x.TimeScheduled" Sortable="false" />
-            <PropertyColumn Property="x => x.Length" Sortable="false" CellStyle="width: 10px;" />
+            <PropertyColumn Property="x => x.Length" Sortable="false" />
             <PropertyColumn Property="x => x.Date" SortBy="@(x => x.Date)" Sortable="false" />
 
             @if (_openMakenextDrawer)
