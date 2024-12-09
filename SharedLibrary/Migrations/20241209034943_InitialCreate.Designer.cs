@@ -12,7 +12,7 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241209015136_InitialCreate")]
+    [Migration("20241209034943_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -286,8 +286,8 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("text");
 
-                    b.Property<double>("Duration")
-                        .HasColumnType("double precision");
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("interval");
 
                     b.Property<int>("EndDate")
                         .HasColumnType("integer");
@@ -533,8 +533,8 @@ namespace SharedLibrary.Migrations
                     b.Property<short>("Intro")
                         .HasColumnType("smallint");
 
-                    b.Property<double>("Length")
-                        .HasColumnType("double precision");
+                    b.Property<TimeSpan>("Length")
+                        .HasColumnType("interval");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");

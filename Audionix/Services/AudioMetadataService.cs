@@ -55,7 +55,7 @@ namespace Audionix.Services
                     Title = additionalFields.TryGetValue("disp.entry[0].value", out string? title) ? title.Trim('\0') : string.Empty,
                     Intro = additionalFields.TryGetValue("info.ISRF", out var ISRFfield) && Int16.TryParse(ISRFfield, out var intro) ? intro : (short)0,
                     Segue = additionalFields.TryGetValue("info.IMED", out var IMEDfield) && Int16.TryParse(IMEDfield, out var segue) ? segue : (short)0,
-                    Duration = theTrack.Duration
+                    Duration = TimeSpan.FromSeconds(theTrack.Duration)
                 };
 
                 Log.Information($"--- AudioMetadata -- GetMetadata() - Audio AudioMetadata.IntroSeconds:  {audioMetadata.IntroSeconds}");

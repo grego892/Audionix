@@ -102,7 +102,7 @@ namespace Audionix.Components.Pages.LogBuilder
                 newDaysLog.Add(newLogItem);
 
                 // Add the length of the current song to the current time for the next song
-                currentTime = currentTime.Add(TimeSpan.FromSeconds(song.Duration));
+                currentTime = currentTime.Add(song.Duration);
             }
 
             return newDaysLog;

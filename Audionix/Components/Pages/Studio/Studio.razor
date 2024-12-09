@@ -69,7 +69,7 @@
             <PropertyColumn Property="x => x.Title" Sortable="false" />
             <PropertyColumn Property="x => x.Artist" Sortable="false" />
             <PropertyColumn Property="x => x.TimeScheduled" Sortable="false" />
-            <PropertyColumn Property="x => x.Length" Sortable="false" />
+            <PropertyColumn Property="x => FormatTimeSpan(x.Length)" Sortable="false" />
             <PropertyColumn Property="x => x.Date" SortBy="@(x => x.Date)" Sortable="false" />
 
             @if (_openMakenextDrawer)

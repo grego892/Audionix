@@ -67,7 +67,7 @@
                             <MudText>Duration</MudText>
                         </HeaderTemplate>
                         <CellTemplate>
-                            <MudText>@TimeSpan.FromSeconds(context.Item.Duration).ToString(@"mm\:ss")</MudText>
+                            <MudText>@context.Item.Duration.ToString(@"mm\:ss")</MudText>
                         </CellTemplate>
                     </TemplateColumn>
                     @if (isSongdataEnabled)

@@ -24,7 +24,7 @@ namespace SharedLibrary.Models
 
         public string? Name { get; set; }
         public Rotator? Rotator { get; set; }
-        public double Length { get; set; }
+        public TimeSpan Length { get; set; }
         public Int16 Intro { get; set; }
         public Int16 Segue { get; set; }
         public string? Category { get; set; }

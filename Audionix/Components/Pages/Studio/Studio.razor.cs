@@ -63,8 +63,6 @@ namespace Audionix.Components.Pages.Studio
                     // Remove leading zeros and colons
                     timeDifferenceFormatted = Regex.Replace(timeDifferenceFormatted, @"^0+(:0+)*", "").TrimStart(':');
 
-                    Log.Debug($"~~~~~ currentTime: {currentTime} -- totalTime: {totalTime} -- timeDifference: {timeDifference} -- timeSpan: {timeSpan} -- TimeDifference: {timeDifferenceFormatted}");
-
                     InvokeAsync(StateHasChanged);
                 }
             });
@@ -77,13 +75,14 @@ namespace Audionix.Components.Pages.Studio
                     logItem.Status = updatedLogItem.Status;
                     logItem.Progress = updatedLogItem.Progress;
                     InvokeAsync(StateHasChanged);
+
                     InvokeAsync(ScrollToCurrentPlayingItem);
                 }
             });
 
             await _hubConnection.StartAsync();
 
-
+            //await ScrollToCurrentPlayingItem();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -92,11 +91,15 @@ namespace Audionix.Components.Pages.Studio
             {
                 await ScrollToCurrentPlayingItem();
                 _isFirstRender = false;
+
+                Log.Debug("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
             }
-            else
-            {
-                await ScrollToCurrentPlayingItem();
-            }
+            //else
+            //{
+            //    await ScrollToCurrentPlayingItem();
+
+            //    Log.Debug("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+            //}
         }
 
         private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()
@@ -276,7 +279,7 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task ScrollToCurrentPlayingItem()
         {
-            if (_isFirstRender) return;
+            //if (_isFirstRender) return;
 
             Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
 
@@ -299,6 +302,12 @@ namespace Audionix.Components.Pages.Studio
 
             await ScrollManager.ScrollToAsync(".mud-table-container", 0, scrollTo, ScrollBehavior.Smooth);
             Log.Debug($"--- Studio - ScrollToCurrentPlayingItem() -- Scrolling to CurrentPlayingItem - Index: {index} -- ScrollTo: {scrollTo}");
+        }
+
+        private string FormatTimeSpan(TimeSpan timeSpan)
+        {
+            string formatted = timeSpan.ToString(@"hh\:mm\:ss");
+            return Regex.Replace(formatted, @"^0+(:0+)*", "").TrimStart(':');
         }
 
         public void Dispose()

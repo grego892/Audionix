@@ -54,9 +54,12 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task StopAndEmptyWavePlayer()
         {
-            await wavePlayer.Stop();
-            await wavePlayer.Empty();
-            await wavePlayer.RegionClearRegions();
+            if (wavePlayer != null)
+            {
+                await wavePlayer.Stop();
+                await wavePlayer.Empty();
+                await wavePlayer.RegionClearRegions();
+            }
         }
 
         private async Task<string> RequestFileFromAPI(AudioMetadata audioMetadata)
@@ -76,31 +79,38 @@ namespace Audionix.Components.Pages.FileManager
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - scheme: " + scheme);
                 string encodedFilename = System.Net.WebUtility.UrlEncode(audioMetadata.Filename);
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFilename: " + encodedFilename);
-                string encodedFoldername = System.Net.WebUtility.UrlEncode(audioMetadata.Folder);
+                string encodedFoldername = System.Net.WebUtility.UrlEncode(audioMetadata.Folder ?? string.Empty);
                 Log.Debug("--- FileManager - EditAudio() -- EditAudio() - RequestFileFromAPI() - encodedFoldername: " + encodedFoldername);
-                string url = $"{scheme}://{host}/api/audio/{AppStateService.station.CallLetters}/{encodedFoldername}/{encodedFilename}";
 
-                Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
-
-                try
+                if (AppStateService.station?.CallLetters != null)
                 {
-                    var httpClient = new HttpClient();
-                    Log.Debug("--- FileManager - EditAudio() -- EditAudio() - about to httpClient.GetAsync(url)");
-                    var response = await httpClient.GetAsync(url);
-                    Log.Information("--- FileManager - EditAudio() -- EditAudio response: " + response.StatusCode);
+                    string url = $"{scheme}://{host}/api/audio/{AppStateService.station.CallLetters}/{encodedFoldername}/{encodedFilename}";
+                    Log.Information("--- FileManager - EditAudio() -- EditAudio sending to API: " + url);
 
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        return url;
+                        var httpClient = new HttpClient();
+                        Log.Debug("--- FileManager - EditAudio() -- EditAudio() - about to httpClient.GetAsync(url)");
+                        var response = await httpClient.GetAsync(url);
+                        Log.Information("--- FileManager - EditAudio() -- EditAudio response: " + response.StatusCode);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            return url;
+                        }
+                        else
+                        {
+                            Log.Error("++++++ FileManager - EditAudio() -- Error making HTTP request");
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Log.Error("++++++ FileManager - EditAudio() -- Error making HTTP request");
+                        Log.Error(ex, "++++++ FileManager - EditAudio() - FileManager - EditAudio() - Error making HTTP request");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Log.Error(ex, "++++++ FileManager - EditAudio() - FileManager - EditAudio() - Error making HTTP request");
+                    Log.Error("++++++ FileManager - EditAudio() -- AppStateService.station.CallLetters is null");
                 }
             }
             else
@@ -114,7 +124,15 @@ namespace Audionix.Components.Pages.FileManager
         private async Task LoadFileIntoWavePlayer(string url, AudioMetadata audioMetadata)
         {
             wavePlayer?.Load(url);
-            audioMetadata = await AudioMetadataRepository.GetAudioFileByIdAsync(audioMetadata.Id);
+            var audioFile = await AudioMetadataRepository.GetAudioFileByIdAsync(audioMetadata.Id);
+            if (audioFile != null)
+            {
+                audioMetadata = audioFile;
+            }
+            else
+            {
+                Log.Error("++++++ FileManager - EditAudio() -- Audio file not found");
+            }
         }
 
         private async Task UpdateWavePlayerRegions(AudioMetadata audioMetadata)
@@ -155,8 +173,8 @@ namespace Audionix.Components.Pages.FileManager
                         await wavePlayer.RegionAddRegion(
                             new WavesurferRegion()
                             {
-                                Start = (float)audioMetadata.Duration - ((audioMetadata.Segue) / 1000),
-                                End = duration.HasValue ? (float)audioMetadata.Duration : 0,
+                                Start = (float)audioMetadata.Duration.TotalSeconds - ((audioMetadata.Segue) / 1000),
+                                End = duration.HasValue ? (float)audioMetadata.Duration.TotalSeconds : 0,
                                 Resize = true,
                                 Color = "rgba(200,10,25,0.3)",
                                 Drag = true,
@@ -165,8 +183,8 @@ namespace Audionix.Components.Pages.FileManager
                     }
                     else
                     {
-                        segueRegion.Start = (float)(duration.HasValue ? ((audioMetadata.Duration - audioMetadata.Segue)) : 0);
-                        segueRegion.End = duration.HasValue ? (float)(audioMetadata.Duration) : 0;
+                        segueRegion.Start = (float)(duration.HasValue ? ((audioMetadata.Duration.TotalSeconds - audioMetadata.Segue / 1000)) : 0);
+                        segueRegion.End = duration.HasValue ? (float)(audioMetadata.Duration.TotalSeconds) : 0;
                     }
                     await wavePlayer.RegionListUpdate(regions);
                 }

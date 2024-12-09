@@ -14,7 +14,7 @@
         public bool ProtectNextIntro { get; set; }
         public double IntroSeconds { get; set; } = 0;
         public double SegueSeconds { get; set; } = 0;
-        public double Duration { get; set; } = 0;
+        public TimeSpan Duration { get; set; }
 
         public Guid StationId { get; set; }
         public Station? Station { get; set; }
