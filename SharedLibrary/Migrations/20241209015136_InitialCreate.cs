@@ -120,6 +120,26 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Rotator",
+                columns: table => new
+                {
+                    RotatorID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RotatorTitle = table.Column<string>(type: "text", nullable: true),
+                    RotatorArtist = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Length = table.Column<double>(type: "double precision", nullable: false),
+                    Intro = table.Column<short>(type: "smallint", nullable: false),
+                    Segue = table.Column<short>(type: "smallint", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rotator", x => x.RotatorID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -330,7 +350,6 @@ namespace SharedLibrary.Migrations
                 {
                     LogOrderID = table.Column<int>(type: "integer", nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: true),
                     Cue = table.Column<string>(type: "text", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Artist = table.Column<string>(type: "text", nullable: true),
@@ -338,8 +357,8 @@ namespace SharedLibrary.Migrations
                     TimeEstimated = table.Column<TimeOnly>(type: "time", nullable: false),
                     TimePlayed = table.Column<TimeOnly>(type: "time", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    Cart = table.Column<string>(type: "text", nullable: true),
-                    Length = table.Column<string>(type: "text", nullable: true),
+                    RotatorID = table.Column<int>(type: "integer", nullable: true),
+                    Length = table.Column<double>(type: "double precision", nullable: false),
                     Intro = table.Column<short>(type: "smallint", nullable: false),
                     Segue = table.Column<short>(type: "smallint", nullable: false),
                     Category = table.Column<string>(type: "text", nullable: true),
@@ -347,15 +366,19 @@ namespace SharedLibrary.Migrations
                     From = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Passthrough = table.Column<string>(type: "text", nullable: true),
-                    States = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: true),
                     Device = table.Column<int>(type: "integer", nullable: true),
-                    sID = table.Column<int>(type: "integer", nullable: true),
                     Progress = table.Column<double>(type: "double precision", nullable: false),
                     StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Log", x => new { x.Date, x.LogOrderID });
+                    table.ForeignKey(
+                        name: "FK_Log_Rotator_RotatorID",
+                        column: x => x.RotatorID,
+                        principalTable: "Rotator",
+                        principalColumn: "RotatorID");
                     table.ForeignKey(
                         name: "FK_Log_Stations_StationId",
                         column: x => x.StationId,
@@ -457,6 +480,11 @@ namespace SharedLibrary.Migrations
                 column: "StationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Log_RotatorID",
+                table: "Log",
+                column: "RotatorID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Log_StationId",
                 table: "Log",
                 column: "StationId");
@@ -518,6 +546,9 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Rotator");
 
             migrationBuilder.DropTable(
                 name: "Stations");

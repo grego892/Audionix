@@ -77,6 +77,7 @@ namespace Audionix.Components.Pages.LogBuilder
 
             var newDaysLog = new List<ProgramLogItem>();
             int logOrderId = 1;
+            TimeOnly currentTime = new TimeOnly(0, 0); // Start at midnight
 
             foreach (var song in scheduledSongs)
             {
@@ -87,19 +88,26 @@ namespace Audionix.Components.Pages.LogBuilder
                     Artist = song.Artist,
                     Date = DateOnly.FromDateTime(LogBuilderLogDate ?? DateTime.Now),
                     Name = song.Filename,
-                    Length = song.Duration.ToString(),
+                    Length = song.Duration,
                     Intro = song.Intro,
                     Segue = song.Segue,
+                    From = "Music",
                     StationId = AppStateService.station.StationId,
-                    States = StatesType.notPlayed,
-                    AudioType = song.AudioType
+                    Status = StatusType.notPlayed,
+                    TimeScheduled = currentTime,
+                    Cue = "AutoStart",
+                    AudioType = AudioType.song
                 };
 
                 newDaysLog.Add(newLogItem);
+
+                // Add the length of the current song to the current time for the next song
+                currentTime = currentTime.Add(TimeSpan.FromSeconds(song.Duration));
             }
 
             return newDaysLog;
         }
+
         private async Task LoadMusicFromFile()
         {
             await Task.CompletedTask;

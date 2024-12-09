@@ -7,15 +7,15 @@ namespace Audionix.Components.Pages.Studio
     {
         private static Func<ProgramLogItem, int, string> RowStyleFunc => (x, i) =>
         {
-            if (x.States == StatesType.hasPlayed)
+            if (x.Status == StatusType.hasPlayed)
             {
                 return "background: #969696;";
             }
-            else if (x.States == StatesType.isPlaying)
+            else if (x.Status == StatusType.isPlaying)
             {
                 return $"background: linear-gradient(to right, #4caf50 {x.Progress}%, transparent {x.Progress}%);";
             }
-            else if (x.States == StatesType.notPlayed)
+            else if (x.Status == StatusType.notPlayed)
             {
                 return x.AudioType switch
                 {

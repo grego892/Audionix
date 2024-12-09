@@ -142,7 +142,7 @@ namespace AudionixAudioServer.Services
 
                 Log.Information($"--- AudioPlayer.cs -- PlayAudioFileAsync() - Starting audio: {logItem.Title} by {logItem.Artist}");
                 outputDevice.Play();
-                logItem.States = StatesType.isPlaying;
+                logItem.Status = StatusType.isPlaying;
 
                 await NotifyClientsAsync(logItem);
                 await UpdateLogItemStateAsync(logItem);
@@ -181,7 +181,7 @@ namespace AudionixAudioServer.Services
                     }
                 }
 
-                logItem.States = StatesType.hasPlayed;
+                logItem.Status = StatusType.hasPlayed;
                 await NotifyClientsAsync(logItem);
                 await UpdateLogItemStateAsync(logItem);
 

@@ -512,9 +512,6 @@ namespace SharedLibrary.Migrations
                     b.Property<int?>("AudioType")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Cart")
-                        .HasColumnType("text");
-
                     b.Property<string>("Category")
                         .HasColumnType("text");
 
@@ -533,8 +530,8 @@ namespace SharedLibrary.Migrations
                     b.Property<short>("Intro")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("Length")
-                        .HasColumnType("text");
+                    b.Property<double>("Length")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -545,17 +542,17 @@ namespace SharedLibrary.Migrations
                     b.Property<double>("Progress")
                         .HasColumnType("double precision");
 
+                    b.Property<int?>("RotatorID")
+                        .HasColumnType("integer");
+
                     b.Property<short>("Segue")
                         .HasColumnType("smallint");
-
-                    b.Property<int?>("States")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("StationId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<TimeOnly>("TimeEstimated")
                         .HasColumnType("time");
@@ -569,14 +566,50 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.Property<int?>("sID")
-                        .HasColumnType("integer");
-
                     b.HasKey("Date", "LogOrderID");
+
+                    b.HasIndex("RotatorID");
 
                     b.HasIndex("StationId");
 
                     b.ToTable("Log");
+                });
+
+            modelBuilder.Entity("SharedLibrary.Models.Rotator", b =>
+                {
+                    b.Property<int>("RotatorID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RotatorID"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<short>("Intro")
+                        .HasColumnType("smallint");
+
+                    b.Property<double>("Length")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RotatorArtist")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RotatorTitle")
+                        .HasColumnType("text");
+
+                    b.Property<short>("Segue")
+                        .HasColumnType("smallint");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RotatorID");
+
+                    b.ToTable("Rotator");
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.Station", b =>
@@ -719,11 +752,17 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.ProgramLogItem", b =>
                 {
+                    b.HasOne("SharedLibrary.Models.Rotator", "Rotator")
+                        .WithMany()
+                        .HasForeignKey("RotatorID");
+
                     b.HasOne("SharedLibrary.Models.Station", "Station")
                         .WithMany("ProgramLogItems")
                         .HasForeignKey("StationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Rotator");
 
                     b.Navigation("Station");
                 });

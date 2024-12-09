@@ -54,7 +54,7 @@ namespace Audionix.Components.Pages.Studio
                     logItem.Progress = (currentTime / totalTime) * 100;
                     if (currentTime == totalTime)
                     {
-                        logItem.States = StatesType.hasPlayed;
+                        logItem.Status = StatusType.hasPlayed;
                     }
                     var timeDifference = (totalTime - currentTime); // Calculate the difference in milliseconds
                     var timeSpan = TimeSpan.FromMilliseconds(timeDifference);
@@ -74,7 +74,7 @@ namespace Audionix.Components.Pages.Studio
                 var logItem = ProgramLog.FirstOrDefault(item => item.LogOrderID == updatedLogItem.LogOrderID && item.Date == updatedLogItem.Date);
                 if (logItem != null)
                 {
-                    logItem.States = updatedLogItem.States;
+                    logItem.Status = updatedLogItem.Status;
                     logItem.Progress = updatedLogItem.Progress;
                     InvokeAsync(StateHasChanged);
                     InvokeAsync(ScrollToCurrentPlayingItem);
@@ -235,10 +235,9 @@ namespace Audionix.Components.Pages.Studio
                     Progress = 0.0,
                     TimeScheduled = TimeOnly.FromDateTime(DateTime.Now),
                     TimePlayed = TimeOnly.FromDateTime(DateTime.Now),
-                    Status = "ready",
+                    Status = StatusType.notPlayed,
                     StationId = logItem.StationId,
-                    LogOrderID = index,
-                    States = StatesType.notPlayed
+                    LogOrderID = index
                 };
 
                 await ProgramLogRepository.AddProgramLogItemAsync(newLogItem);
