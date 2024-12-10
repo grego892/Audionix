@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Serilog;
 using SharedLibrary.Models;
 using SharedLibrary.Repositories;
+using Microsoft.Extensions.Configuration;
 
 namespace AudionixAudioServer.Services
 {
@@ -15,13 +16,39 @@ namespace AudionixAudioServer.Services
         private readonly AudioPlayer _audioPlayer;
         private HubConnection _hubConnection;
 
-        public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository, IProgramLogRepository programLogRepository)
+        public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository, IProgramLogRepository programLogRepository, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _stationRepository = stationRepository;
             _programLogRepository = programLogRepository;
+
+            var hubUrl = configuration.GetValue<string>("SignalR:HubUrl");
+
+            Log.Debug("--- AudioService -- AudioService() - HubUrl: {HubUrl}", hubUrl);
+
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:5298/progressHub")
+                .WithUrl(hubUrl, options =>
+                {
+                    options.HttpMessageHandlerFactory = (message) =>
+                    {
+                        if (message is HttpClientHandler clientHandler)
+                        {
+                            // Return a handler that will ignore SSL certificate errors for localhost
+                            clientHandler.ServerCertificateCustomValidationCallback +=
+                                (sender, certificate, chain, sslPolicyErrors) =>
+                                {
+                                    if (sender is HttpRequestMessage requestMessage &&
+                                        requestMessage.RequestUri != null &&
+                                        requestMessage.RequestUri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return true;
+                                    }
+                                    return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None;
+                                };
+                        }
+                        return message;
+                    };
+                })
                 .ConfigureLogging(logging =>
                 {
                     logging.SetMinimumLevel(LogLevel.Debug);
@@ -30,11 +57,10 @@ namespace AudionixAudioServer.Services
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
 
-
             _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
             // Register the handler for ReceiveProgress
-            _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderID, logOrderDate, currentTime, totalTime) => {});
+            _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderID, logOrderDate, currentTime, totalTime) => { });
 
             _hubConnection.On<ProgramLogItem>("UpdateLogItemState", (logItem) =>
             {
@@ -80,12 +106,11 @@ namespace AudionixAudioServer.Services
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Failed to connect to the server. Retrying in 5 seconds... Error: {Error}", ex.Message);
+                    Log.Error("--- AudioService -- RetryConnectionAsync() - Failed to connect to the server. Retrying in 5 seconds... Error: {Error}", ex.Message);
                     await Task.Delay(5000);
                 }
             }
         }
-
 
         public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
         {
@@ -99,3 +124,4 @@ namespace AudionixAudioServer.Services
         }
     }
 }
+

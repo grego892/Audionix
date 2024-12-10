@@ -10,6 +10,13 @@ using SharedLibrary.Repositories;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Load configuration
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
+
 // LOGGING
 string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
 var configuration = builder.Configuration;
@@ -25,6 +32,10 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
 builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+
+Log.Information("=== AudionixAudioServer --- Program.cs - builder.Environment.EnvironmentName:  " + builder.Environment.EnvironmentName);
+var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+Log.Information("--- Program.cs - Running version: " + assembly.GetName().Version);
 
 // DATABASE
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
@@ -44,9 +55,6 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AudioService>();
 
 builder.Services.AddHostedService<Worker>();
-
-// Register SignalR
-//builder.Services.AddSignalR();
 
 var host = builder.Build();
 

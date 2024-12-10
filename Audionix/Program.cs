@@ -91,8 +91,8 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddSignalR();
 
     // Add logging configuration for SignalR
-    builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
-    builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+    builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
+    builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
 
     // Add logging configuration for DevelopmentAuthenticationHandler
     builder.Logging.AddFilter("DevelopmentAuthenticationHandler", LogLevel.Information);
@@ -139,15 +139,16 @@ void ConfigureLogger(WebApplicationBuilder builder)
 void ConfigureHost(WebApplicationBuilder builder)
 {
     builder.Host.UseWindowsService();
-    Log.Information("--- Program.cs - builder.Environment.EnvironmentName:  " + builder.Environment.EnvironmentName);
+    Log.Information("=== Audionix --- Program.cs - builder.Environment.EnvironmentName:  " + builder.Environment.EnvironmentName);
     var assembly = System.Reflection.Assembly.GetExecutingAssembly();
     Log.Information("--- Program.cs - Running version: " + assembly.GetName().Version);
 
-    if (!builder.Environment.IsDevelopment())
+    builder.WebHost.UseKestrel(options =>
     {
-        builder.WebHost.UseKestrel(options =>
+        // Listen on port 443 for HTTPS traffic
+        options.ListenAnyIP(443, listenOptions =>
         {
-            options.ConfigureHttpsDefaults(httpsOptions =>
+            listenOptions.UseHttps(httpsOptions =>
             {
                 var certificatePath = Path.Combine(AppContext.BaseDirectory, "certificate.pfx");
                 if (!File.Exists(certificatePath))
@@ -158,7 +159,22 @@ void ConfigureHost(WebApplicationBuilder builder)
                 httpsOptions.ServerCertificate = new X509Certificate2(certificatePath, "Teamone1!");
             });
         });
-    }
+
+        // Listen on port 5001 for SignalR hub
+        options.ListenAnyIP(5001, listenOptions =>
+        {
+            listenOptions.UseHttps(httpsOptions =>
+            {
+                var certificatePath = Path.Combine(AppContext.BaseDirectory, "certificate.pfx");
+                if (!File.Exists(certificatePath))
+                {
+                    Log.Error($"Certificate file not found at path: {certificatePath}");
+                    throw new FileNotFoundException($"Certificate file not found at path: {certificatePath}");
+                }
+                httpsOptions.ServerCertificate = new X509Certificate2(certificatePath, "Teamone1!");
+            });
+        });
+    });
 
     if (!builder.Environment.IsDevelopment())
     {
