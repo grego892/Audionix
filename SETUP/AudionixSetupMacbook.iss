@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Audionix"
-#define MyAppVersion "0.0.4.0"
+#define MyAppVersion "0.0.5.8"
 #define MyAppPublisher "Greg Davis"
 #define MyAppExeName "Audionix.exe"
 
@@ -36,8 +36,8 @@ UpdateUninstallLogAppName=no
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\Users\gregdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net8.0\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\gregdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net8.0\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\gregdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net9.0\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\gregdavis\OneDrive\CODE\CURRENT PROJECTS\Audionix\Audionix\bin\Release\net9.0\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

@@ -30,6 +30,7 @@ namespace Audionix.Components.Pages.Studio
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
+        [Inject] private NavigationManager NavigationManager { get; set; } // Inject NavigationManager
 
         protected override async Task OnInitializedAsync()
         {
@@ -43,7 +44,7 @@ namespace Audionix.Components.Pages.Studio
             }
 
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:5298/progressHub")
+                .WithUrl(NavigationManager.ToAbsoluteUri("/progressHub")) // Use injected NavigationManager
                 .Build();
 
             _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderId, logOrderDate, currentTime, totalTime) =>
@@ -81,8 +82,6 @@ namespace Audionix.Components.Pages.Studio
             });
 
             await _hubConnection.StartAsync();
-
-            //await ScrollToCurrentPlayingItem();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -91,15 +90,7 @@ namespace Audionix.Components.Pages.Studio
             {
                 await ScrollToCurrentPlayingItem();
                 _isFirstRender = false;
-
-                Log.Debug("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
             }
-            //else
-            //{
-            //    await ScrollToCurrentPlayingItem();
-
-            //    Log.Debug("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-            //}
         }
 
         private Dictionary<string, SortDefinition<ProgramLogItem>> initialSorts = new()

@@ -45,9 +45,6 @@ await SeedDataAsync(app);
 // Middleware
 ConfigureMiddleware(app);
 
-// Endpoints
-ConfigureEndpoints(app);
-
 Log.Information("--- Program.cs - Starting app.Run()");
 app.Run();
 
@@ -226,10 +223,8 @@ void ConfigureMiddleware(WebApplication app)
     app.UseAuthentication(); // Add authentication middleware
     app.UseAuthorization(); // Add authorization middleware
     app.UseAntiforgery();
-}
 
-void ConfigureEndpoints(WebApplication app)
-{
+    // Add SignalR middleware
     app.UseEndpoints(endpoints =>
     {
         endpoints.MapRazorComponents<App>().AddInteractiveServerRenderMode();

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Audionix", "Audionix\Audionix.csproj", "{D208359F-A645-46F0-9D3B-E21D61996127}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudionixAudioServer", "AudionixAudioService\AudionixAudioServer.csproj", "{99B74ACE-792B-4FFB-9E71-909E62241E93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudionixAudioServer", "AudionixAudioServer\AudionixAudioServer.csproj", "{99B74ACE-792B-4FFB-9E71-909E62241E93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "SharedLibrary\SharedLibrary.csproj", "{F4884C9A-2B0C-4E8F-9786-CC498B6CB2A2}"
 EndProject

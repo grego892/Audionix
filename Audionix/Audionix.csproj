@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-	<AssemblyVersion>0.0.5.0</AssemblyVersion>
+	<AssemblyVersion>0.0.5.9</AssemblyVersion>
 	<FileVersion>$(AssemblyVersion)</FileVersion>
 	<Version>$(AssemblyVersion)</Version>
     <TargetFramework>net9.0</TargetFramework>
@@ -81,7 +81,7 @@
 
   <ItemGroup>
     <None Update="certificate.pfx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
