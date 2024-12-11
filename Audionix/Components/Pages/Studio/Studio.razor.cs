@@ -44,7 +44,7 @@ namespace Audionix.Components.Pages.Studio
             }
 
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri("/progressHub")) // Use injected NavigationManager
+                .WithUrl(NavigationManager.ToAbsoluteUri("https://localhost:7157/progressHub"))
                 .Build();
 
             _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderId, logOrderDate, currentTime, totalTime) =>

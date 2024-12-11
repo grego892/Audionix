@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Serilog;
 using SharedLibrary.Models;
 using SharedLibrary.Repositories;
+using Microsoft.Extensions.Configuration;
 
 namespace AudionixAudioServer.Services
 {
@@ -15,13 +16,16 @@ namespace AudionixAudioServer.Services
         private readonly AudioPlayer _audioPlayer;
         private HubConnection _hubConnection;
 
-        public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository, IProgramLogRepository programLogRepository)
+        public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository, IProgramLogRepository programLogRepository, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _stationRepository = stationRepository;
             _programLogRepository = programLogRepository;
+
+            var hubUrl = configuration.GetValue<string>("SignalR:HubUrl");
+
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:5298/progressHub")
+                .WithUrl(hubUrl)
                 .ConfigureLogging(logging =>
                 {
                     logging.SetMinimumLevel(LogLevel.Debug);
@@ -30,11 +34,10 @@ namespace AudionixAudioServer.Services
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
 
-
             _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
             // Register the handler for ReceiveProgress
-            _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderID, logOrderDate, currentTime, totalTime) => {});
+            _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderID, logOrderDate, currentTime, totalTime) => { });
 
             _hubConnection.On<ProgramLogItem>("UpdateLogItemState", (logItem) =>
             {
@@ -85,7 +88,6 @@ namespace AudionixAudioServer.Services
                 }
             }
         }
-
 
         public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
         {

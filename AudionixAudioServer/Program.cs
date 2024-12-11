@@ -45,9 +45,6 @@ builder.Services.AddScoped<AudioService>();
 
 builder.Services.AddHostedService<Worker>();
 
-// Register SignalR
-//builder.Services.AddSignalR();
-
 var host = builder.Build();
 
 host.Run();
