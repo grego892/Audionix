@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 using MudBlazor;
 using Serilog;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Configuration;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -32,7 +31,6 @@ namespace Audionix.Components.Pages.Studio
         [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; } // Inject NavigationManager
-        [Inject] private IConfiguration Configuration { get; set; } // Inject IConfiguration
 
         protected override async Task OnInitializedAsync()
         {
@@ -45,33 +43,8 @@ namespace Audionix.Components.Pages.Studio
                 StateHasChanged();
             }
 
-            var hubUrl = Configuration.GetValue<string>("SignalR:HubUrl");
-
-            Log.Debug($"--- Studio - OnInitializedAsync() -- HubUrl: {hubUrl}");
-
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(hubUrl, options =>
-                {
-                    options.HttpMessageHandlerFactory = (message) =>
-                    {
-                        if (message is HttpClientHandler clientHandler)
-                        {
-                            // Return a handler that will ignore SSL certificate errors for localhost
-                            clientHandler.ServerCertificateCustomValidationCallback +=
-                                (sender, certificate, chain, sslPolicyErrors) =>
-                                {
-                                    if (sender is HttpRequestMessage requestMessage &&
-                                        requestMessage.RequestUri != null &&
-                                        requestMessage.RequestUri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        return true;
-                                    }
-                                    return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None;
-                                };
-                        }
-                        return message;
-                    };
-                })
+                .WithUrl(NavigationManager.ToAbsoluteUri("https://localhost:7157/progressHub"))
                 .Build();
 
             _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderId, logOrderDate, currentTime, totalTime) =>
@@ -110,7 +83,6 @@ namespace Audionix.Components.Pages.Studio
 
             await _hubConnection.StartAsync();
         }
-
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
