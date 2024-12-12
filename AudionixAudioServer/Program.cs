@@ -6,44 +6,51 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Settings.Configuration;
 using SharedLibrary.Repositories;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 
+var builder = Host.CreateDefaultBuilder(args)
+    .UseWindowsService() // Add this line to enable Windows Service
+    .ConfigureServices((hostContext, services) =>
+    {
+        // LOGGING
+        string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
+        var configuration = hostContext.Configuration;
+        var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration, options)
+            .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
+            .WriteTo.Console()
+            .CreateLogger();
 
-var builder = Host.CreateApplicationBuilder(args);
+        services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.ClearProviders();
+            loggingBuilder.AddConsole();
+            loggingBuilder.AddDebug();
+            loggingBuilder.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
+            loggingBuilder.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+        });
 
-// LOGGING
-string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
-var configuration = builder.Configuration;
-var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration, options)
-    .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
-    .WriteTo.Console()
-    .CreateLogger();
+        // DATABASE
+        services.AddDbContextFactory<ApplicationDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
-builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Information);
-builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Information);
+        // Register DbContextFactory
+        services.AddScoped<IDbContextFactory, DbContextFactory>();
 
-// DATABASE
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        // Register Repositories
+        services.AddScoped<IStationRepository, StationRepository>();
+        services.AddScoped<IProgramLogRepository, ProgramLogRepository>();
 
-// Register DbContextFactory
-builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
+        // Register Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Register Repositories
-builder.Services.AddScoped<IStationRepository, StationRepository>();
-builder.Services.AddScoped<IProgramLogRepository, ProgramLogRepository>();
+        // Register AudioService
+        services.AddScoped<AudioService>();
 
-// Register Unit of Work
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-// Register AudioService
-builder.Services.AddScoped<AudioService>();
-
-builder.Services.AddHostedService<Worker>();
+        services.AddHostedService<Worker>();
+    });
 
 var host = builder.Build();
 
