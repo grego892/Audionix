@@ -34,6 +34,8 @@ namespace AudionixAudioServer.Services
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
 
+            Log.Information($"--- AudioService -- AudioService() -- HubConnection URL: {hubUrl}");
+
             _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
             // Register the handler for ReceiveProgress

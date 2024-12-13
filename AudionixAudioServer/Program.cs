@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 var builder = Host.CreateDefaultBuilder(args)
-    .UseWindowsService() // Add this line to enable Windows Service
+    .UseWindowsService()
     .ConfigureServices((hostContext, services) =>
     {
         // LOGGING
@@ -22,6 +22,8 @@ var builder = Host.CreateDefaultBuilder(args)
             .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
             .WriteTo.Console()
             .CreateLogger();
+
+        Log.Information("--- Program.cs - builder.Environment.EnvironmentName:  " + hostContext.HostingEnvironment.EnvironmentName);
 
         services.AddLogging(loggingBuilder =>
         {

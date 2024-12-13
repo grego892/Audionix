@@ -30,7 +30,7 @@ namespace Audionix.Components.Pages.Studio
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
-        [Inject] private NavigationManager NavigationManager { get; set; } // Inject NavigationManager
+        [Inject] private NavigationManager NavigationManager { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -43,9 +43,12 @@ namespace Audionix.Components.Pages.Studio
                 StateHasChanged();
             }
 
+            var hubUrl = NavigationManager.ToAbsoluteUri("/progressHub").ToString();
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri("https://localhost:7157/progressHub"))
+                .WithUrl(hubUrl) // Use the captured URL
                 .Build();
+
+            Log.Information($"--- Studio - OnInitializedAsync() -- HubConnection URL: {hubUrl}");
 
             _hubConnection.On<int, DateOnly, double, double>("ReceiveProgress", (logOrderId, logOrderDate, currentTime, totalTime) =>
             {
@@ -81,7 +84,27 @@ namespace Audionix.Components.Pages.Studio
                 }
             });
 
-            await _hubConnection.StartAsync();
+            await StartHubConnectionWithContinuousRetryAsync();
+        }
+
+
+        private async Task StartHubConnectionWithContinuousRetryAsync()
+        {
+            Log.Debug($"--- Studio -- OnInitializedAsync() - Attempting to connect to SignalR hub at {_hubConnection.State.ToString()}");
+            while (true)
+            {
+                try
+                {
+                    await _hubConnection.StartAsync();
+                    Log.Information("Connected to SignalR hub.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"--- Studio -- OnInitializedAsync() - Failed to connect to SignalR hub at {_hubConnection.State.ToString()}. Exception: {ex.Message}");
+                    await Task.Delay(2000); // Wait for 2 seconds before retrying
+                }
+            }
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
