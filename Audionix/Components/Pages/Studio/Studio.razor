@@ -10,6 +10,12 @@
 <MudPaper>
     <MudToolBar Dense="false" >
         <MudPaper Class="mx-auto">
+            <MudStack Row="true" Justify="Justify.FlexEnd" Align="right">
+                <MudText Class="pa-2 ma-2 border-solid border-2">@_currentStationTime.ToString("HH:mm:ss")</MudText>
+            </MudStack>
+        </MudPaper>
+        <MudSpacer />
+        <MudPaper Class="mx-auto">
             <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ScrollToCurrentPlayingItem">Home</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Play Next</MudButton>

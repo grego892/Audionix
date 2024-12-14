@@ -7,6 +7,7 @@ using MudBlazor;
 using Serilog;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using System.Timers;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -18,8 +19,10 @@ namespace Audionix.Components.Pages.Studio
         private AudioMetadata? selectedAudioFile;
         private ProgramLogItem? selectedLogItem;
         private HubConnection? _hubConnection;
-        private string timeDifferenceFormatted;
+        private string timeDifferenceFormatted = string.Empty;
         private bool _isFirstRender = true;
+        private System.Timers.Timer? _timer;
+        private DateTime _currentStationTime;
 
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
@@ -31,8 +34,8 @@ namespace Audionix.Components.Pages.Studio
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
-        [Inject] private NavigationManager NavigationManager { get; set; } // Inject NavigationManager
-        [Inject] private IConfiguration Configuration { get; set; } // Inject IConfiguration
+        [Inject] private NavigationManager? NavigationManager { get; set; }
+        [Inject] private IConfiguration? Configuration { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -46,6 +49,11 @@ namespace Audionix.Components.Pages.Studio
             }
 
             var hubUrl = Configuration.GetValue<string>("SignalR:HubUrl");
+
+            if (hubUrl == null)
+            {
+                throw new ArgumentNullException(nameof(hubUrl), "Hub URL cannot be null");
+            }
 
             Log.Debug($"--- Studio - OnInitializedAsync() -- HubUrl: {hubUrl}");
 
@@ -109,8 +117,12 @@ namespace Audionix.Components.Pages.Studio
             });
 
             await _hubConnection.StartAsync();
-        }
 
+            _currentStationTime = DateTime.Now;
+            _timer = new System.Timers.Timer(1000); // Set the timer interval to 1 second (1000 ms)
+            _timer.Elapsed += UpdateClock;
+            _timer.Start();
+        }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -271,6 +283,11 @@ namespace Audionix.Components.Pages.Studio
             }
         }
 
+        public Task InsertSelectedLogItem(ProgramLogItem logItem)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task MakeNextSelectedLogItem(int logOrderID, DateOnly date)
         {
             if (AppStateService?.station != null && StationRepository != null)
@@ -278,11 +295,6 @@ namespace Audionix.Components.Pages.Studio
                 await StationRepository.UpdateStationNextPlayAsync(AppStateService.station.StationId, logOrderID, date);
             }
             _openMakenextDrawer = false;
-        }
-
-        public async Task InsertSelectedLogItem(ProgramLogItem logItem)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)
@@ -298,9 +310,17 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task ScrollToCurrentPlayingItem()
         {
-            //if (_isFirstRender) return;
+            if (AppStateService?.station == null || StationRepository == null)
+            {
+                return;
+            }
 
             Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
+
+            if (station == null)
+            {
+                return;
+            }
 
             // Order the ProgramLog by Date and LogOrderID
             var orderedProgramLog = ProgramLog
@@ -329,6 +349,12 @@ namespace Audionix.Components.Pages.Studio
             return Regex.Replace(formatted, @"^0+(:0+)*", "").TrimStart(':');
         }
 
+        private void UpdateClock(object? sender, ElapsedEventArgs e)
+        {
+            _currentStationTime = DateTime.Now;
+            InvokeAsync(StateHasChanged); // Request UI update
+        }
+
         public void Dispose()
         {
             if (AppStateService != null)
@@ -340,6 +366,12 @@ namespace Audionix.Components.Pages.Studio
             {
                 _hubConnection.StopAsync().GetAwaiter().GetResult();
                 _hubConnection.DisposeAsync().GetAwaiter().GetResult();
+            }
+
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer.Dispose();
             }
         }
     }
