@@ -16,6 +16,7 @@ using Audionix.DataAccess;
 using Microsoft.AspNetCore.Authentication;
 using Audionix.Hubs;
 using SharedLibrary.Data;
+using Audionix.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -239,6 +240,12 @@ void ConfigureMiddleware(WebApplication app)
     app.UseAuthentication(); // Add authentication middleware
     app.UseAuthorization(); // Add authorization middleware
     app.UseAntiforgery();
+
+    // Add the localhost restriction middleware for the registration page
+    app.UseWhen(context => context.Request.Path.StartsWithSegments("/Account/Register"), appBuilder =>
+    {
+        appBuilder.UseMiddleware<LocalhostRestrictionMiddleware>();
+    });
 
     // Add SignalR middleware
     app.UseEndpoints(endpoints =>
