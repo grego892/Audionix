@@ -24,8 +24,31 @@ namespace AudionixAudioServer.Services
 
             var hubUrl = configuration.GetValue<string>("SignalR:HubUrl");
 
+            Log.Debug("--- AudioService -- AudioService() - HubUrl: {HubUrl}", hubUrl);
+
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(hubUrl)
+                .WithUrl(hubUrl, options =>
+                {
+                    options.HttpMessageHandlerFactory = (message) =>
+                    {
+                        if (message is HttpClientHandler clientHandler)
+                        {
+                            // Return a handler that will ignore SSL certificate errors for localhost
+                            clientHandler.ServerCertificateCustomValidationCallback +=
+                                (sender, certificate, chain, sslPolicyErrors) =>
+                                {
+                                    if (sender is HttpRequestMessage requestMessage &&
+                                        requestMessage.RequestUri != null &&
+                                        requestMessage.RequestUri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return true;
+                                    }
+                                    return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None;
+                                };
+                        }
+                        return message;
+                    };
+                })
                 .ConfigureLogging(logging =>
                 {
                     logging.SetMinimumLevel(LogLevel.Debug);
@@ -33,8 +56,6 @@ namespace AudionixAudioServer.Services
                 })
                 .WithAutomaticReconnect() // Enable automatic reconnection
                 .Build();
-
-            Log.Information($"--- AudioService -- AudioService() -- HubConnection URL: {hubUrl}");
 
             _audioPlayer = new AudioPlayer(_unitOfWork, _stationRepository, _hubConnection, _programLogRepository);
 
@@ -85,7 +106,7 @@ namespace AudionixAudioServer.Services
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Failed to connect to the server. Retrying in 5 seconds... Error: {Error}", ex.Message);
+                    Log.Error("--- AudioService -- RetryConnectionAsync() - Failed to connect to the server. Retrying in 5 seconds... Error: {Error}", ex.Message);
                     await Task.Delay(5000);
                 }
             }
@@ -103,3 +124,4 @@ namespace AudionixAudioServer.Services
         }
     }
 }
+

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 var builder = Host.CreateDefaultBuilder(args)
-    .UseWindowsService() // Add this line to enable Windows Service
+    .UseWindowsService()
     .ConfigureServices((hostContext, services) =>
     {
         // LOGGING
