@@ -46,7 +46,7 @@ namespace AudionixAudioServer.Services
 
                     ProgramLogItem logItem = await GetLogItemAsync(stationId, station, stoppingToken);
 
-                    Log.Debug($"======================= AudioPlayer.cs -- PlayAudioAsync() - logItem: {logItem.LogOrderID} - {logItem.Date} - {logItem.Title} - {logItem.Artist}");
+                    Log.Debug($"=== AudioPlayer.cs -- PlayAudioAsync() - logItem: {logItem.LogOrderID} - {logItem.Date} - {logItem.Title} - {logItem.Artist}");
 
                     if (logItem == null) continue;
 
