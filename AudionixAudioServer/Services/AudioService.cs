@@ -18,11 +18,15 @@ namespace AudionixAudioServer.Services
 
         public AudioService(IUnitOfWork unitOfWork, IStationRepository stationRepository, IProgramLogRepository programLogRepository, IConfiguration configuration)
         {
-            _unitOfWork = unitOfWork;
-            _stationRepository = stationRepository;
-            _programLogRepository = programLogRepository;
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _stationRepository = stationRepository ?? throw new ArgumentNullException(nameof(stationRepository));
+            _programLogRepository = programLogRepository ?? throw new ArgumentNullException(nameof(programLogRepository));
 
             var hubUrl = configuration.GetValue<string>("SignalR:HubUrl");
+            if (string.IsNullOrEmpty(hubUrl))
+            {
+                throw new ArgumentException("SignalR HubUrl is not configured.");
+            }
 
             Log.Debug("--- AudioService -- AudioService() - HubUrl: {HubUrl}", hubUrl);
 
@@ -83,7 +87,7 @@ namespace AudionixAudioServer.Services
             _hubConnection.Closed += async error =>
             {
                 Log.Error("Connection closed. Trying to restart the connection...");
-                _ = RetryConnectionAsync();
+                await RetryConnectionAsync();
             };
 
             _hubConnection.On<Guid>("PlayNextAudio", async (stationId) =>
@@ -114,14 +118,23 @@ namespace AudionixAudioServer.Services
 
         public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
         {
+            if (stationId == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid station ID.");
+            }
+
             return _audioPlayer.PlayAudioAsync(stationId, stoppingToken);
         }
 
         public async Task PlayNextAudioAsync(Guid stationId)
         {
+            if (stationId == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid station ID.");
+            }
+
             _audioPlayer.TriggerPlayNext();
             Log.Information($"--- AudioService -- PlayNextAudioAsync() - Playing next audio for station: {stationId}");
         }
     }
 }
-
