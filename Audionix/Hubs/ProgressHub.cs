@@ -26,5 +26,19 @@ namespace Audionix.Hubs
         {
             await Clients.All.SendAsync("UpdateLogItemState", logItem);
         }
+        public async Task SendOffer(string offer)
+        {
+            await Clients.All.SendAsync("ReceiveOffer", offer);
+        }
+
+        public async Task SendAnswer(string answer)
+        {
+            await Clients.All.SendAsync("ReceiveAnswer", answer);
+        }
+
+        public async Task SendIceCandidate(string candidate)
+        {
+            await Clients.All.SendAsync("ReceiveIceCandidate", candidate);
+        }
     }
 }
