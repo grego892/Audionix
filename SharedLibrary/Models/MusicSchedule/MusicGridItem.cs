@@ -3,7 +3,7 @@
     public class MusicGridItem
     {
         public int Id { get; set; }
-        public string Hour { get; set; }
+        public string? Hour { get; set; }
         public string Sunday { get; set; } = string.Empty;
         public string Monday { get; set; } = string.Empty;
         public string Tuesday { get; set; } = string.Empty;

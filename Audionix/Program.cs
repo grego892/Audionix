@@ -11,11 +11,9 @@ using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
-using DataAccess.UnitOfWork;
 using Audionix.DataAccess;
 using Microsoft.AspNetCore.Authentication;
 using Audionix.Hubs;
-using SharedLibrary.Data;
 using Audionix.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);

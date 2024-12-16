@@ -1,11 +1,9 @@
-﻿using Audionix.DataAccess;
-using SharedLibrary.Models;
+﻿using SharedLibrary.Models;
 using Audionix.Repositories;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Data;
 
-
-namespace DataAccess.UnitOfWork
+namespace Audionix.DataAccess
 {
     public class UnitOfWork : IUnitOfWork
     {
@@ -22,7 +20,8 @@ namespace DataAccess.UnitOfWork
         {
             return await _context.SaveChangesAsync();
         }
-        public async Task<AppSettings> GetAppSettingsDataPathAsync()
+
+        public async Task<AppSettings?> GetAppSettingsDataPathAsync()
         {
             return await _context.AppSettings.FirstOrDefaultAsync();
         }

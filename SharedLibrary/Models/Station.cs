@@ -9,7 +9,7 @@ namespace SharedLibrary.Models
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
         public Guid AudioDeviceId { get; set; } // Foreign key property
-        public AudioDevice AudioDevice { get; set; } // Navigation property
+        public AudioDevice AudioDevice { get; set; } = new AudioDevice(); // Initialize non-nullable property
         public int CurrentPlayingId { get; set; } = 1;
         [Column(TypeName = "date")]
         public DateOnly? CurrentPlayingDate { get; set; }
@@ -33,6 +33,7 @@ namespace SharedLibrary.Models
                 CallLetters = this.CallLetters,
                 Slogan = this.Slogan,
                 AudioDeviceId = this.AudioDeviceId,
+                AudioDevice = this.AudioDevice, // Copy the AudioDevice property
                 AudioFiles = this.AudioFiles?.Select(af => new AudioMetadata
                 {
                     StationId = af.StationId,

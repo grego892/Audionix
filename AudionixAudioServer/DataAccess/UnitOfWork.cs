@@ -3,7 +3,6 @@ using SharedLibrary.Models;
 using AudionixAudioServer.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace AudionixAudioServer.DataAccess
 {
     public class UnitOfWork : IUnitOfWork
@@ -21,10 +20,12 @@ namespace AudionixAudioServer.DataAccess
         {
             return await _context.SaveChangesAsync();
         }
-        public async Task<AppSettings> GetAppSettingsDataPathAsync()
+
+        public async Task<AppSettings?> GetAppSettingsDataPathAsync()
         {
             return await _context.AppSettings.FirstOrDefaultAsync();
         }
+
         public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
         {
             return await Stations.GetAudioFileByFilenameAsync(filename);

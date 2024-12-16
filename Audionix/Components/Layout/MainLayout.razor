@@ -28,6 +28,7 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
         <MudSpacer />
+        <MudButton Class="ma-2" Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
         <MudNavLink Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
             @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
         </MudNavLink>
@@ -45,6 +46,7 @@
     private string userName = "";
     private Color buttonColor = Color.Error;
     private bool isLoginPage = false;
+    private bool streamStatus = false;
     [Inject] private NavigationManager? NavigationManager { get; set; }
     [Inject] private IDialogService? DialogService { get; set; }
     [CascadingParameter]
@@ -131,6 +133,11 @@
             (MarkupString) $"Version: {GetVersion()} <br /> Developed by: Greg Davis <br /> djgrego@djgrego.com");
         string? state = result == null ? "Canceled" : "Deleted!";
         StateHasChanged();
+    }
+
+    private void ToggleStreamStatus()
+    {
+        streamStatus = !streamStatus;
     }
     string GetVersion()
     {

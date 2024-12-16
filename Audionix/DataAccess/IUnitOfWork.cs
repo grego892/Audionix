@@ -1,13 +1,9 @@
-﻿using SharedLibrary.Models;
-using Audionix.Repositories;
+﻿using Audionix.Repositories;
+using SharedLibrary.Models;
 
-
-namespace Audionix.DataAccess
+public interface IUnitOfWork : IDisposable
 {
-    public interface IUnitOfWork : IDisposable
-    {
-        IStationRepository Stations { get; }
-        Task<int> CompleteAsync();
-        Task<AppSettings> GetAppSettingsDataPathAsync();
-    }
+    IStationRepository Stations { get; }
+    Task<int> CompleteAsync();
+    Task<AppSettings?> GetAppSettingsDataPathAsync();
 }

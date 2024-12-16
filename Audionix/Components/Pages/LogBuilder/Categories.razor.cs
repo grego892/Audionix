@@ -11,8 +11,8 @@ namespace Audionix.Components.Pages.LogBuilder
         private List<Category> categories = new();
         private List<Category> filteredCategories = new();
         private string? newCategoryName;
-        [Inject] private IStationRepository StationRepository { get; set; }
-        [Inject] private ICategoryRepository CategoryRepository { get; set; }
+        [Inject] private IStationRepository? StationRepository { get; set; }
+        [Inject] private ICategoryRepository? CategoryRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
