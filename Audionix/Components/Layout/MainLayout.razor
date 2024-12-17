@@ -1,13 +1,13 @@
-﻿@using SharedLibrary.Data
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@using SharedLibrary.Data
 @using Audionix
 @using Audionix.Services
 @using Serilog
-@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IJSRuntime JSRuntime
+
 
 <MudThemeProvider @ref="@_mudThemeProvider" Theme="AudionixTheme" @bind-IsDarkMode="@_isDarkMode" />
 <MudSnackbarProvider />
@@ -48,8 +48,11 @@
     private Color buttonColor = Color.Error;
     private bool isLoginPage = false;
     private bool streamStatus = false;
+    private HubConnection? hubConnection;
+
     [Inject] private NavigationManager? NavigationManager { get; set; }
     [Inject] private IDialogService? DialogService { get; set; }
+    [Inject] private IJSRuntime JS { get; set; }
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
@@ -58,6 +61,40 @@
         Log.Information("--- MainLayout -- OnInitializedAsync() - Method Starting");
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdateAuthenticationState();
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/progressHub"))
+            .Build();
+
+        hubConnection.On<string>("ReceiveOffer", async (offer) =>
+        {
+            await JS.InvokeVoidAsync("handleOffer", offer);
+        });
+
+        hubConnection.On<string>("ReceiveAnswer", async (answer) =>
+        {
+            await JS.InvokeVoidAsync("handleAnswer", answer);
+        });
+
+        hubConnection.On<string>("ReceiveIceCandidate", async (candidate) =>
+        {
+            await JS.InvokeVoidAsync("handleIceCandidate", candidate);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task ToggleStreamStatus()
+    {
+        streamStatus = !streamStatus;
+        if (streamStatus)
+        {
+            await JS.InvokeVoidAsync("startStreaming");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("stopStreaming");
+        }
     }
 
     private async Task ToggleLoginLogout()
@@ -68,10 +105,9 @@
         Log.Debug("--- MainLayout -- isAuthenticated: " + isAuthenticated);
         if (isAuthenticated)
         {
-            Log.Debug("--- MainLayout -- " + userName + "IS LOGGING OUT.");
-            // await SignInManager.SignOutAsync();
+            Log.Debug("--- MainLayout -- " + userName + " IS LOGGING OUT.");
             NavigationManager?.NavigateTo("/Account/LoggingOut", true);
-            Log.Debug("--- MainLayout -- " + userName + "IS LOGGED OUT.");
+            Log.Debug("--- MainLayout -- " + userName + " IS LOGGED OUT.");
             NavigationManager?.NavigateTo("/Account/LoggedOut", true);
         }
         else
@@ -135,19 +171,10 @@
         StateHasChanged();
     }
 
-    private async void ToggleStreamStatus()
+    private void ToggleStreamStatus()
     {
         streamStatus = !streamStatus;
-        if (streamStatus)
-        {
-            await JSRuntime.InvokeVoidAsync("playAudio");
-        }
-        else
-        {
-            await JSRuntime.InvokeVoidAsync("pauseAudio");
-        }
     }
-
     string GetVersion()
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
