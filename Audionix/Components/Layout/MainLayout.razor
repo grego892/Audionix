@@ -27,7 +27,8 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
         <MudSpacer />
-        <MudButton Class="ma-2" Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
+        <audio id="audioPlayer" src="https://audionix.djgrego.com:8443/stream" controls controlslist="play stop volume" ></audio>
+@*         <MudButton Class="ma-2" Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton> *@
         <MudNavLink Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
             @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
         </MudNavLink>
@@ -37,7 +38,7 @@
     </MudMainContent>
 </MudLayout>
 
-<audio id="audioPlayer" src="https://audionix.djgrego.com:8443/stream"></audio>
+
 
 @code {
     bool _drawerOpen = true;
@@ -152,5 +153,15 @@
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version;
         return version.ToString();
+    }
+
+    private class AudioStatus
+    {
+        public double CurrentTime { get; set; }
+        public double Duration { get; set; }
+        public bool Paused { get; set; }
+        public double Volume { get; set; }
+        public bool Muted { get; set; }
+        public bool Ended { get; set; }
     }
 }
