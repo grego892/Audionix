@@ -7,13 +7,12 @@
 @using Microsoft.AspNetCore.Identity
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<ApplicationUser> SignInManager
-
+@inject IJSRuntime JSRuntime
 
 <MudThemeProvider @ref="@_mudThemeProvider" Theme="AudionixTheme" @bind-IsDarkMode="@_isDarkMode" />
 <MudSnackbarProvider />
 <MudDialogProvider />
 <MudPopoverProvider />
-
 
 <MudLayout>
     <MudAppBar>
@@ -38,8 +37,9 @@
     </MudMainContent>
 </MudLayout>
 
+<audio id="audioPlayer" src="https://audionix.djgrego.com:8443/stream"></audio>
+
 @code {
-    // Removed unused field 'loginLogoutText'
     bool _drawerOpen = true;
     private MudThemeProvider? _mudThemeProvider;
     private bool _isDarkMode = true;
@@ -83,7 +83,6 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var isAuthenticated = authState.User?.Identity?.IsAuthenticated ?? false;
-        // Use null-coalescing operator to provide a default value
         userName = isAuthenticated ? authState.User?.Identity?.Name ?? "" : "";
         buttonColor = isAuthenticated ? Color.Primary : Color.Error;
         isLoginPage = HttpContext?.Request.Path.StartsWithSegments("/Account") ?? false;
@@ -94,7 +93,7 @@
         await InvokeAsync(async () =>
         {
             await UpdateAuthenticationState();
-            StateHasChanged(); // Notify Blazor that the state has changed and a re-render is necessary
+            StateHasChanged();
         });
     }
 
@@ -123,22 +122,31 @@
             LayoutProperties = new LayoutProperties()
             {
                 DrawerWidthLeft = "180px",
-                //DrawerWidthRight = "500px"
             }
         };
+
     private async Task ShowAboutSnackbar()
     {
         bool? result = await DialogService.ShowMessageBox(
             "Audionix",
-            (MarkupString) $"Version: {GetVersion()} <br /> Developed by: Greg Davis <br /> djgrego@djgrego.com");
+            (MarkupString)$"Version: {GetVersion()} <br /> Developed by: Greg Davis <br /> djgrego@djgrego.com");
         string? state = result == null ? "Canceled" : "Deleted!";
         StateHasChanged();
     }
 
-    private void ToggleStreamStatus()
+    private async void ToggleStreamStatus()
     {
         streamStatus = !streamStatus;
+        if (streamStatus)
+        {
+            await JSRuntime.InvokeVoidAsync("playAudio");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("pauseAudio");
+        }
     }
+
     string GetVersion()
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
