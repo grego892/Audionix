@@ -11,3 +11,10 @@ window.pauseAudio = () => {
         audioPlayer.pause();
     }
 };
+
+window.setVolume = (volume) => {
+    const audioPlayer = document.getElementById('audioPlayer');
+    if (audioPlayer) {
+        audioPlayer.volume = volume;
+    }
+};

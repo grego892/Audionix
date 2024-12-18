@@ -16,7 +16,7 @@
 
 <MudLayout>
     <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
         <MudImage Src="Images/NavbarLogo.svg" Width="200" Height="60" />
         <MudSpacer />
         <MudSpacer />
@@ -27,7 +27,10 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
         <MudSpacer />
-        <MudButton Class="ma-2" Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
+        <MudField class="pa-2" Label="Streaming" Variant="Variant.Outlined">
+            <MudSlider Value="@streamVolume" T="double" Min="0" Max="1" Step="0.05" ValueChanged="@(async (value) => await SetStreamVolume(value))">Volume</MudSlider>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
+        </MudField>
         <MudNavLink Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
             @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
         </MudNavLink>
@@ -47,6 +50,7 @@
     private Color buttonColor = Color.Error;
     private bool isLoginPage = false;
     private bool streamStatus = false;
+    private double streamVolume = 0.5;
     [Inject] private NavigationManager? NavigationManager { get; set; }
     [Inject] private IDialogService? DialogService { get; set; }
     [CascadingParameter]
@@ -145,6 +149,12 @@
         {
             await JSRuntime.InvokeVoidAsync("pauseAudio");
         }
+    }
+
+    private async Task SetStreamVolume(double volume)
+    {
+        streamVolume = volume;
+        await JSRuntime.InvokeVoidAsync("setVolume", volume);
     }
 
     string GetVersion()
