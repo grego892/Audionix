@@ -1,8 +1,13 @@
-﻿window.initializeAudioPlayer = (dotNetHelper) => {
+﻿let reconnectAttempts = 0;
+const maxReconnectAttempts = 5;
+const reconnectInterval = 5000; // 5 seconds
+
+window.initializeAudioPlayer = (dotNetHelper) => {
     const audioPlayer = document.getElementById('audioPlayer');
     if (audioPlayer) {
         audioPlayer.addEventListener('playing', () => {
             dotNetHelper.invokeMethodAsync('UpdateStreamStatus', 'Playing');
+            reconnectAttempts = 0; // Reset reconnect attempts on successful play
         });
 
         audioPlayer.addEventListener('pause', () => {
@@ -15,10 +20,12 @@
 
         audioPlayer.addEventListener('error', () => {
             dotNetHelper.invokeMethodAsync('UpdateStreamStatus', 'Error');
+            attemptReconnect();
         });
 
         audioPlayer.addEventListener('ended', () => {
             dotNetHelper.invokeMethodAsync('UpdateStreamStatus', 'Stopped');
+            attemptReconnect();
         });
     }
 };
@@ -26,6 +33,7 @@
 window.playAudio = () => {
     const audioPlayer = document.getElementById('audioPlayer');
     if (audioPlayer) {
+        audioPlayer.preload = 'auto';
         audioPlayer.load();
         audioPlayer.play();
     }
@@ -34,7 +42,7 @@ window.playAudio = () => {
 window.pauseAudio = () => {
     const audioPlayer = document.getElementById('audioPlayer');
     if (audioPlayer) {
-        audioPlayer.stop();
+        audioPlayer.pause();
     }
 };
 
@@ -44,3 +52,15 @@ window.setVolume = (volume) => {
         audioPlayer.volume = volume;
     }
 };
+
+function attemptReconnect() {
+    if (reconnectAttempts < maxReconnectAttempts) {
+        reconnectAttempts++;
+        setTimeout(() => {
+            console.log(`Reconnect attempt ${reconnectAttempts}`);
+            playAudio();
+        }, reconnectInterval);
+    } else {
+        console.log('Max reconnect attempts reached');
+    }
+}

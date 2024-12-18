@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-	<AssemblyVersion>0.0.5.26</AssemblyVersion>
+	<AssemblyVersion>0.0.6.00</AssemblyVersion>
 	<FileVersion>$(AssemblyVersion)</FileVersion>
 	<Version>$(AssemblyVersion)</Version>
     <TargetFramework>net9.0</TargetFramework>
