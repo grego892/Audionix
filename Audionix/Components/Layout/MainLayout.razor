@@ -27,11 +27,16 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
         <MudSpacer />
-        <MudField class="pa-2" Label="Streaming" Variant="Variant.Outlined">
-            <MudSlider Value="@streamVolume" T="double" Min="0" Max="1" Step="0.05" ValueChanged="@(async (value) => await SetStreamVolume(value))">Volume</MudSlider>
-            <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
-        </MudField>
-        <MudNavLink Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
+        <MudPaper Class="ma-1" Elevation="3">
+            <MudField Label="Monitor Stream" Variant="Variant.Outlined">
+                <MudSlider Value="@streamVolume" T="double" Min="0" Max="1" Step="0.05" ValueChanged="@(async (value) => await SetStreamVolume(value))" />
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
+                <MudField Class="pt-1" Label="Stream Status" Variant="Variant.Outlined" InnerPadding="false">
+                    @streamStatusText
+                </MudField>
+            </MudField>
+        </MudPaper>
+        <MudNavLink Class="pa-2" Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
             @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
         </MudNavLink>
     </MudDrawer>
@@ -51,6 +56,7 @@
     private bool isLoginPage = false;
     private bool streamStatus = false;
     private double streamVolume = 0.5;
+    private string streamStatusText = "Stopped";
     [Inject] private NavigationManager? NavigationManager { get; set; }
     [Inject] private IDialogService? DialogService { get; set; }
     [CascadingParameter]
@@ -61,6 +67,14 @@
         Log.Information("--- MainLayout -- OnInitializedAsync() - Method Starting");
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdateAuthenticationState();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initializeAudioPlayer", DotNetObjectReference.Create(this));
+        }
     }
 
     private async Task ToggleLoginLogout()
@@ -155,6 +169,13 @@
     {
         streamVolume = volume;
         await JSRuntime.InvokeVoidAsync("setVolume", volume);
+    }
+
+    [JSInvokable]
+    public void UpdateStreamStatus(string status)
+    {
+        streamStatusText = status;
+        StateHasChanged();
     }
 
     string GetVersion()

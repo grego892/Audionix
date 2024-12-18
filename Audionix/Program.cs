@@ -111,7 +111,10 @@ void ConfigureAuthentication(WebApplicationBuilder builder)
             options.DefaultScheme = IdentityConstants.ApplicationScheme;
             options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
         })
-        .AddIdentityCookies();
+        .AddCookie(IdentityConstants.ApplicationScheme)
+        .AddCookie(IdentityConstants.ExternalScheme)
+        .AddCookie(IdentityConstants.TwoFactorRememberMeScheme)
+        .AddCookie(IdentityConstants.TwoFactorUserIdScheme);
     }
 }
 
