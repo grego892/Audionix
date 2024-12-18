@@ -7,7 +7,7 @@ window.initializeAudioPlayer = (dotNetHelper) => {
     if (audioPlayer) {
         audioPlayer.addEventListener('playing', () => {
             dotNetHelper.invokeMethodAsync('UpdateStreamStatus', 'Playing');
-            reconnectAttempts = 0; // Reset reconnect attempts on successful play
+            reconnectAttempts = 0;
         });
 
         audioPlayer.addEventListener('pause', () => {

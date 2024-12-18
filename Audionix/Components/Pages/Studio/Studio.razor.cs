@@ -119,9 +119,11 @@ namespace Audionix.Components.Pages.Studio
             await _hubConnection.StartAsync();
 
             _currentStationTime = DateTime.Now;
-            _timer = new System.Timers.Timer(1000); // Set the timer interval to 1 second (1000 ms)
+            _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += UpdateClock;
             _timer.Start();
+
+            await ScrollToCurrentPlayingItem();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

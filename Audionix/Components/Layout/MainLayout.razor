@@ -7,7 +7,7 @@
 @using Microsoft.AspNetCore.Identity
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IJSRuntime JSRuntime
+
 
 <MudThemeProvider @ref="@_mudThemeProvider" Theme="AudionixTheme" @bind-IsDarkMode="@_isDarkMode" />
 <MudSnackbarProvider />
@@ -27,15 +27,6 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
         <MudSpacer />
-        <MudPaper Class="ma-1" Elevation="3">
-            <MudField Label="Monitor Stream" Variant="Variant.Outlined">
-                <MudSlider Value="@streamVolume" T="double" Min="0" Max="1" Step="0.05" ValueChanged="@(async (value) => await SetStreamVolume(value))" />
-                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
-                <MudField Class="pt-1" Label="Stream Status" Variant="Variant.Outlined" InnerPadding="false">
-                    @streamStatusText
-                </MudField>
-            </MudField>
-        </MudPaper>
         <MudNavLink Class="pa-2" Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
             @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
         </MudNavLink>

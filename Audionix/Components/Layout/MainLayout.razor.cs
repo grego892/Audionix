@@ -22,6 +22,7 @@ namespace Audionix.Components.Layout
         private string streamStatusText = "Stopped";
         [Inject] private NavigationManager? NavigationManager { get; set; }
         [Inject] private IDialogService? DialogService { get; set; }
+        [Inject] private IJSRuntime? JSRuntime { get; set; }
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
 
