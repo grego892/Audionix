@@ -25,11 +25,12 @@
         <MudIconButton Class="ml-n2" Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" OnClick="ShowAboutSnackbar" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-        <MudSpacer />
-        <MudNavLink Class="pa-2" Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
-            @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
-        </MudNavLink>
+    <NavMenu />
+    <MudSpacer />
+    <StreamMonitor />
+    <MudNavLink Class="pa-2" Disabled="@isLoginPage" OnClick="@(async () => await ToggleLoginLogout())" Icon="@Icons.Material.Filled.AccountCircle">
+        @(string.IsNullOrEmpty(userName) ? "Login" : "Logoff")
+    </MudNavLink>
     </MudDrawer>
     <MudMainContent>
         @Body

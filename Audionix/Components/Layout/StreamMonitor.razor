@@ -1,0 +1,39 @@
+﻿@inject IJSRuntime JSRuntime
+
+
+<AuthorizeView>
+    <MudPaper Class="ma-1" Elevation="3">
+        <MudField Label="Monitor Stream" Variant="Variant.Outlined">
+            <MudSlider Value="@streamVolume" T="double" Min="0" Max="1" Step="0.05" ValueChanged="@(async (value) => await SetStreamVolume(value))" />
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
+            <MudField Class="pt-1" Label="Stream Status" Variant="Variant.Outlined" InnerPadding="false">
+                @streamStatusText
+            </MudField>
+        </MudField>
+    </MudPaper>
+</AuthorizeView>
+
+@code {
+    private double streamVolume = 0.5;
+    private bool streamStatus = false;
+    private string streamStatusText = "Stopped";
+
+    private async Task SetStreamVolume(double value)
+    {
+        streamVolume = value;
+        await JSRuntime.InvokeVoidAsync("setVolume", value);
+    }
+    private async Task ToggleStreamStatus()
+    {
+        streamStatus = !streamStatus;
+        streamStatusText = streamStatus ? "Playing" : "Stopped";
+        if (streamStatus)
+        {
+            await JSRuntime.InvokeVoidAsync("playAudio");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("pauseAudio");
+        }
+    }
+}

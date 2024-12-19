@@ -10,7 +10,7 @@
 @inject NavigationManager NavigationManager
 @inject AppStateService AppStateService
 @inject IStationRepository StationRepository
-@inject IJSRuntime JSRuntime
+
 
 <AuthorizeView>
     <MudNavMenu>
@@ -38,25 +38,13 @@
         {
             <MudNavLink Href="/setup" Icon="@Icons.Material.Filled.Settings">Initial Setup</MudNavLink>
         }
-        <MudSpacer />
-        <MudPaper Class="ma-1" Elevation="3">
-            <MudField Label="Monitor Stream" Variant="Variant.Outlined">
-                <MudSlider Value="@streamVolume" T="double" Min="0" Max="1" Step="0.05" ValueChanged="@(async (value) => await SetStreamVolume(value))" />
-                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleStreamStatus">@(streamStatus ? "Stop Stream" : "Start Stream")</MudButton>
-                <MudField Class="pt-1" Label="Stream Status" Variant="Variant.Outlined" InnerPadding="false">
-                    @streamStatusText
-                </MudField>
-            </MudField>
-        </MudPaper>
     </MudNavMenu>
 </AuthorizeView>
 
 
 @code {
     private List<Station> stations = new();
-    private bool streamStatus;
-    private double streamVolume;
-    private string streamStatusText = "Stopped";
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,26 +72,6 @@
     private void HandleAppSettingsChanged(object? sender, EventArgs e)
     {
         InvokeAsync(StateHasChanged);
-    }
-
-    private async Task SetStreamVolume(double value)
-    {
-        streamVolume = value;
-        await JSRuntime.InvokeVoidAsync("setVolume", value);
-    }
-
-    private async Task ToggleStreamStatus()
-    {
-        streamStatus = !streamStatus;
-        streamStatusText = streamStatus ? "Playing" : "Stopped";
-        if (streamStatus)
-        {
-            await JSRuntime.InvokeVoidAsync("playAudio");
-        }
-        else
-        {
-            await JSRuntime.InvokeVoidAsync("pauseAudio");
-        }
     }
 
     public void Dispose()
