@@ -8,6 +8,7 @@ using Serilog;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using System.Timers;
+using System.Threading;
 
 namespace Audionix.Components.Pages.Studio
 {
@@ -23,6 +24,9 @@ namespace Audionix.Components.Pages.Studio
         private bool _isFirstRender = true;
         private System.Timers.Timer? _timer;
         private DateTime _currentStationTime;
+        private bool _isRendered = false;
+        private bool _isDisposed = false;
+        private CancellationTokenSource _cancellationTokenSource = new();
 
         public List<ProgramLogItem> ProgramLog = new();
         public IEnumerable<AudioMetadata> AudioFiles = new List<AudioMetadata>();
@@ -48,7 +52,7 @@ namespace Audionix.Components.Pages.Studio
                 StateHasChanged();
             }
 
-            var hubUrl = Configuration.GetValue<string>("SignalR:HubUrl");
+            var hubUrl = Configuration?.GetValue<string>("SignalR:HubUrl");
 
             if (hubUrl == null)
             {
@@ -122,8 +126,6 @@ namespace Audionix.Components.Pages.Studio
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += UpdateClock;
             _timer.Start();
-
-            await ScrollToCurrentPlayingItem();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -132,6 +134,12 @@ namespace Audionix.Components.Pages.Studio
             {
                 await ScrollToCurrentPlayingItem();
                 _isFirstRender = false;
+            }
+
+            if (!_isRendered)
+            {
+                _isRendered = true;
+                await ScrollToCurrentPlayingItem();
             }
         }
 
@@ -143,6 +151,8 @@ namespace Audionix.Components.Pages.Studio
 
         private async void HandleStationChanged(object? sender, EventArgs e)
         {
+            if (_isDisposed) return;
+
             if (AppStateService?.station != null)
             {
                 await LoadFolders();
@@ -153,9 +163,16 @@ namespace Audionix.Components.Pages.Studio
 
         private async void PlayNext()
         {
-            if (_hubConnection != null)
+            if (_hubConnection != null && !_isDisposed)
             {
-                await _hubConnection.InvokeAsync("PlayNextAudio", AppStateService?.station?.StationId ?? Guid.Empty);
+                try
+                {
+                    await _hubConnection.InvokeAsync("PlayNextAudio", AppStateService?.station?.StationId ?? Guid.Empty);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while invoking PlayNextAudio");
+                }
             }
             _openMakenextDrawer = false;
             _openInsertDrawer = false;
@@ -189,9 +206,19 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task LoadFolders()
         {
+            if (_isDisposed) return;
+
             if (AppStateService?.station != null && StationRepository != null)
             {
-                Folders = await StationRepository.GetFoldersForStationAsync(AppStateService.station.StationId);
+                try
+                {
+                    Folders = await StationRepository.GetFoldersForStationAsync(AppStateService.station.StationId);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while loading folders");
+                    Folders = new List<Folder>();
+                }
             }
             else
             {
@@ -201,25 +228,47 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task LoadAudioFiles()
         {
+            if (_isDisposed) return;
+
             if (selectedFolder != null && AudioMetadataRepository != null)
             {
-                AudioFiles = await AudioMetadataRepository.GetAudioFilesAsync();
+                try
+                {
+                    AudioFiles = await AudioMetadataRepository.GetAudioFilesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while loading audio files");
+                    AudioFiles = new List<AudioMetadata>();
+                }
             }
         }
 
         private async Task OnFolderChanged(Folder folder)
         {
+            if (_isDisposed) return;
+
             selectedFolder = folder;
             await LoadAudioFiles();
         }
 
         private async Task LoadTodaysLog()
         {
+            if (_isDisposed) return;
+
             Log.Information("--- Studio - LoadTodaysLog() -- Loading Today's Log");
 
             if (AppStateService?.station != null && ProgramLogRepository != null)
             {
-                ProgramLog = await ProgramLogRepository.GetFullProgramLogForStationAsync(AppStateService.station.StationId);
+                try
+                {
+                    ProgramLog = await ProgramLogRepository.GetFullProgramLogForStationAsync(AppStateService.station.StationId);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while loading today's log");
+                    ProgramLog = new List<ProgramLogItem>();
+                }
             }
             else
             {
@@ -229,25 +278,34 @@ namespace Audionix.Components.Pages.Studio
 
         private async Task SelectAudioFile(AudioMetadata audioFile)
         {
+            if (_isDisposed) return;
+
             selectedAudioFile = audioFile;
             _openInsertDrawer = false;
 
             if (AppStateService?.station != null && ProgramLogRepository != null)
             {
-                bool hasLogEntries = await ProgramLogRepository.HasLogEntriesAsync(AppStateService.station.StationId);
-
-                if (!hasLogEntries)
+                try
                 {
-                    if (selectedLogItem == null)
-                    {
-                        selectedLogItem = new ProgramLogItem
-                        {
-                            // Initialize with default values
-                            StationId = AppStateService.station.StationId,
-                        };
-                    }
+                    bool hasLogEntries = await ProgramLogRepository.HasLogEntriesAsync(AppStateService.station.StationId);
 
-                    await AddSelectedAudioToLog(1, selectedLogItem);
+                    if (!hasLogEntries)
+                    {
+                        if (selectedLogItem == null)
+                        {
+                            selectedLogItem = new ProgramLogItem
+                            {
+                                // Initialize with default values
+                                StationId = AppStateService.station.StationId,
+                            };
+                        }
+
+                        await AddSelectedAudioToLog(1, selectedLogItem);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while selecting audio file");
                 }
             }
         }
@@ -256,93 +314,127 @@ namespace Audionix.Components.Pages.Studio
 
         public async Task AddSelectedAudioToLog(int index, ProgramLogItem logItem)
         {
+            if (_isDisposed) return;
+
             if (selectedAudioFile != null && ProgramLogRepository != null && AppStateService?.station != null)
             {
-                // Shift existing items' LogID
-                await ProgramLogRepository.ShiftLogItemsDownAsync(AppStateService.station.StationId, index);
-
-                var newLogItem = new ProgramLogItem
+                try
                 {
-                    Title = selectedAudioFile.Title,
-                    Artist = selectedAudioFile.Artist,
-                    Name = selectedAudioFile.Filename,
-                    Description = selectedAudioFile.Artist,
-                    Category = selectedAudioFile.Category,
-                    Progress = 0.0,
-                    TimeScheduled = TimeOnly.FromDateTime(DateTime.Now),
-                    TimePlayed = TimeOnly.FromDateTime(DateTime.Now),
-                    Status = StatusType.notPlayed,
-                    StationId = logItem.StationId,
-                    LogOrderID = index
-                };
+                    // Shift existing items' LogID
+                    await ProgramLogRepository.ShiftLogItemsDownAsync(AppStateService.station.StationId, index);
 
-                await ProgramLogRepository.AddProgramLogItemAsync(newLogItem);
-                await LoadTodaysLog();
+                    var newLogItem = new ProgramLogItem
+                    {
+                        Title = selectedAudioFile.Title,
+                        Artist = selectedAudioFile.Artist,
+                        Name = selectedAudioFile.Filename,
+                        Category = selectedAudioFile.Category,
+                        Progress = 0.0,
+                        Cue = "AutoStart",
+                        Intro = selectedAudioFile.Intro,
+                        Segue = selectedAudioFile.Segue,
+                        AudioType = selectedAudioFile.AudioType,
+                        TimeScheduled = logItem.TimeScheduled, // Use the TimeScheduled of the item being shifted down
+                        Status = StatusType.notPlayed,
+                        StationId = logItem.StationId,
+                        LogOrderID = index,
+                        Date = logItem.Date // Use the Date of the item being shifted down
+                    };
 
-                // Update the UI without reloading the entire log
-                StateHasChanged();
-                selectedAudioFile = null;
+                    await ProgramLogRepository.AddProgramLogItemAsync(newLogItem);
+                    await LoadTodaysLog();
+
+                    // Update the UI without reloading the entire log
+                    StateHasChanged();
+                    selectedAudioFile = null;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while adding selected audio to log");
+                }
             }
-        }
-
-        public Task InsertSelectedLogItem(ProgramLogItem logItem)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task MakeNextSelectedLogItem(int logOrderID, DateOnly date)
         {
+            if (_isDisposed) return;
+
             if (AppStateService?.station != null && StationRepository != null)
             {
-                await StationRepository.UpdateStationNextPlayAsync(AppStateService.station.StationId, logOrderID, date);
+                try
+                {
+                    await StationRepository.UpdateStationNextPlayAsync(AppStateService.station.StationId, logOrderID, date);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while making next selected log item");
+                }
             }
             _openMakenextDrawer = false;
         }
 
         public async Task DeleteSelectedLogItem(ProgramLogItem logItem)
         {
+            if (_isDisposed) return;
+
             if (ProgramLogRepository != null)
             {
-                await ProgramLogRepository.RemoveProgramLogItemAsync(logItem);
-                await ProgramLogRepository.ShiftLogItemsUpAsync(logItem.StationId, logItem.LogOrderID);
-                ProgramLog.Remove(logItem);
-                _openDeleteDrawer = false;
+                try
+                {
+                    await ProgramLogRepository.RemoveProgramLogItemAsync(logItem);
+                    await ProgramLogRepository.ShiftLogItemsUpAsync(logItem.StationId, logItem.LogOrderID);
+                    ProgramLog.Remove(logItem);
+                    _openDeleteDrawer = false;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error while deleting selected log item");
+                }
             }
         }
 
         private async Task ScrollToCurrentPlayingItem()
         {
+            if (_isDisposed) return;
+
             if (AppStateService?.station == null || StationRepository == null)
             {
                 return;
             }
 
-            Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
-
-            if (station == null)
+            try
             {
-                return;
+                Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
+
+                if (station == null)
+                {
+                    return;
+                }
+
+                // Order the ProgramLog by Date and LogOrderID
+                var orderedProgramLog = ProgramLog
+                    .OrderBy(item => item.Date)
+                    .ThenBy(item => item.LogOrderID);
+
+                // Find the index of the currently playing item
+                var index = orderedProgramLog
+                    .Select((item, idx) => new { item, idx })
+                    .FirstOrDefault(x => x.item.Date == station.CurrentPlayingDate && x.item.LogOrderID == station.CurrentPlayingId)?.idx ?? -1;
+
+                if (index >= 0)
+                {
+                    index--;
+                }
+
+                int scrollTo = index * 33;
+
+                await ScrollManager.ScrollToAsync(".mud-table-container", 0, scrollTo, ScrollBehavior.Smooth);
+                Log.Debug($"--- Studio - ScrollToCurrentPlayingItem() -- Scrolling to CurrentPlayingItem - Index: {index} -- ScrollTo: {scrollTo}");
             }
-
-            // Order the ProgramLog by Date and LogOrderID
-            var orderedProgramLog = ProgramLog
-                .OrderBy(item => item.Date)
-                .ThenBy(item => item.LogOrderID);
-
-            // Find the index of the currently playing item
-            var index = orderedProgramLog
-                .Select((item, idx) => new { item, idx })
-                .FirstOrDefault(x => x.item.Date == station.CurrentPlayingDate && x.item.LogOrderID == station.CurrentPlayingId)?.idx ?? -1;
-
-            if (index >= 0)
+            catch (Exception ex)
             {
-                index--;
+                Log.Error(ex, "Error while scrolling to current playing item");
             }
-
-            int scrollTo = index * 33;
-
-            await ScrollManager.ScrollToAsync(".mud-table-container", 0, scrollTo, ScrollBehavior.Smooth);
-            Log.Debug($"--- Studio - ScrollToCurrentPlayingItem() -- Scrolling to CurrentPlayingItem - Index: {index} -- ScrollTo: {scrollTo}");
         }
 
         private string FormatTimeSpan(TimeSpan timeSpan)
@@ -353,6 +445,8 @@ namespace Audionix.Components.Pages.Studio
 
         private void UpdateClock(object? sender, ElapsedEventArgs e)
         {
+            if (_isDisposed) return;
+
             _currentStationTime = DateTime.Now;
             InvokeAsync(StateHasChanged); // Request UI update
         }
@@ -375,6 +469,11 @@ namespace Audionix.Components.Pages.Studio
                 _timer.Stop();
                 _timer.Dispose();
             }
+
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+
+            _isDisposed = true;
         }
     }
 }

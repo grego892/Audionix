@@ -1,16 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-	<AssemblyVersion>0.0.6.3</AssemblyVersion>
+	<AssemblyVersion>0.0.6.7</AssemblyVersion>
 	<FileVersion>$(AssemblyVersion)</FileVersion>
 	<Version>$(AssemblyVersion)</Version>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-AudionixAudioService-ff5fbf1c-da0e-4ced-961e-341d10066805</UserSecretsId>
+    <ApplicationIcon>Audionix.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Audionix.ico" />
     <Content Include="Properties\launchSettings.json" />
   </ItemGroup>
 

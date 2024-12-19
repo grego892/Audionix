@@ -94,12 +94,19 @@ namespace Audionix.Repositories
                 .OrderBy(log => log.LogOrderID)
                 .ToListAsync();
 
+            // Remove the items to shift
+            context.Log.RemoveRange(itemsToShift);
+            await context.SaveChangesAsync();
+
+            // Update LogOrderID, Date, and TimeScheduled and re-add the items
             foreach (var item in itemsToShift)
             {
                 item.LogOrderID++;
+                item.Date = item.Date; // Preserve the Date
+                item.TimeScheduled = item.TimeScheduled; // Preserve the TimeScheduled
             }
 
-            context.Log.UpdateRange(itemsToShift);
+            await context.Log.AddRangeAsync(itemsToShift);
             await context.SaveChangesAsync();
         }
 
@@ -111,12 +118,17 @@ namespace Audionix.Repositories
                 .OrderBy(log => log.LogOrderID)
                 .ToListAsync();
 
+            // Remove the items to shift
+            context.Log.RemoveRange(itemsToShift);
+            await context.SaveChangesAsync();
+
+            // Update LogOrderID and re-add the items
             foreach (var item in itemsToShift)
             {
                 item.LogOrderID--;
             }
 
-            context.Log.UpdateRange(itemsToShift);
+            await context.Log.AddRangeAsync(itemsToShift);
             await context.SaveChangesAsync();
         }
     }

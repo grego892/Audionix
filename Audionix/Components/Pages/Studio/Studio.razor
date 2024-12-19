@@ -18,8 +18,8 @@
         <MudPaper Class="mx-auto">
             <MudStack Row="true" Justify="Justify.Center" Align="Align.Center">
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ScrollToCurrentPlayingItem">Home</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Play Next</MudButton>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">Make Next</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="PlayNext">Fade & Play Next</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleMakeNextDrawer">Choose Next</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleInsertDrawer">Insert</MudButton>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" OnClick="ToggleDeleteDrawer">Delete</MudButton>
             </MudStack>
@@ -90,7 +90,7 @@
             {
                 <TemplateColumn Sortable="false">
                     <CellTemplate Context="cellContext">
-                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => InsertSelectedLogItem(cellContext.Item)">Insert</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="() => AddSelectedAudioToLog(cellContext.Item.LogOrderID, cellContext.Item)">Insert</MudButton>
                     </CellTemplate>
                 </TemplateColumn>
             }
