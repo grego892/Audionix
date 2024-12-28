@@ -1,6 +1,7 @@
 using SharedLibrary.Data;
 using SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Audionix.Repositories
 {
@@ -15,15 +16,39 @@ namespace Audionix.Repositories
 
         public async Task<AppSettings?> GetAppSettingsAsync()
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.AppSettings.FirstOrDefaultAsync();
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                return await context.AppSettings.FirstOrDefaultAsync();
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ AppSettingsRepository.cs - PostgreSQL is not running or not set up correctly.");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ AppSettingsRepository.cs - An error occurred while getting app settings.");
+                return null;
+            }
         }
 
         public async Task SaveAppSettingsAsync(AppSettings appSettings)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            context.AppSettings.Update(appSettings);
-            await context.SaveChangesAsync();
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                context.AppSettings.Update(appSettings);
+                await context.SaveChangesAsync();
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ AppSettingsRepository.cs - PostgreSQL is not running or not set up correctly.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ AppSettingsRepository.cs - An error occurred while saving app settings.");
+            }
         }
     }
 }

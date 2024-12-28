@@ -21,6 +21,7 @@ namespace Audionix.Components.Pages
         private List<AudioDevice> audioDevices = new List<AudioDevice>();
         private List<Folder> folders = new List<Folder>();
         private AudioDevice? selectedAudioDevice = new AudioDevice();
+        private string? databaseErrorMessage;
         [Inject] ISnackbar? Snackbar { get; set; }
         [Inject] private FileManagerService FileManagerService { get; set; } = null!;
         [Inject] private IStationRepository StationRepository { get; set; } = null!;
@@ -48,7 +49,16 @@ namespace Audionix.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- Setup.razor.cs - OnInitializedAsync() -- Initializing");
-            await AppStateService.LoadAppSettingsAsync();
+            try
+            {
+                await AppStateService.LoadAppSettingsAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "+++ Setup.razor.cs - OnInitializedAsync() -- Error loading application settings.");
+                Snackbar?.Add("Failed to load application settings.", Severity.Error);
+                return;
+            }
 
             if (AppStateService.AppSettings != null)
             {

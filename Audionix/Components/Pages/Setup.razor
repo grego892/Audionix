@@ -11,6 +11,10 @@
 
 <MudPaper>
     <h2 Class="ptb-2 ml-2">Setup</h2>
+    @if (!string.IsNullOrEmpty(databaseErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@databaseErrorMessage</MudAlert>
+    }
 </MudPaper>
 
 <MudGrid>

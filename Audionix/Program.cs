@@ -35,6 +35,14 @@ ConfigureHost(builder);
 
 var app = builder.Build();
 
+// Check Database Connection
+if (!await CheckDatabaseConnectionAsync(app))
+{
+    Log.Error("++++++ Program.cs - Unable to connect to the database. Please check your database configuration.");
+    Console.WriteLine("Unable to connect to the database. Please check your database configuration.");
+    return;
+}
+
 // Database Migration
 MigrateDatabase(app);
 
@@ -46,6 +54,23 @@ ConfigureMiddleware(app);
 
 Log.Information("--- Program.cs - Starting app.Run()");
 app.Run();
+
+async Task<bool> CheckDatabaseConnectionAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        await dbContext.Database.CanConnectAsync();
+        Log.Information("--- Program.cs - Database connection successful.");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "++++++ Program.cs - Unable to connect to the database.");
+        return false;
+    }
+}
 
 void ConfigureServices(WebApplicationBuilder builder)
 {
@@ -125,7 +150,7 @@ void ConfigureIdentity(WebApplicationBuilder builder)
 
 void ConfigureLogger(WebApplicationBuilder builder)
 {
-    string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "Audionix.log");
+    string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudionixWebServer", "Audionix.log");
     var configuration = builder.Configuration;
     var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
     Log.Logger = new LoggerConfiguration()
