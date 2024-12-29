@@ -83,6 +83,10 @@ namespace AudionixAudioServer.Services
             catch (Exception ex)
             {
                 Log.Error($"+++ AudioPlayer.cs -- GetStationAsync() - Exception: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Log.Error($"+++ AudioPlayer.cs -- GetStationAsync() - Inner Exception: {ex.InnerException.Message}");
+                }
                 return null;
             }
         }

@@ -41,13 +41,6 @@ Name: "AudionixAudioServer"; Description: "Audionix AudioServer"; Types: full co
 Source: "bin\Release\net9.0\publish\*"; DestDir: "{app}\AudionixWebserver"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: AudionixWebserver
 Source: "..\..\{#PostgreSetupFilename}"; DestDir: "{tmp}"; Flags: ignoreversion; Components: AudionixWebserver
 
-; Postgre password file
-Source: "pgpass.conf"; DestDir: "{autoappdata}\postgresql\"; Flags: ignoreversion; Components: AudionixWebserver
-
-
-; Postgresql password file
-Source: "..\..\{#PostgreSetupFilename}"; DestDir: "{tmp}"; Flags: ignoreversion; Components: AudionixWebserver
-
 ; AudionixAudioServer files
 Source: "..\AudionixAudioServer\bin\Release\net9.0\publish\win-x64\*"; DestDir: "{app}\AudionixAudioServer"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: AudionixAudioServer
 
