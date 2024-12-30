@@ -3,13 +3,13 @@ using SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public class AppSettingsRepository : IAppSettingsRepository
     {
-        private readonly IDbContextFactory _dbContextFactory;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-        public AppSettingsRepository(IDbContextFactory dbContextFactory)
+        public AppSettingsRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }
@@ -52,3 +52,4 @@ namespace Audionix.Repositories
         }
     }
 }
+

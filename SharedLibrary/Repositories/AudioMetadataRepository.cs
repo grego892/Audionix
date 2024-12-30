@@ -1,16 +1,15 @@
-﻿using SharedLibrary.Data;
+using SharedLibrary.Data;
 using SharedLibrary.Models;
 using SharedLibrary.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public class AudioMetadataRepository : IAudioMetadataRepository
     {
-        private readonly IDbContextFactory _dbContextFactory;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-        public AudioMetadataRepository(IDbContextFactory dbContextFactory)
+        public AudioMetadataRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }
@@ -77,6 +76,12 @@ namespace Audionix.Repositories
             }
 
             return scheduledSongs;
+        }
+
+        public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using SharedLibrary.Models;
 using SharedLibrary.Models.MusicSchedule;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public interface IAudioMetadataRepository
     {

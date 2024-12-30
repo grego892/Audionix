@@ -3,13 +3,13 @@ using SharedLibrary.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public class MusicPatternRepository : IMusicPatternRepository
     {
-        private readonly IDbContextFactory _dbContextFactory;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-        public MusicPatternRepository(IDbContextFactory dbContextFactory)
+        public MusicPatternRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }
@@ -65,7 +65,6 @@ namespace Audionix.Repositories
                 await context.SaveChangesAsync();
             }
         }
-
 
         public async Task RemoveCategoryFromPatternAsync(MusicPattern musicPattern, Category category)
         {
@@ -151,6 +150,7 @@ namespace Audionix.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             return await context.MusicPatterns.Select(mp => mp.Name!).ToListAsync();
         }
+
         public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
         {
             using var context = _dbContextFactory.CreateDbContext();
@@ -173,22 +173,25 @@ namespace Audionix.Repositories
 
             return patternIds;
         }
+
         public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.MusicGridItems.Where(m => m.StationId == stationId).ToListAsync();
         }
+
         public async Task AddMusicGridItemAsync(MusicGridItem item)
         {
             using var context = _dbContextFactory.CreateDbContext();
             await context.MusicGridItems.AddAsync(item);
             await context.SaveChangesAsync();
         }
+
         public async Task UpdateMusicGridItemAsync(MusicGridItem musicGridItem)
         {
             using var context = _dbContextFactory.CreateDbContext();
             context.MusicGridItems.Update(musicGridItem);
-                await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 }

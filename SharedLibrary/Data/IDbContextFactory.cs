@@ -3,12 +3,7 @@ using SharedLibrary.Data;
 
 namespace SharedLibrary.Data
 {
-    public interface IDbContextFactory
-    {
-        ApplicationDbContext CreateDbContext();
-    }
-
-    public class DbContextFactory : IDbContextFactory
+    public class DbContextFactory : IDbContextFactory<ApplicationDbContext>
     {
         private readonly DbContextOptions<ApplicationDbContext> _options;
 
@@ -22,5 +17,5 @@ namespace SharedLibrary.Data
             return new ApplicationDbContext(_options);
         }
     }
-
 }
+

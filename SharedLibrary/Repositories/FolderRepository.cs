@@ -2,13 +2,13 @@ using SharedLibrary.Data;
 using SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public class FolderRepository : IFolderRepository
     {
-        private readonly IDbContextFactory _dbContextFactory;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-        public FolderRepository(IDbContextFactory dbContextFactory)
+        public FolderRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }

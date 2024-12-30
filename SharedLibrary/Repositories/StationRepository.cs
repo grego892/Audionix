@@ -1,12 +1,10 @@
-﻿using SharedLibrary.Data;
+using SharedLibrary.Data;
 using SharedLibrary.Models;
 using SharedLibrary.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore;
-using AudionixAudioServer.Repositories;
-using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 
-namespace AudionixAudioServer.Repositories
+namespace SharedLibrary.Repositories
 {
     public class StationRepository : IStationRepository
     {
@@ -19,38 +17,106 @@ namespace AudionixAudioServer.Repositories
 
         public async Task<List<Station>> GetStationsAsync()
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.Stations.ToListAsync();
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                return await context.Stations.ToListAsync();
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - PostgreSQL is not running or not set up correctly.");
+                return new List<Station>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - An error occurred while getting stations.");
+                return new List<Station>();
+            }
         }
 
         public async Task<Station?> GetStationByIdAsync(Guid stationId)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.Stations.AsNoTracking().FirstOrDefaultAsync(s => s.StationId == stationId);
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                return await context.Stations.AsNoTracking().FirstOrDefaultAsync(s => s.StationId == stationId);
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - PostgreSQL is not running or not set up correctly.");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - An error occurred while getting station by ID.");
+                return null;
+            }
         }
 
         public async Task AddStationAsync(Station station)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            context.Stations.Add(station);
-            await context.SaveChangesAsync();
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                await context.Stations.AddAsync(station);
+                await context.SaveChangesAsync();
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - PostgreSQL is not running or not set up correctly.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - An error occurred while adding a station.");
+            }
         }
 
         public async Task UpdateStationAsync(Station station)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            context.Stations.Update(station);
-            await context.SaveChangesAsync();
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+
+                // Validate the AudioDeviceId
+                var audioDeviceExists = await context.AudioDevices.AnyAsync(ad => ad.Id == station.AudioDeviceId);
+                if (!audioDeviceExists)
+                {
+                    Log.Error("++++++ StationRepository.cs - The specified AudioDeviceId {AudioDeviceId} does not exist.", station.AudioDeviceId);
+                    return;
+                }
+
+                context.Stations.Update(station);
+                await context.SaveChangesAsync();
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - PostgreSQL is not running or not set up correctly.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - An error occurred while updating a station.");
+            }
         }
 
         public async Task DeleteStationAsync(Guid stationId)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            var station = await context.Stations.FindAsync(stationId);
-            if (station != null)
+            try
             {
-                context.Stations.Remove(station);
-                await context.SaveChangesAsync();
+                using var context = _dbContextFactory.CreateDbContext();
+                var station = await context.Stations.FindAsync(stationId);
+                if (station != null)
+                {
+                    context.Stations.Remove(station);
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - PostgreSQL is not running or not set up correctly.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - An error occurred while deleting a station.");
             }
         }
 
@@ -178,7 +244,7 @@ namespace AudionixAudioServer.Repositories
             }
             else
             {
-                Log.Error("+++ AppDatabaseService - AddNewDayLogToDbLogAsync() -- NewDaysLog is null or empty.");
+                Log.Error("+++ StationRepository - AddNewDayLogToDbLogAsync() -- NewDaysLog is null or empty.");
             }
         }
 
@@ -284,6 +350,30 @@ namespace AudionixAudioServer.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             context.Log.Update(logItem);
             await context.SaveChangesAsync();
+        }
+
+        public async Task UpdateStationNextPlayAsync(Guid stationId, int logOrderID, DateOnly Date)
+        {
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                var station = await context.Stations.FirstOrDefaultAsync(s => s.StationId == stationId);
+                if (station != null)
+                {
+                    station.NextPlayId = logOrderID;
+                    station.NextPlayDate = Date;
+                    context.Stations.Update(station);
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - PostgreSQL is not running or not set up correctly.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "++++++ StationRepository.cs - An error occurred while updating station next play.");
+            }
         }
     }
 }

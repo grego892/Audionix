@@ -69,7 +69,8 @@ namespace SharedLibrary.Migrations
                 name: "AudioDevices",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DeviceID = table.Column<string>(type: "text", nullable: true),
                     FriendlyName = table.Column<string>(type: "text", nullable: true)
                 },
@@ -84,7 +85,7 @@ namespace SharedLibrary.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Hour = table.Column<string>(type: "text", nullable: false),
+                    Hour = table.Column<string>(type: "text", nullable: true),
                     Sunday = table.Column<string>(type: "text", nullable: false),
                     Monday = table.Column<string>(type: "text", nullable: false),
                     Tuesday = table.Column<string>(type: "text", nullable: false),
@@ -253,7 +254,7 @@ namespace SharedLibrary.Migrations
                     StationSortOrder = table.Column<int>(type: "integer", nullable: false),
                     CallLetters = table.Column<string>(type: "text", nullable: true),
                     Slogan = table.Column<string>(type: "text", nullable: true),
-                    AudioDeviceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AudioDeviceId = table.Column<int>(type: "integer", nullable: false),
                     CurrentPlayingId = table.Column<int>(type: "integer", nullable: false),
                     CurrentPlayingDate = table.Column<DateOnly>(type: "date", nullable: true),
                     NextPlayId = table.Column<int>(type: "integer", nullable: false),
@@ -267,7 +268,7 @@ namespace SharedLibrary.Migrations
                         column: x => x.AudioDeviceId,
                         principalTable: "AudioDevices",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -330,7 +331,7 @@ namespace SharedLibrary.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
                     StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>

@@ -1,9 +1,8 @@
-﻿using SharedLibrary.Models;
+using SharedLibrary.Models;
 using SharedLibrary.Models.MusicSchedule;
-using Microsoft.EntityFrameworkCore.Internal;
-using Serilog;
+using System.Threading.Tasks;
 
-namespace AudionixAudioServer.Repositories
+namespace SharedLibrary.Repositories
 {
     public interface IStationRepository
     {
@@ -12,6 +11,8 @@ namespace AudionixAudioServer.Repositories
         Task AddStationAsync(Station station);
         Task UpdateStationAsync(Station station);
         Task DeleteStationAsync(Guid stationId);
+        Task<List<Folder>> GetFoldersForStationAsync(Guid stationId);
+        Task UpdateStationNextPlayAsync(Guid stationId, int logOrderID, DateOnly Date);
         Task<List<Category>> GetCategoriesAsync(Guid stationId);
         Task AddCategoryAsync(Category category);
         Task DeleteCategoryAsync(Guid categoryId);
@@ -26,7 +27,6 @@ namespace AudionixAudioServer.Repositories
         Task<AudioMetadata?> GetAudioFileByIdAsync(int id);
         Task AddAudioFileAsync(AudioMetadata audioMetadata);
         Task DeleteAudioFileAsync(AudioMetadata audioMetadata);
-        Task<List<Folder>> GetFoldersForStationAsync(Guid stationId);
         Task<Folder?> GetFolderByIdAsync(int id);
         Task AddFolderAsync(Folder folder);
         Task DeleteFolderAsync(Folder folder);
@@ -37,9 +37,5 @@ namespace AudionixAudioServer.Repositories
         //Task<ProgramLogItem?> GetProgramLogItemAsync(Guid stationId, int logOrderID);
         Task UpdateProgramLogItemAsync(ProgramLogItem logItem);
 
-    }
-    public interface IAudioMetadataRepository
-    {
-        Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename);
     }
 }

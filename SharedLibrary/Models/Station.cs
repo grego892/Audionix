@@ -8,7 +8,7 @@ namespace SharedLibrary.Models
         public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
-        public Guid AudioDeviceId { get; set; } // Foreign key property
+        public int AudioDeviceId { get; set; } // Change this to int
         public AudioDevice AudioDevice { get; set; } = new AudioDevice(); // Initialize non-nullable property
         public int CurrentPlayingId { get; set; } = 1;
         [Column(TypeName = "date")]

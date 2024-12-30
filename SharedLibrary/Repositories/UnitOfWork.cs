@@ -1,9 +1,8 @@
-﻿using SharedLibrary.Models;
-using Audionix.Repositories;
-using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Data;
+using SharedLibrary.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace Audionix.DataAccess
+namespace SharedLibrary.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
@@ -24,6 +23,11 @@ namespace Audionix.DataAccess
         public async Task<AppSettings?> GetAppSettingsDataPathAsync()
         {
             return await _context.AppSettings.FirstOrDefaultAsync();
+        }
+
+        public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
+        {
+            return await Stations.GetAudioFileByFilenameAsync(filename);
         }
 
         public void Dispose()

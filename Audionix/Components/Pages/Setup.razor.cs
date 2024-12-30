@@ -5,7 +5,7 @@ using System.Diagnostics;
 using MudBlazor;
 using SharedLibrary.Models;
 using NAudio.CoreAudioApi;
-using Audionix.Repositories;
+using SharedLibrary.Repositories;
 
 namespace Audionix.Components.Pages
 {
@@ -20,7 +20,7 @@ namespace Audionix.Components.Pages
         private Station? selectedStation;
         private List<AudioDevice> audioDevices = new List<AudioDevice>();
         private List<Folder> folders = new List<Folder>();
-        private AudioDevice? selectedAudioDevice = new AudioDevice();
+        private AudioDevice? selectedAudioDevice;
         private string? databaseErrorMessage;
         [Inject] ISnackbar? Snackbar { get; set; }
         [Inject] private FileManagerService FileManagerService { get; set; } = null!;
@@ -135,7 +135,7 @@ namespace Audionix.Components.Pages
                     return;
                 }
 
-                newStation.AudioDeviceId = selectedAudioDevice.Id;
+                newStation.AudioDeviceId = selectedAudioDevice.Id; // Use Id instead of DeviceID
                 newStation.AudioDevice = selectedAudioDevice;
 
                 await StationRepository.AddStationAsync(newStation);
@@ -305,7 +305,6 @@ namespace Audionix.Components.Pages
                 {
                     devices.Add(new AudioDevice
                     {
-                        Id = Guid.NewGuid(), // Use GUID for unique Id
                         DeviceID = device.ID,
                         FriendlyName = device.FriendlyName
                     });
@@ -321,7 +320,7 @@ namespace Audionix.Components.Pages
             return devices;
         }
 
-        public string GetAudioDeviceFriendlyName(Guid audioDeviceId)
+        public string GetAudioDeviceFriendlyName(int audioDeviceId)
         {
             Log.Debug("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Getting friendly name for device: {DeviceId}", audioDeviceId);
 

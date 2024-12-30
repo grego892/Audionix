@@ -1,8 +1,7 @@
 using SharedLibrary.Models.MusicSchedule;
-using Audionix.Repositories;
+using SharedLibrary.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
-using MudBlazor;
 
 namespace Audionix.Components.Pages.LogBuilder
 {

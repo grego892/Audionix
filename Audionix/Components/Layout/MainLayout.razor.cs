@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
 using MudBlazor;
 using Serilog;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Audionix.Components.Layout
 {

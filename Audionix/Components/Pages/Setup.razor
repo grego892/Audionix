@@ -68,7 +68,7 @@
                                 <MudSelect T="AudioDevice" Label="Audio Device" @bind-Value="selectedAudioDevice" Variant="Variant.Outlined">
                                     @foreach (var device in audioDevices)
                                     {
-                                        <MudSelectItem T="AudioDevice" Value="@device">@device.FriendlyName</MudSelectItem>
+                                        <MudTd DataLabel="AudioDevice">@GetAudioDeviceFriendlyName(context.AudioDeviceId)</MudTd>
                                     }
                                 </MudSelect>
                             </MudTd>

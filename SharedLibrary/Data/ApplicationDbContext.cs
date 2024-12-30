@@ -78,7 +78,8 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<Station>()
                 .HasOne(s => s.AudioDevice)
                 .WithMany()
-                .HasForeignKey(s => s.AudioDeviceId);
+                .HasForeignKey(s => s.AudioDeviceId)
+                .OnDelete(DeleteBehavior.Restrict); // Ensure the foreign key constraint is enforced
 
             // Add unique constraint to AppSettings Id
             modelBuilder.Entity<AppSettings>()
@@ -98,6 +99,10 @@ namespace SharedLibrary.Data
             // Configure composite key for ProgramLogItem
             modelBuilder.Entity<ProgramLogItem>()
                 .HasKey(pl => new { pl.Date, pl.LogOrderID });
+
+            // Configure primary key for AudioDevice
+            modelBuilder.Entity<AudioDevice>()
+                .HasKey(ad => ad.Id); // Add this line to configure the primary key
         }
     }
 }

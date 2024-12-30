@@ -6,7 +6,7 @@ using WavesurferBlazorWrapper;
 using MudBlazor;
 using SharedLibrary.Models;
 using SharedLibrary.Models.MusicSchedule;
-using Audionix.Repositories;
+using SharedLibrary.Repositories;
 
 namespace Audionix.Components.Pages.FileManager
 {

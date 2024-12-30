@@ -1,11 +1,7 @@
 ﻿using Serilog;
 using ATL;
 using SharedLibrary.Models;
-using Audionix.Repositories;
-using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using Microsoft.AspNetCore.Components;
-
+using SharedLibrary.Repositories;
 
 namespace Audionix.Services
 {

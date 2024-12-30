@@ -1,10 +1,8 @@
-﻿using Audionix;
-using Microsoft.AspNetCore.Components;
-using Serilog;
+﻿using Serilog;
 using WavesurferBlazorWrapper;
 using SharedLibrary.Models;
 using Audionix.Services;
-using Audionix.Repositories;
+using SharedLibrary.Repositories;
 
 namespace Audionix.Components.Pages.FileManager
 {

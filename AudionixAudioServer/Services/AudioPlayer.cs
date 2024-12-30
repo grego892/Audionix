@@ -3,8 +3,6 @@ using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
 using Serilog;
 using SharedLibrary.Models;
-using AudionixAudioServer.DataAccess;
-using AudionixAudioServer.Repositories;
 using SharedLibrary.Repositories;
 
 namespace AudionixAudioServer.Services
@@ -76,6 +74,7 @@ namespace AudionixAudioServer.Services
                     station.NextPlayDate = DateOnly.FromDateTime(DateTime.Today);
                     await _unitOfWork.Stations.UpdateStationAsync(station);
                     await _unitOfWork.CompleteAsync();
+                    Log.Warning("+++ AudioPlayer.cs -- GetStationAsync() - Set station.NextPlayDate to today.");
                 }
 
                 return station;

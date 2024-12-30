@@ -3,13 +3,13 @@ using SharedLibrary.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly IDbContextFactory _dbContextFactory;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-        public CategoryRepository(IDbContextFactory dbContextFactory)
+        public CategoryRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }
@@ -49,29 +49,30 @@ namespace Audionix.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Categories.Select(c => c.CategoryName!).ToListAsync();
         }
+
         public async Task<List<Category>> GetCategoriesForPatternsAsync(List<Guid> musicPatterns)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var categories = new List<Category>();
 
-                foreach (var patternId in musicPatterns)
-                {
-                    var patternCategories = await context.PatternCategories
-                        .AsNoTracking()
-                        .Where(pc => pc.MusicPatternId == patternId)
-                        .Include(pc => pc.Category)
-                        .ToListAsync();
+            foreach (var patternId in musicPatterns)
+            {
+                var patternCategories = await context.PatternCategories
+                    .AsNoTracking()
+                    .Where(pc => pc.MusicPatternId == patternId)
+                    .Include(pc => pc.Category)
+                    .ToListAsync();
 
-                    foreach (var patternCategory in patternCategories)
+                foreach (var patternCategory in patternCategories)
+                {
+                    if (patternCategory.Category != null)
                     {
-                        if (patternCategory.Category != null)
-                        {
-                            categories.Add(patternCategory.Category);
-                        }
+                        categories.Add(patternCategory.Category);
                     }
                 }
+            }
 
-                return categories;
+            return categories;
         }
     }
 }

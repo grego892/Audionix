@@ -12,8 +12,8 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241228024201_NotSure")]
-    partial class NotSure
+    [Migration("20241230043849_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -253,9 +253,11 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.AudioDevice", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DeviceID")
                         .HasColumnType("text");
@@ -619,8 +621,8 @@ namespace SharedLibrary.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AudioDeviceId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("AudioDeviceId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("CallLetters")
                         .HasColumnType("text");
@@ -773,7 +775,7 @@ namespace SharedLibrary.Migrations
                     b.HasOne("SharedLibrary.Models.AudioDevice", "AudioDevice")
                         .WithMany()
                         .HasForeignKey("AudioDeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("AudioDevice");

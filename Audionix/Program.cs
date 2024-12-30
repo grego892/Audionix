@@ -2,7 +2,7 @@ using Audionix.Components.Account;
 using Audionix.Components;
 using SharedLibrary.Data;
 using Audionix.Services;
-using Audionix.Repositories;
+using SharedLibrary.Repositories;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,6 @@ using Serilog;
 using MudBlazor;
 using System.Security.Cryptography.X509Certificates;
 using Serilog.Settings.Configuration;
-using Audionix.DataAccess;
 using Microsoft.AspNetCore.Authentication;
 using Audionix.Hubs;
 using Audionix.Middleware;
@@ -99,16 +98,16 @@ void ConfigureServices(WebApplicationBuilder builder)
 
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+
+    // Register IDbContextFactory<ApplicationDbContext> with a scoped lifetime
+    builder.Services.AddScoped<IDbContextFactory<ApplicationDbContext>, DbContextFactory>();
+
+    builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
     builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
     builder.Services.AddScoped<IFolderRepository, FolderRepository>();
     builder.Services.AddScoped<IMusicPatternRepository, MusicPatternRepository>();
     builder.Services.AddScoped<IProgramLogRepository, ProgramLogRepository>();
     builder.Services.AddScoped<IStationRepository, StationRepository>();
-    builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
-    builder.Services.AddScoped<IStationRepository, StationRepository>();
-    builder.Services.AddScoped<IMusicPatternRepository, MusicPatternRepository>();
-    builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
     builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
     builder.Services.AddScoped<AppStateService>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

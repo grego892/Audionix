@@ -1,10 +1,7 @@
-﻿using AudionixAudioServer.DataAccess;
-using AudionixAudioServer.Repositories;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Serilog;
 using SharedLibrary.Models;
 using SharedLibrary.Repositories;
-using Microsoft.Extensions.Configuration;
 
 namespace AudionixAudioServer.Services
 {

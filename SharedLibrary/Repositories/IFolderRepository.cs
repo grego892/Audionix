@@ -1,6 +1,6 @@
 ﻿using SharedLibrary.Models;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public interface IFolderRepository
     {

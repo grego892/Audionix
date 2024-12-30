@@ -1,13 +1,9 @@
 using SharedLibrary.Data;
-using AudionixAudioServer.DataAccess;
-using AudionixAudioServer.Repositories;
+using SharedLibrary.Repositories;
 using AudionixAudioServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Settings.Configuration;
-using SharedLibrary.Repositories;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.WindowsServices;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -39,9 +35,6 @@ var builder = Host.CreateDefaultBuilder(args)
         // DATABASE
         services.AddDbContextFactory<ApplicationDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-
-        // Register DbContextFactory
-        services.AddScoped<IDbContextFactory, DbContextFactory>();
 
         // Register Repositories
         services.AddScoped<IStationRepository, StationRepository>();

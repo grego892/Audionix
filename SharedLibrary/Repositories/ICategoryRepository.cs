@@ -1,6 +1,6 @@
 ﻿using SharedLibrary.Models.MusicSchedule;
 
-namespace Audionix.Repositories
+namespace SharedLibrary.Repositories
 {
     public interface ICategoryRepository
     {
