@@ -27,6 +27,9 @@
                     </ActivatorContent>
                 </MudFileUpload>
             </MudPaper>
+            <MudPaper Width="450px" Class="pt-2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ImportExistingAudio">Import Existing Audio</MudButton>
+            </MudPaper>
             <MudPaper Class="ma-1" Width="calc(99% - 350px)">
                 @if (isUploading && progress < 99)
                 {

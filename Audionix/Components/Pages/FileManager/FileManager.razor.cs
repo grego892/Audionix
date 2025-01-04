@@ -46,7 +46,7 @@ namespace Audionix.Components.Pages.FileManager
         protected override async Task OnInitializedAsync()
         {
             Log.Information("--- FileManager - OnInitializedAsync() -- Initializing FileManager Page");
-            if (AppStateService?.station != null)
+            if (AppStateService?.station != null && FileManagerService != null)
             {
                 folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
                 categories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
@@ -57,7 +57,7 @@ namespace Audionix.Components.Pages.FileManager
 
         private async void HandleStationChanged(object? sender, EventArgs e)
         {
-            if (AppStateService?.station != null)
+            if (AppStateService?.station != null && FileManagerService != null)
             {
                 folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
                 categories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
@@ -122,12 +122,40 @@ namespace Audionix.Components.Pages.FileManager
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
-            if (FileManagerSvc != null && AppStateService?.station != null)
+            if (FileManagerSvc == null)
             {
-                var appSettings = await AppSettingsRepository?.GetAppSettingsAsync();
-                var dataPath = appSettings?.DataPath ?? string.Empty;
-                await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, dataPath, async () => await GetFolderFileList(SelectedFolder));
+                Log.Error("DeleteAudioAsync: FileManagerSvc is null.");
+                return;
             }
+
+            if (AppStateService?.station == null)
+            {
+                Log.Error("DeleteAudioAsync: AppStateService or station is null.");
+                return;
+            }
+
+            if (AppSettingsRepository == null)
+            {
+                Log.Error("DeleteAudioAsync: AppSettingsRepository is null.");
+                return;
+            }
+
+            if (AppStateService.station.CallLetters == null)
+            {
+                Log.Error("DeleteAudioAsync: Call letters are null.");
+                return;
+            }
+
+            var appSettings = await AppSettingsRepository.GetAppSettingsAsync();
+            var dataPath = appSettings?.DataPath ?? string.Empty;
+
+            if (string.IsNullOrEmpty(dataPath))
+            {
+                Log.Error("DeleteAudioAsync: Data path is null or empty.");
+                return;
+            }
+
+            await FileManagerSvc.DeleteAudioAsync(audioMetadata, AppStateService.station.CallLetters, dataPath, async () => await GetFolderFileList(SelectedFolder));
         }
 
         public double RoundedEditorIntro
@@ -176,6 +204,11 @@ namespace Audionix.Components.Pages.FileManager
                     StateHasChanged();
                 }
             }
+        }
+
+        public void ImportExistingAudio()
+        {
+
         }
 
         public void Dispose()
