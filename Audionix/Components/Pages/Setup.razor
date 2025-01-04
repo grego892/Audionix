@@ -4,6 +4,7 @@
 @using SharedLibrary.Data
 @using Audionix
 @using SharedLibrary.Models
+@using MudBlazor
 @inject ISnackbar snackbar
 @inject NavigationManager NavigationManager
 
@@ -51,24 +52,24 @@
                         <MudTh />
                         <MudTh />
                     </HeaderContent>
-                    <RowTemplate>
+                    <RowTemplate Context="context">
                         @if (context.StationId == StationEditing)
                         {
                             <MudTd>
                                 <MudStack Row="true">
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationUpAsync(@context))">Up</MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationDownAsync(@context))">Down</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationUpAsync(context))">Up</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>MoveStationDownAsync(context))">Down</MudButton>
                                 </MudStack>
                             </MudTd>
                             <MudTd DataLabel="CallLetters">
-                                <MudTextField @bind-Value="@context.CallLetters" Label="Call Letters" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                <MudTextField @bind-Value="context.CallLetters" Label="Call Letters" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                             </MudTd>
                             <MudTd DataLabel="Slogan">
-                                <MudTextField @bind-Value="@context.Slogan" Label="Slogan" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                                <MudTextField @bind-Value="context.Slogan" Label="Slogan" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                             </MudTd>
                             <MudTd>
                                 <MudSelect T="string" Label="Audio Device" @bind-Value="selectedAudioDeviceId" Variant="Variant.Outlined">
-                                    @foreach (var device in audioDevices)
+                                    @foreach (var device in audioDevices ?? new List<string>())
                                     {
                                         <MudSelectItem T="string" Value="@device">@GetAudioDeviceFriendlyName(device)</MudSelectItem>
                                     }
@@ -76,8 +77,8 @@
                             </MudTd>
                             <MudTd>
                                 <MudStack Row="true">
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStationAsync(@context))">Save</MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(@context))">Cancel</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStationAsync(context))">Save</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(context))">Cancel</MudButton>
                                 </MudStack>
                             </MudTd>
                             <MudTd>
@@ -91,8 +92,8 @@
                             <MudTd DataLabel="Slogan">@context.Slogan</MudTd>
                             <MudTd DataLabel="AudioDevice">@GetAudioDeviceFriendlyName(context.AudioDeviceId)</MudTd>
                             <MudTd>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStationAsync(@context))" Disabled="true">Save</MudButton>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(@context))" Disabled="true">Cancel</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(()=>SaveEditedStationAsync(context))" Disabled="true">Save</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>CancelStationEdit(context))" Disabled="true">Cancel</MudButton>
                             </MudTd>
                             <MudTd>
                                 <MudButton Variant="Variant.Outlined" Disabled="true">Delete</MudButton>
@@ -105,10 +106,10 @@
                             <MudTd DataLabel="Slogan">@context.Slogan</MudTd>
                             <MudTd DataLabel="AudioDevice">@GetAudioDeviceFriendlyName(context.AudioDeviceId)</MudTd>
                             <MudTd>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>EditStationButton(@context))">Edit</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(()=>EditStationButton(context))">Edit</MudButton>
                             </MudTd>
                             <MudTd>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveStationAsync(@context))">Delete</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveStationAsync(context))">Delete</MudButton>
                             </MudTd>
                         }
                     </RowTemplate>
@@ -116,10 +117,10 @@
             </MudCardContent>
 
             <MudCardActions>
-                <MudTextField @bind-Value="@newStation.CallLetters" Label="Call Letters" Variant="Variant.Outlined"></MudTextField>
-                <MudTextField @bind-Value="@newStation.Slogan" Label="Slogan" Variant="Variant.Outlined"></MudTextField>
+                <MudTextField @bind-Value="newStation.CallLetters" Label="Call Letters" Variant="Variant.Outlined"></MudTextField>
+                <MudTextField @bind-Value="newStation.Slogan" Label="Slogan" Variant="Variant.Outlined"></MudTextField>
                 <MudSelect T="string" Label="Audio Device" @bind-Value="selectedAudioDeviceId" Variant="Variant.Outlined">
-                    @foreach (var device in audioDevices)
+                    @foreach (var device in audioDevices ?? new List<string>())
                     {
                         <MudSelectItem T="string" Value="@device">@GetAudioDeviceFriendlyName(device)</MudSelectItem>
                     }
@@ -152,15 +153,15 @@
                     <MudTh>Call Letters</MudTh>
                     <MudTh>Delete</MudTh>
                 </HeaderContent>
-                <RowTemplate>
+                <RowTemplate Context="context">
                     <MudTd DataLabel="Call Letters">@context.Name</MudTd>
                     <MudTd>
-                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveFolder(@context))">Delete</MudButton>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveFolder(context))">Delete</MudButton>
                     </MudTd>
                 </RowTemplate>
             </MudTable>
             <MudCardActions>
-                <MudTextField @bind-Value="@newFolder.Name" Label="Folder Name" Variant="Variant.Outlined"></MudTextField>
+                <MudTextField @bind-Value="newFolder.Name" Label="Folder Name" Variant="Variant.Outlined"></MudTextField>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddFolder">Add Folder</MudButton>
             </MudCardActions>
         </MudCard>
