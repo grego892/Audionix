@@ -8,8 +8,7 @@ namespace SharedLibrary.Models
         public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
-        public int AudioDeviceId { get; set; } // Change this to int
-        public AudioDevice AudioDevice { get; set; } = new AudioDevice(); // Initialize non-nullable property
+        public string AudioDeviceId { get; set; }
         public int CurrentPlayingId { get; set; } = 1;
         [Column(TypeName = "date")]
         public DateOnly? CurrentPlayingDate { get; set; }
@@ -33,7 +32,6 @@ namespace SharedLibrary.Models
                 CallLetters = this.CallLetters,
                 Slogan = this.Slogan,
                 AudioDeviceId = this.AudioDeviceId,
-                AudioDevice = this.AudioDevice, // Copy the AudioDevice property
                 AudioFiles = this.AudioFiles?.Select(af => new AudioMetadata
                 {
                     StationId = af.StationId,

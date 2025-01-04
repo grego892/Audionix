@@ -248,25 +248,6 @@ namespace SharedLibrary.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SharedLibrary.Models.AudioDevice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DeviceID")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FriendlyName")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AudioDevices");
-                });
-
             modelBuilder.Entity("SharedLibrary.Models.AudioMetadata", b =>
                 {
                     b.Property<int>("Id")
@@ -618,8 +599,9 @@ namespace SharedLibrary.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("AudioDeviceId")
-                        .HasColumnType("integer");
+                    b.Property<string>("AudioDeviceId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("CallLetters")
                         .HasColumnType("text");
@@ -643,8 +625,6 @@ namespace SharedLibrary.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("StationId");
-
-                    b.HasIndex("AudioDeviceId");
 
                     b.ToTable("Stations");
                 });
@@ -765,17 +745,6 @@ namespace SharedLibrary.Migrations
                     b.Navigation("Rotator");
 
                     b.Navigation("Station");
-                });
-
-            modelBuilder.Entity("SharedLibrary.Models.Station", b =>
-                {
-                    b.HasOne("SharedLibrary.Models.AudioDevice", "AudioDevice")
-                        .WithMany()
-                        .HasForeignKey("AudioDeviceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("AudioDevice");
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Category", b =>

@@ -18,9 +18,9 @@ namespace Audionix.Components.Pages
         private Folder newFolder = new();
         private List<Station> stations = new List<Station>();
         private Station? selectedStation;
-        private List<AudioDevice> audioDevices = new List<AudioDevice>();
+        private List<string>? audioDevices;
         private List<Folder> folders = new List<Folder>();
-        private AudioDevice? selectedAudioDevice;
+        private string? selectedAudioDeviceId;
         private string? databaseErrorMessage;
         [Inject] ISnackbar? Snackbar { get; set; }
         [Inject] private FileManagerService FileManagerService { get; set; } = null!;
@@ -128,15 +128,14 @@ namespace Audionix.Components.Pages
                 newStation.StationSortOrder = maxSortOrder + 1;
 
                 // Ensure the selected AudioDeviceId is valid
-                if (selectedAudioDevice == null)
+                if (selectedAudioDeviceId == null)
                 {
                     Log.Error("++++++ Setup - AddStation() -- No AudioDevice selected");
                     Snackbar?.Add("No Audio Device selected.", Severity.Error);
                     return;
                 }
 
-                newStation.AudioDeviceId = selectedAudioDevice.Id; // Use Id instead of DeviceID
-                newStation.AudioDevice = selectedAudioDevice;
+                newStation.AudioDeviceId = selectedAudioDeviceId;
 
                 await StationRepository.AddStationAsync(newStation);
 
@@ -204,19 +203,6 @@ namespace Audionix.Components.Pages
             editingStation.Slogan = tempEditStation.Slogan;
             editingStation.CallLetters = tempEditStation.CallLetters;
             StationEditing = Guid.Empty;
-        }
-
-        public void RestartService()
-        {
-            try
-            {
-                const string strCmdText = "/C net stop \"Audionix\"&net start \"Audionix\"";
-                Process.Start("CMD.exe", strCmdText);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("++++++ Setup - RestartService() -- " + ex.Message);
-            }
         }
 
         private async Task AddFolder()
@@ -294,20 +280,16 @@ namespace Audionix.Components.Pages
             }
         }
 
-        public List<AudioDevice> GetWasapiOutputDevices()
+        public List<string> GetWasapiOutputDevices()
         {
-            var devices = new List<AudioDevice>();
+            var devices = new List<string>();
             var enumerator = new MMDeviceEnumerator();
 
             try
             {
                 foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
                 {
-                    devices.Add(new AudioDevice
-                    {
-                        DeviceID = device.ID,
-                        FriendlyName = device.FriendlyName
-                    });
+                    devices.Add(device.ID);
                 }
 
                 Log.Information("--- Setup.razor.cs - GetWasapiOutputDevices() -- Found {Count} devices", devices.Count);
@@ -320,23 +302,12 @@ namespace Audionix.Components.Pages
             return devices;
         }
 
-        public string GetAudioDeviceFriendlyName(int audioDeviceId)
+        private string GetAudioDeviceFriendlyName(string deviceId)
         {
-            Log.Debug("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Getting friendly name for device: {DeviceId}", audioDeviceId);
-
-            // Query the database for the AudioDevice with the given audioDeviceId
-            var device = audioDevices.FirstOrDefault(ad => ad.Id == audioDeviceId);
-
-            if (device != null)
-            {
-                Log.Debug("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Found device: {Device}", device);
-                return device.FriendlyName ?? "Unknown Device";
-            }
-            else
-            {
-                Log.Warning("--- Setup.razor.cs - GetAudioDeviceFriendlyName() -- Device not found for Id: {DeviceId}", audioDeviceId);
-                return "Unknown Device";
-            }
+            var enumerator = new MMDeviceEnumerator();
+            var device = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)
+                                   .FirstOrDefault(d => d.ID == deviceId);
+            return device?.FriendlyName ?? "Unknown Device";
         }
     }
 }

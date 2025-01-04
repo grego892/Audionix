@@ -66,20 +66,6 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AudioDevices",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    DeviceID = table.Column<string>(type: "text", nullable: true),
-                    FriendlyName = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AudioDevices", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MusicGridItems",
                 columns: table => new
                 {
@@ -138,6 +124,25 @@ namespace SharedLibrary.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Rotator", x => x.RotatorID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Stations",
+                columns: table => new
+                {
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StationSortOrder = table.Column<int>(type: "integer", nullable: false),
+                    CallLetters = table.Column<string>(type: "text", nullable: true),
+                    Slogan = table.Column<string>(type: "text", nullable: true),
+                    AudioDeviceId = table.Column<string>(type: "text", nullable: false),
+                    CurrentPlayingId = table.Column<int>(type: "integer", nullable: false),
+                    CurrentPlayingDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    NextPlayId = table.Column<int>(type: "integer", nullable: false),
+                    NextPlayDate = table.Column<DateOnly>(type: "date", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stations", x => x.StationId);
                 });
 
             migrationBuilder.CreateTable(
@@ -244,31 +249,6 @@ namespace SharedLibrary.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Stations",
-                columns: table => new
-                {
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StationSortOrder = table.Column<int>(type: "integer", nullable: false),
-                    CallLetters = table.Column<string>(type: "text", nullable: true),
-                    Slogan = table.Column<string>(type: "text", nullable: true),
-                    AudioDeviceId = table.Column<int>(type: "integer", nullable: false),
-                    CurrentPlayingId = table.Column<int>(type: "integer", nullable: false),
-                    CurrentPlayingDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    NextPlayId = table.Column<int>(type: "integer", nullable: false),
-                    NextPlayDate = table.Column<DateOnly>(type: "date", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Stations", x => x.StationId);
-                    table.ForeignKey(
-                        name: "FK_Stations_AudioDevices_AudioDeviceId",
-                        column: x => x.AudioDeviceId,
-                        principalTable: "AudioDevices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -499,11 +479,6 @@ namespace SharedLibrary.Migrations
                 name: "IX_PatternCategories_MusicPatternId",
                 table: "PatternCategories",
                 column: "MusicPatternId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stations_AudioDeviceId",
-                table: "Stations",
-                column: "AudioDeviceId");
         }
 
         /// <inheritdoc />
@@ -556,9 +531,6 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categories");
-
-            migrationBuilder.DropTable(
-                name: "AudioDevices");
 
             migrationBuilder.DropTable(
                 name: "MusicPatterns");

@@ -76,15 +76,6 @@ namespace SharedLibrary.Repositories
             try
             {
                 using var context = _dbContextFactory.CreateDbContext();
-
-                // Validate the AudioDeviceId
-                var audioDeviceExists = await context.AudioDevices.AnyAsync(ad => ad.Id == station.AudioDeviceId);
-                if (!audioDeviceExists)
-                {
-                    Log.Error("++++++ StationRepository.cs - The specified AudioDeviceId {AudioDeviceId} does not exist.", station.AudioDeviceId);
-                    return;
-                }
-
                 context.Stations.Update(station);
                 await context.SaveChangesAsync();
             }

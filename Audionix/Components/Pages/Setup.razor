@@ -18,6 +18,7 @@
 </MudPaper>
 
 <MudGrid>
+    @* ------- SETTINGS PATH ------- *@
     <MudCard Outlined=true Class="ma-8" Elevation="9">
         <MudCardContent>
             <MudText>Settings Path</MudText>
@@ -31,6 +32,7 @@
         </MudCardActions>
     </MudCard>
 
+    @* ------- STATIONS SETUP ------- *@
     @if (AppStateService.AppSettings?.IsDatapathSetup == true)
     {
         <MudCard Outlined="true" Class="ma-8" Elevation="25">
@@ -65,10 +67,10 @@
                                 <MudTextField @bind-Value="@context.Slogan" Label="Slogan" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                             </MudTd>
                             <MudTd>
-                                <MudSelect T="AudioDevice" Label="Audio Device" @bind-Value="selectedAudioDevice" Variant="Variant.Outlined">
+                                <MudSelect T="string" Label="Audio Device" @bind-Value="selectedAudioDeviceId" Variant="Variant.Outlined">
                                     @foreach (var device in audioDevices)
                                     {
-                                        <MudTd DataLabel="AudioDevice">@GetAudioDeviceFriendlyName(context.AudioDeviceId)</MudTd>
+                                        <MudSelectItem T="string" Value="@device">@GetAudioDeviceFriendlyName(device)</MudSelectItem>
                                     }
                                 </MudSelect>
                             </MudTd>
@@ -116,10 +118,10 @@
             <MudCardActions>
                 <MudTextField @bind-Value="@newStation.CallLetters" Label="Call Letters" Variant="Variant.Outlined"></MudTextField>
                 <MudTextField @bind-Value="@newStation.Slogan" Label="Slogan" Variant="Variant.Outlined"></MudTextField>
-                <MudSelect T="AudioDevice" Label="Audio Device" @bind-Value="selectedAudioDevice" Variant="Variant.Outlined">
+                <MudSelect T="string" Label="Audio Device" @bind-Value="selectedAudioDeviceId" Variant="Variant.Outlined">
                     @foreach (var device in audioDevices)
                     {
-                        <MudSelectItem T="AudioDevice" Value="@device">@device.FriendlyName</MudSelectItem>
+                        <MudSelectItem T="string" Value="@device">@GetAudioDeviceFriendlyName(device)</MudSelectItem>
                     }
                 </MudSelect>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddStationAsync">Add Station</MudButton>
@@ -127,6 +129,7 @@
         </MudCard>
     }
 
+    @* ------- STATION FOLDERS SETUP ------- *@
     @if (AppStateService.AppSettings != null && AppStateService.AppSettings.IsDatapathSetup)
     {
         <MudCard Outlined="true" Class="ma-8" Elevation="25">
@@ -165,4 +168,5 @@
 
 </MudGrid>
 
+@* ------- DEBUG SECTION ------- *@
 <MudButton Class="ma-8" Href="\debug" Variant="Variant.Outlined" Color="Color.Secondary">Debug</MudButton>

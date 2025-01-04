@@ -19,7 +19,6 @@ namespace SharedLibrary.Data
             MusicPatterns = Set<MusicPattern>();
             PatternCategories = Set<PatternCategory>();
             MusicGridItems = Set<MusicGridItem>();
-            AudioDevices = Set<AudioDevice>();
             AppSettings = Set<AppSettings>();
         }
 
@@ -32,7 +31,6 @@ namespace SharedLibrary.Data
         public DbSet<MusicPattern> MusicPatterns { get; set; }
         public DbSet<PatternCategory> PatternCategories { get; set; }
         public DbSet<MusicGridItem> MusicGridItems { get; set; }
-        public DbSet<AudioDevice> AudioDevices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -74,13 +72,6 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<MusicGridItem>()
                 .HasKey(mgi => mgi.Id);
 
-            // Configure the relationship between Station and AudioDevice
-            modelBuilder.Entity<Station>()
-                .HasOne(s => s.AudioDevice)
-                .WithMany()
-                .HasForeignKey(s => s.AudioDeviceId)
-                .OnDelete(DeleteBehavior.Restrict); // Ensure the foreign key constraint is enforced
-
             // Add unique constraint to AppSettings Id
             modelBuilder.Entity<AppSettings>()
                 .HasIndex(a => a.Id)
@@ -99,10 +90,6 @@ namespace SharedLibrary.Data
             // Configure composite key for ProgramLogItem
             modelBuilder.Entity<ProgramLogItem>()
                 .HasKey(pl => new { pl.Date, pl.LogOrderID });
-
-            // Configure primary key for AudioDevice
-            modelBuilder.Entity<AudioDevice>()
-                .HasKey(ad => ad.Id); // Add this line to configure the primary key
         }
     }
 }
