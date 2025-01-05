@@ -40,13 +40,13 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task AddCategoryToPatternAsync(Guid musicPatternId, Guid categoryId)
+        public async Task AddSongCategoryToPatternAsync(Guid musicPatternId, Guid songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicPattern = await context.MusicPatterns.Include(mp => mp.PatternCategories).FirstOrDefaultAsync(mp => mp.PatternId == musicPatternId);
-            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == categoryId);
+            var songCategory = await context.SongCategories.FirstOrDefaultAsync(c => c.SongCategoryId == songCategoryId);
 
-            if (musicPattern != null && category != null)
+            if (musicPattern != null && songCategory != null)
             {
                 var maxSortOrder = musicPattern.PatternCategories.Any()
                     ? musicPattern.PatternCategories.Max(pc => pc.MusicPatternSortOrder)
@@ -55,8 +55,8 @@ namespace SharedLibrary.Repositories
                 var patternCategory = new PatternCategory
                 {
                     MusicPatternId = musicPattern.PatternId,
-                    CategoryId = category.CategoryId,
-                    CategoryName = category.CategoryName!,
+                    SongCategoryId = songCategory.SongCategoryId,
+                    SongCategoryName = songCategory.SongCategoryName!,
                     MusicPatternSortOrder = maxSortOrder + 1,
                     StationId = musicPattern.StationId
                 };
@@ -66,10 +66,10 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task RemoveCategoryFromPatternAsync(MusicPattern musicPattern, Category category)
+        public async Task RemoveSongCategoryFromPatternAsync(MusicPattern musicPattern, SongCategory songCategory)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            var patternCategory = await context.PatternCategories.FirstOrDefaultAsync(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == musicPattern.PatternId);
+            var patternCategory = await context.PatternCategories.FirstOrDefaultAsync(pc => pc.SongCategoryId == songCategory.SongCategoryId && pc.MusicPatternId == musicPattern.PatternId);
             if (patternCategory != null)
             {
                 context.PatternCategories.Remove(patternCategory);
@@ -77,11 +77,11 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task MoveCategoryUpAsync(MusicPattern musicPattern, Category category)
+        public async Task MoveSongCategoryUpAsync(MusicPattern musicPattern, SongCategory songCategory)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var currentPatternCategory = await context.PatternCategories
-                .FirstOrDefaultAsync(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == musicPattern.PatternId);
+                .FirstOrDefaultAsync(pc => pc.SongCategoryId == songCategory.SongCategoryId && pc.MusicPatternId == musicPattern.PatternId);
 
             if (currentPatternCategory != null && currentPatternCategory.MusicPatternSortOrder > 1)
             {
@@ -99,11 +99,11 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task MoveCategoryDownAsync(MusicPattern musicPattern, Category category)
+        public async Task MoveSongCategoryDownAsync(MusicPattern musicPattern, SongCategory songCategory)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var currentPatternCategory = await context.PatternCategories
-                .FirstOrDefaultAsync(pc => pc.CategoryId == category.CategoryId && pc.MusicPatternId == musicPattern.PatternId);
+                .FirstOrDefaultAsync(pc => pc.SongCategoryId == songCategory.SongCategoryId && pc.MusicPatternId == musicPattern.PatternId);
 
             if (currentPatternCategory != null)
             {
@@ -121,28 +121,28 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<Category>> GetSelectedPatternCategoriesAsync(Guid musicPatternId)
+        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(Guid musicPatternId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.PatternCategories
                 .Where(pc => pc.MusicPatternId == musicPatternId)
                 .OrderBy(pc => pc.MusicPatternSortOrder)
-                .Select(pc => pc.Category)
+                .Select(pc => pc.SongCategory)
                 .ToListAsync();
         }
 
-        public async Task<List<Category>> GetSelectedPatternCategoriesAsync(Guid stationId, string patternName)
+        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(Guid stationId, string patternName)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicPattern = await context.MusicPatterns
                 .Include(mp => mp.PatternCategories)
-                .ThenInclude(pc => pc.Category)
+                .ThenInclude(pc => pc.SongCategory)
                 .FirstOrDefaultAsync(mp => mp.Name == patternName && mp.StationId == stationId);
 
             return musicPattern?.PatternCategories
                 .OrderBy(pc => pc.MusicPatternSortOrder)
-                .Select(pc => pc.Category)
-                .ToList() ?? new List<Category>();
+                .Select(pc => pc.SongCategory)
+                .ToList() ?? new List<SongCategory>();
         }
 
         public async Task<List<string>> GetMusicPatternNamesAsync()

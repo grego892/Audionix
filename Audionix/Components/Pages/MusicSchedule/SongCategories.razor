@@ -1,0 +1,40 @@
+﻿@page "/songcategories"
+@using Audionix;
+@using SharedLibrary.Data
+@inject ILogger<SongCategories> Logger
+@inject ApplicationDbContext DbContext
+@inject AppStateService AppStateService
+@inject NavigationManager _nav
+
+<PageTitle>Song Categories</PageTitle>
+
+<MudPaper>
+    <h2 Class="ptb-2 ml-2">Song Categories</h2>
+</MudPaper>
+
+<MudPaper Class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="1000px">
+
+    <MudTable Items="filteredSongCategories"
+              ReadOnly=false
+              Dense=true
+              Bordered=true
+              Class="border-solid">
+        <HeaderContent>
+            <MudTh>Song Category Name</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.SongCategoryName</MudTd>
+            <MudTd>
+                <MudButton Color="Color.Error" OnClick="@(() => DeleteSongCategory(context.SongCategoryId))">Delete</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+<MudPaper Class="ma-2" MaxWidth="1000px">
+    <MudStack Row="true">
+        <MudTextField @bind-Value="newSongCategoryName" Label="New Song Category" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+        <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddSongCategory" Size="Size.Small">Add Song Category</MudButton>
+    </MudStack>
+</MudPaper>

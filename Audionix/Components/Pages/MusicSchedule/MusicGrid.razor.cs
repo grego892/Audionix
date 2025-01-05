@@ -3,7 +3,7 @@ using SharedLibrary.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace Audionix.Components.Pages.LogBuilder
+namespace Audionix.Components.Pages.MusicSchedule
 {
     public partial class MusicGrid
     {

@@ -103,7 +103,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IDbContextFactory<ApplicationDbContext>, DbContextFactory>();
 
     builder.Services.AddScoped<IAudioMetadataRepository, AudioMetadataRepository>();
-    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddScoped<ISongCategoryRepository, SongCategoryRepository>();
     builder.Services.AddScoped<IFolderRepository, FolderRepository>();
     builder.Services.AddScoped<IMusicPatternRepository, MusicPatternRepository>();
     builder.Services.AddScoped<IProgramLogRepository, ProgramLogRepository>();

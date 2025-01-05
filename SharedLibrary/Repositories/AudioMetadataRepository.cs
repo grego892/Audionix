@@ -47,21 +47,21 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<AudioMetadata>> GetScheduledSongsAsync(List<Category> categories, Dictionary<string, int> categoryRotationIndex)
+        public async Task<List<AudioMetadata>> GetScheduledSongsAsync(List<SongCategory> songCategories, Dictionary<string, int> songCategoryRotationIndex)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var scheduledSongs = new List<AudioMetadata>();
 
-            foreach (var category in categories)
+            foreach (var songCategory in songCategories)
             {
                 var audioFiles = await context.AudioFiles
                     .AsNoTracking()
-                    .Where(af => af.Category == category.CategoryName)
+                    .Where(af => af.SongCategory == songCategory.SongCategoryName)
                     .ToListAsync();
 
                 if (audioFiles.Any())
                 {
-                    if (!categoryRotationIndex.TryGetValue(category.CategoryName ?? string.Empty, out int lastIndex))
+                    if (!songCategoryRotationIndex.TryGetValue(songCategory.SongCategoryName ?? string.Empty, out int lastIndex))
                     {
                         lastIndex = 0;
                     }
@@ -69,7 +69,7 @@ namespace SharedLibrary.Repositories
                     var nextIndex = (lastIndex + 1) % audioFiles.Count;
                     var rotatedSong = audioFiles[nextIndex];
 
-                    categoryRotationIndex[category.CategoryName ?? string.Empty] = nextIndex;
+                    songCategoryRotationIndex[songCategory.SongCategoryName ?? string.Empty] = nextIndex;
 
                     scheduledSongs.Add(rotatedSong);
                 }

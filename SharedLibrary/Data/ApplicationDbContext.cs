@@ -15,7 +15,7 @@ namespace SharedLibrary.Data
             AudioFiles = Set<AudioMetadata>();
             Folders = Set<Folder>();
             Log = Set<ProgramLogItem>();
-            Categories = Set<Category>();
+            SongCategories = Set<SongCategory>();
             MusicPatterns = Set<MusicPattern>();
             PatternCategories = Set<PatternCategory>();
             MusicGridItems = Set<MusicGridItem>();
@@ -27,7 +27,7 @@ namespace SharedLibrary.Data
         public DbSet<AudioMetadata> AudioFiles { get; set; }
         public DbSet<Folder> Folders { get; set; }
         public DbSet<ProgramLogItem> Log { get; set; }
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<SongCategory> SongCategories { get; set; }
         public DbSet<MusicPattern> MusicPatterns { get; set; }
         public DbSet<PatternCategory> PatternCategories { get; set; }
         public DbSet<MusicGridItem> MusicGridItems { get; set; }
@@ -48,9 +48,9 @@ namespace SharedLibrary.Data
                 .HasForeignKey(pc => pc.MusicPatternId);
 
             modelBuilder.Entity<PatternCategory>()
-                .HasOne(pc => pc.Category)
+                .HasOne(pc => pc.SongCategory)
                 .WithMany(c => c.PatternCategories)
-                .HasForeignKey(pc => pc.CategoryId);
+                .HasForeignKey(pc => pc.SongCategoryId);
 
             // Configure relationships if necessary
             modelBuilder.Entity<AudioMetadata>()

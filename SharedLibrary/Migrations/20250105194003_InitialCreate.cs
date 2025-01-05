@@ -252,20 +252,20 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "SongCategories",
                 columns: table => new
                 {
-                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CategoryName = table.Column<string>(type: "text", nullable: true),
+                    SongCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SongCategoryName = table.Column<string>(type: "text", nullable: true),
                     StationId = table.Column<Guid>(type: "uuid", nullable: false),
                     TemplateId = table.Column<int>(type: "integer", nullable: true),
                     TemplatePatternId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.CategoryId);
+                    table.PrimaryKey("PK_SongCategories", x => x.SongCategoryId);
                     table.ForeignKey(
-                        name: "FK_Categories_MusicPatterns_TemplatePatternId",
+                        name: "FK_SongCategories_MusicPatterns_TemplatePatternId",
                         column: x => x.TemplatePatternId,
                         principalTable: "MusicPatterns",
                         principalColumn: "PatternId");
@@ -291,8 +291,8 @@ namespace SharedLibrary.Migrations
                     Duration = table.Column<TimeSpan>(type: "interval", nullable: false),
                     StationId = table.Column<Guid>(type: "uuid", nullable: false),
                     Folder = table.Column<string>(type: "text", nullable: true),
-                    Category = table.Column<string>(type: "text", nullable: true),
-                    AudioType = table.Column<int>(type: "integer", nullable: false)
+                    SongCategory = table.Column<string>(type: "text", nullable: true),
+                    EventType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -342,8 +342,8 @@ namespace SharedLibrary.Migrations
                     Length = table.Column<TimeSpan>(type: "interval", nullable: false),
                     Intro = table.Column<short>(type: "smallint", nullable: false),
                     Segue = table.Column<short>(type: "smallint", nullable: false),
-                    Category = table.Column<string>(type: "text", nullable: true),
-                    AudioType = table.Column<int>(type: "integer", nullable: true),
+                    SongCategory = table.Column<string>(type: "text", nullable: true),
+                    EventType = table.Column<int>(type: "integer", nullable: true),
                     From = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Passthrough = table.Column<string>(type: "text", nullable: true),
@@ -376,24 +376,24 @@ namespace SharedLibrary.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MusicPatternSortOrder = table.Column<int>(type: "integer", nullable: false),
                     MusicPatternId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CategoryName = table.Column<string>(type: "text", nullable: false),
+                    SongCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SongCategoryName = table.Column<string>(type: "text", nullable: false),
                     StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PatternCategories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PatternCategories_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_PatternCategories_MusicPatterns_MusicPatternId",
                         column: x => x.MusicPatternId,
                         principalTable: "MusicPatterns",
                         principalColumn: "PatternId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PatternCategories_SongCategories_SongCategoryId",
+                        column: x => x.SongCategoryId,
+                        principalTable: "SongCategories",
+                        principalColumn: "SongCategoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -451,11 +451,6 @@ namespace SharedLibrary.Migrations
                 column: "StationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_TemplatePatternId",
-                table: "Categories",
-                column: "TemplatePatternId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Folders_StationId",
                 table: "Folders",
                 column: "StationId");
@@ -471,14 +466,19 @@ namespace SharedLibrary.Migrations
                 column: "StationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PatternCategories_CategoryId",
-                table: "PatternCategories",
-                column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PatternCategories_MusicPatternId",
                 table: "PatternCategories",
                 column: "MusicPatternId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PatternCategories_SongCategoryId",
+                table: "PatternCategories",
+                column: "SongCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SongCategories_TemplatePatternId",
+                table: "SongCategories",
+                column: "TemplatePatternId");
         }
 
         /// <inheritdoc />
@@ -530,7 +530,7 @@ namespace SharedLibrary.Migrations
                 name: "Stations");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "SongCategories");
 
             migrationBuilder.DropTable(
                 name: "MusicPatterns");

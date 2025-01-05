@@ -5,7 +5,7 @@
 @using SharedLibrary.Models.MusicSchedule
 @using MudBlazor
 @using MudBlazor.Components
-@inject ILogger<Categories> Logger
+@inject ILogger<SongCategories> Logger
 @inject ApplicationDbContext DbContext
 @inject NavigationManager _nav
 @inject IDialogService DialogService
@@ -42,27 +42,27 @@
     <MudPaper Style="min-height:calc(100vh - 157px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
         <MudPaper Class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
             <MudStack Row="true">
-                <MudSelect Class="ma-1" T="Guid?" Label="Category" Value="selectedCategoryId" ValueChanged="OnCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
-                    @foreach (var category in filteredCategories)
+                <MudSelect Class="ma-1" T="Guid?" Label="Song Category" Value="selectedSongCategoryId" ValueChanged="OnSongCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                    @foreach (var songCategory in filteredSongCategories)
                     {
-                        <MudSelectItem Value="@(category.CategoryId as Guid?)">@category.CategoryName</MudSelectItem>
+                        <MudSelectItem Value="@(songCategory.SongCategoryId as Guid?)">@songCategory.SongCategoryName</MudSelectItem>
                     }
                 </MudSelect>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddCategoryToPattern" Size="Size.Small">Add Category</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddSongCategoryToPattern" Size="Size.Small">Add Song Category</MudButton>
             </MudStack>
         </MudPaper>
 
         <MudPaper class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
             <MudTable Items="selectedPatternCategories" ReadOnly="false" Dense="true">
                 <HeaderContent>
-                    <MudTh>Category Name</MudTh>
+                    <MudTh>Song Category Name</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Category Name">@context.CategoryName</MudTd>
+                    <MudTd DataLabel="Song Category Name">@context.SongCategoryName</MudTd>
                     <MudTd>
-                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveCategoryUp(@context))" />
-                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveCategoryDown(@context))" />
-                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveCategoryFromPattern(@context))">Delete</MudButton>
+                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveSongCategoryUp(@context))" />
+                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveSongCategoryDown(@context))" />
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveSongCategoryFromPattern(@context))">Delete</MudButton>
                     </MudTd>
                 </RowTemplate>
             </MudTable>

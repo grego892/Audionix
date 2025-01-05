@@ -13,17 +13,15 @@ namespace Audionix.Components.Pages.FileManager
     partial class FileManager : IDisposable
     {
         private string selectedFolder = string.Empty;
-        private string selectedCategory = string.Empty;
-
+        private string selectedSongCategory = string.Empty;
         private bool isUploading;
         private int progress;
         private WavesurferPlayer? wavePlayer;
         readonly List<IBrowserFile> filesToUpload = new List<IBrowserFile>();
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<string>? folders;
-        private List<Category>? categories;
-        private List<AudioType>? audioTypes;
-        private bool isSongdataEnabled = false;
+        private List<SongCategory>? songCategories;
+        private List<EventType>? eventTypes;
         private bool editorEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
@@ -31,7 +29,7 @@ namespace Audionix.Components.Pages.FileManager
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] public FileManagerService? FileManagerSvc { get; set; }
         [Inject] private IStationRepository StationRepository { get; set; } = default!;
-        [Inject] private ICategoryRepository CategoryRepository { get; set; } = default!;
+        [Inject] private ISongCategoryRepository SongCategoryRepository { get; set; } = default!;
         [Inject] private IAudioMetadataRepository AudioMetadataRepository { get; set; } = default!;
         [Inject] public AppStateService? AppStateService { get; set; }
         [Inject] FileManagerService? FileManagerService { get; set; }
@@ -49,8 +47,8 @@ namespace Audionix.Components.Pages.FileManager
             if (AppStateService?.station != null && FileManagerService != null)
             {
                 folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
-                categories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
-                audioTypes = Enum.GetValues(typeof(AudioType)).Cast<AudioType>().ToList();
+                songCategories = await SongCategoryRepository.GetSongCategoriesAsync(AppStateService.station.StationId);
+                eventTypes = Enum.GetValues(typeof(EventType)).Cast<EventType>().ToList();
                 AppStateService.OnStationChanged += HandleStationChanged;
             }
         }
@@ -60,7 +58,7 @@ namespace Audionix.Components.Pages.FileManager
             if (AppStateService?.station != null && FileManagerService != null)
             {
                 folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
-                categories = await CategoryRepository.GetCategoriesAsync(AppStateService.station.StationId);
+                songCategories = await SongCategoryRepository.GetSongCategoriesAsync(AppStateService.station.StationId);
 
                 filesInDirectory.Clear();
                 SelectedFolder = string.Empty;
@@ -100,25 +98,25 @@ namespace Audionix.Components.Pages.FileManager
             await GetFolderFileList(SelectedFolder);
         }
 
-        private async Task SongCategoryChanged(AudioMetadata audioMetadata, string newCategory)
-        {
-            if (AudioMetadataRepository != null)
-            {
-                audioMetadata.Category = newCategory;
-                await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
-                Snackbar?.Add("Category updated successfully", Severity.Success);
-            }
-        }
+        //private async Task SongCategoryChanged(AudioMetadata audioMetadata, string newSongCategory)
+        //{
+        //    if (AudioMetadataRepository != null)
+        //    {
+        //        audioMetadata.SongCategory = newSongCategory;
+        //        await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
+        //        Snackbar?.Add("Song Category updated successfully", Severity.Success);
+        //    }
+        //}
 
-        private async Task SongAudioTypeChanged(AudioMetadata audioMetadata, AudioType audioType)
-        {
-            if (AudioMetadataRepository != null)
-            {
-                audioMetadata.AudioType = audioType;
-                await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
-                Snackbar?.Add("Audio Type updated successfully", Severity.Success);
-            }
-        }
+        //private async Task SongEventTypeChanged(AudioMetadata audioMetadata, EventType eventType)
+        //{
+        //    if (AudioMetadataRepository != null)
+        //    {
+        //        audioMetadata.EventType = EventType;
+        //        await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
+        //        Snackbar?.Add("Audio Type updated successfully", Severity.Success);
+        //    }
+        //}
 
         private async Task DeleteAudioAsync(AudioMetadata audioMetadata)
         {
@@ -185,11 +183,6 @@ namespace Audionix.Components.Pages.FileManager
         {
             progress = value;
             StateHasChanged();
-        }
-
-        private void SongdataPressed()
-        {
-            isSongdataEnabled = !isSongdataEnabled;
         }
 
         public string SelectedFolder

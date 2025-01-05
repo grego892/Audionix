@@ -67,7 +67,7 @@ namespace SharedLibrary.Models
                     Rotator = pl.Rotator,
                     Length = pl.Length,
                     Segue = pl.Segue,
-                    Category = pl.Category,
+                    SongCategory = pl.SongCategory,
                     From = pl.From,
                     Description = pl.Description,
                     Passthrough = pl.Passthrough,

@@ -65,7 +65,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-    <Content Update="Components\Pages\LogBuilder\Categories.razor">
+    <Content Update="Components\Pages\MusicSchedule\SongCategories.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Update="wwwroot\favicon.ico">

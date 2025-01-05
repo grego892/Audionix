@@ -13,17 +13,17 @@ namespace Audionix.Components.Pages.LogBuilder
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
-        [Inject] private ICategoryRepository? CategoryRepository { get; set; }
+        [Inject] private ISongCategoryRepository? SongCategoryRepository { get; set; }
         [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
 
 
         private MudDatePicker _logBuilderPicker;
         private List<Guid> musicPatterns = new();
-        private List<Category> categoryList = new();
+        private List<SongCategory> songCategoryList = new();
         private List<AudioMetadata> scheduledSongs = new();
         private List<ProgramLogItem> log = new();
-        private Dictionary<string, int> categoryRotationIndex = new();
+        private Dictionary<string, int> songCategoryRotationIndex = new();
         private List<ProgramLogItem> newDaysLog = new();
 
 
@@ -34,8 +34,8 @@ namespace Audionix.Components.Pages.LogBuilder
                 var dayOfWeek = LogBuilderLogDate.Value.DayOfWeek;
                 var stationId = AppStateService.station.StationId;
                 musicPatterns = await MusicPatternRepository.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
-                categoryList = await CategoryRepository.GetCategoriesForPatternsAsync(musicPatterns);
-                scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(categoryList, categoryRotationIndex);
+                songCategoryList = await SongCategoryRepository.GetSongCategoriesForPatternsAsync(musicPatterns);
+                scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(songCategoryList, songCategoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
                 await LogBuilderPickerOk();
@@ -95,7 +95,7 @@ namespace Audionix.Components.Pages.LogBuilder
                     Status = StatusType.notPlayed,
                     TimeScheduled = currentTime,
                     Cue = "AutoStart",
-                    AudioType = AudioType.song
+                    EventType = EventType.song
                 };
 
                 newDaysLog.Add(newLogItem);

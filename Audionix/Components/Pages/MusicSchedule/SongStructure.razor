@@ -1,0 +1,66 @@
+﻿@page "/songstructure"
+@using SharedLibrary.Models.MusicSchedule
+@rendermode InteractiveServer
+
+<PageTitle>Song Structure</PageTitle>
+
+<MudPaper Style="min-height:calc(100vh - 68px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
+    <MudPaper>
+        <MudPaper Class="ml-1 mr-1 mb-1">
+            <h2 Class="ptb-2 ml-2">File Manager</h2>
+        </MudPaper>
+        <MudStack Row="true" >
+            <MudPaper Width="300px">
+                <MudSelect Class="pl-2" Margin="Margin.Dense" T="string" Label="Folders" Value="SelectedFolder" ValueChanged="GetFolderFileList" Variant="Variant.Outlined">
+                    @foreach (var folder in folders ?? Enumerable.Empty<string>())
+                    {
+                        <MudSelectItem Value="@folder" />
+                    }
+                </MudSelect>
+            </MudPaper>
+        </MudStack>
+    </MudPaper>
+
+    @if (filesInDirectory.Any())
+    {
+        <MudPaper Class="border-solid border-2 mud-border-primary ma-1" Style="overflow:auto">
+            <MudDataGrid Items="filesInDirectory"
+                         Bordered="true"
+                         T="AudioMetadata"
+                         SortMode="SortMode.None"
+                         FixedHeader="true"
+                         Virtualize="false"
+                         Dense="true">
+                <Columns>
+                    <PropertyColumn Property="x => x.Title" />
+                    <PropertyColumn Property="x => x.Artist" />
+                    <TemplateColumn>
+                        <HeaderTemplate>
+                            <MudText>Duration</MudText>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudText>@context.Item.Duration.ToString(@"mm\:ss")</MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.Filename" />
+                    <TemplateColumn>
+                        <HeaderTemplate>
+                            <MudText>Intro</MudText>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudText>@(((double)context.Item.Intro / 1000).ToString("F1"))</MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn>
+                        <HeaderTemplate>
+                            <MudText>Segue</MudText>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudText>@(((double)context.Item.Segue / 1000).ToString("F1"))</MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudPaper>
+    }
+</MudPaper>

@@ -27,8 +27,8 @@ namespace SharedLibrary.Models
         public TimeSpan Length { get; set; }
         public Int16 Intro { get; set; }
         public Int16 Segue { get; set; }
-        public string? Category { get; set; }
-        public AudioType? AudioType { get; set; }
+        public string? SongCategory { get; set; }
+        public EventType? EventType { get; set; }
         public string? From { get; set; }
         public string? Description { get; set; }
         public string? Passthrough { get; set; }
