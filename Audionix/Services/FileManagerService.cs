@@ -18,7 +18,6 @@ namespace Audionix.Services
         private readonly IUnitOfWork _unitOfWork;
         private AppSettings? appSettings;
 
-
         public FileManagerService(IStationRepository stationRepository, IAudioMetadataRepository audioMetadataRepository, IAppSettingsRepository appSettingsRepository, IFolderRepository FolderRepository, IUnitOfWork unitOfWork)
         {
             _stationRepository = stationRepository;
@@ -27,7 +26,6 @@ namespace Audionix.Services
             _folderRepository = FolderRepository;
             _unitOfWork = unitOfWork;
         }
-
 
         public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
         {
@@ -121,7 +119,6 @@ namespace Audionix.Services
             Log.Information("--- FileManager - LoadFiles() -- End - LoadFiles: {Count}", selectedFiles.Count);
         }
 
-
         public async Task DeleteAudioAsync(AudioMetadata audioMetadata, string selectedStation, string dataPath, Func<Task> getFolderFileList)
         {
             Log.Information("--- FileManager - GetFolderFileList() -- DeleteAudio: " + audioMetadata.Filename);
@@ -137,7 +134,6 @@ namespace Audionix.Services
             await getFolderFileList();
             Log.Information("--- FileManager - GetFolderFileList() - End - DeleteAudio: " + audioMetadata.Filename);
         }
-
 
         public async Task AddFolder(Folder newFolder, Station selectedStation, ISnackbar snackbar)
         {
@@ -188,7 +184,6 @@ namespace Audionix.Services
                 Log.Error(ex, "++++++ FileManagerService -- AddFolder() - Error adding folder");
             }
         }
-
 
         public async Task RemoveFolder(Folder folder)
         {

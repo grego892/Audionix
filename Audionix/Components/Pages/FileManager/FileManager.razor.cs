@@ -206,9 +206,54 @@ namespace Audionix.Components.Pages.FileManager
             }
         }
 
-        public void ImportExistingAudio()
+        private async Task ImportExistingAudio()
         {
+            if (FileManagerSvc == null || AppStateService?.station == null || AppSettingsRepository == null)
+            {
+                Log.Error("ImportExistingAudio: Required services are null.");
+                return;
+            }
 
+            var appSettings = await AppSettingsRepository.GetAppSettingsAsync();
+            var dataPath = appSettings?.DataPath ?? string.Empty;
+
+            if (string.IsNullOrEmpty(dataPath))
+            {
+                Log.Error("ImportExistingAudio: Data path is null or empty.");
+                return;
+            }
+
+            var folderPath = Path.Combine(dataPath, "Stations", AppStateService.station.CallLetters, "Audio", SelectedFolder);
+            if (!Directory.Exists(folderPath))
+            {
+                Log.Error("ImportExistingAudio: Folder does not exist.");
+                return;
+            }
+
+            var filesInFolder = Directory.GetFiles(folderPath);
+            var audioFilesInDb = await AudioMetadataRepository.GetAudioFilesAsync();
+            var filesNotInDb = filesInFolder.Where(file => !audioFilesInDb.Any(dbFile => dbFile.Filename == Path.GetFileName(file))).ToList();
+
+            var audioMetadataService = new AudioMetadataService(StationRepository, AudioMetadataRepository);
+
+            foreach (var file in filesNotInDb)
+            {
+                try
+                {
+                    var audioMetadata = await audioMetadataService.GetMetadataAsync(file);
+                    if (audioMetadata != null)
+                    {
+                        audioMetadata.Folder = SelectedFolder;
+                        await audioMetadataService.SaveAudioMetadata(audioMetadata, Path.GetFileName(file), AppStateService.station.StationId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "ImportExistingAudio: Error processing file {Filename}", file);
+                }
+            }
+
+            await GetFolderFileList(SelectedFolder);
         }
 
         public void Dispose()

@@ -13,7 +13,7 @@ namespace Audionix.Services
         public AudioMetadataService(IStationRepository stationRepository, IAudioMetadataRepository audioMetadataRepository)
         {
             _stationRepository = stationRepository;
-            _audioMetadataRepository = audioMetadataRepository;  
+            _audioMetadataRepository = audioMetadataRepository;
         }
 
         public async Task<AudioMetadata> GetMetadataAsync(string filepath)
