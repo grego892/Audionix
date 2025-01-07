@@ -11,35 +11,35 @@ namespace SharedLibrary.Models.MusicSchedule
         public int Id { get; set; }
         public int AudioMetadataId { get; set; }
         public AudioMetadata? AudioMetadata { get; set; }
-        public Category SongCategory { get; set; }
-        public Tempo SongTempo { get; set; }
-        public EnergyLevel SongEnergyLevel { get; set; }
+        public List<string> Category { get; set; } = new List<string>
+        {
+            "Current",
+            "Recurrent",
+            "Gold",
+            "Power",
+            "Specialty",
+            "Holiday",
+            "Liner",
+            "Custom",
+            "None"
+        };
         public int PlayCount { get; set; }
         public int LastPlayed { get; set; }
-
-        public enum Category
+        public string? SoundCode { get; set; }
+        public List<string> Tempo { get; set; } = new List<string>
         {
-            Current,
-            Recurrent,
-            Gold,
-            Power,
-            Specialty,
-            Holiday,
-            Custom,
-            None
-        }
-        public enum Tempo
+            "Slow",
+            "Medium",
+            "Fast"
+        };
+        public List<string> EnergyLevel { get; set; } = new List<string>
         {
-            Slow,
-            Medium,
-            Fast
-        }
-        public enum EnergyLevel
-        {
-            Low,
-            Medium,
-            High
-        }
-
+            "Low",
+            "Medium",
+            "High"
+        };
+        public string? Daypart { get; set; }
+        public string? Level { get; set; }
+        public string? Soundwave { get; set; }
     }
 }
