@@ -11,6 +11,10 @@ namespace SharedLibrary.Models.MusicSchedule
         public int Id { get; set; }
         public int AudioMetadataId { get; set; }
         public AudioMetadata? AudioMetadata { get; set; }
+
+        //Play history
+        public int PlayCount { get; set; }
+        public int LastPlayed { get; set; }
         public List<string> Category { get; set; } = new List<string>
         {
             "Current",
@@ -23,8 +27,7 @@ namespace SharedLibrary.Models.MusicSchedule
             "Custom",
             "None"
         };
-        public int PlayCount { get; set; }
-        public int LastPlayed { get; set; }
+
         public string? SoundCode { get; set; }
         public List<string> Tempo { get; set; } = new List<string>
         {

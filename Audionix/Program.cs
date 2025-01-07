@@ -14,6 +14,7 @@ using Serilog.Settings.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Audionix.Hubs;
 using Audionix.Middleware;
+using SharedLibrary.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +112,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
     builder.Services.AddScoped<AppStateService>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+    builder.Services.AddScoped<LogService>();
     builder.Services.AddSignalR();
 
     // Add logging configuration for SignalR

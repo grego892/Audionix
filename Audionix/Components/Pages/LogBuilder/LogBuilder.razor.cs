@@ -4,6 +4,7 @@ using SharedLibrary.Repositories;
 using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using SharedLibrary.Services;
 
 namespace Audionix.Components.Pages.LogBuilder
 {
@@ -11,6 +12,7 @@ namespace Audionix.Components.Pages.LogBuilder
     {
         public DateTime? LogBuilderLogDate { get; set; } = null;
         [Inject] private AppStateService? AppStateService { get; set; }
+        [Inject] private LogService? LogService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
         [Inject] private ISongCategoryRepository? SongCategoryRepository { get; set; }
@@ -40,6 +42,8 @@ namespace Audionix.Components.Pages.LogBuilder
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
                 await LogBuilderPickerOk();
             }
+
+            LogService.Test();
         }
 
         private void LogBuilderPickerSetToday()
