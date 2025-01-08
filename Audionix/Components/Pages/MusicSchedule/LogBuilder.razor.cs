@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SharedLibrary.Services;
 
-namespace Audionix.Components.Pages.LogBuilder
+namespace Audionix.Components.Pages.MusicSchedule
 {
     public partial class LogBuilder
     {
