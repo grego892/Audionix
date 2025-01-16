@@ -1,0 +1,71 @@
+﻿@page "/patterns"
+@using Audionix
+@using SharedLibrary.Data
+@using SharedLibrary.Models
+@using SharedLibrary.Models.MusicSchedule
+@using MudBlazor
+@using MudBlazor.Components
+@inject ILogger<SongCategories> Logger
+@inject ApplicationDbContext DbContext
+@inject NavigationManager _nav
+@inject IDialogService DialogService
+
+<PageTitle>Patterns</PageTitle>
+
+<MudPaper>
+    <h2 class="ptb-2 ml-2">Patterns</h2>
+</MudPaper>
+
+<MudStack Row="true">
+    <MudPaper class="ma-1" Elevation="8">
+        <MudStack Row="true">
+            <MudSelect Style="min-width: 200px;" T="string" Label="Select Template" Value="selectedMusicPatternName" ValueChanged="OnPatternChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                @foreach (var musicPatternName in filteredMusicPatternNames)
+                {
+                    <MudSelectItem Value="musicPatternName.Name">@musicPatternName.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton OnClick="OpenDialogRemoveMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Remove Selected Pattern</MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Width="500px" Class="ma-1" Elevation="8">
+        <MudStack Row="true">
+            <MudTextField Class="ml-1 mt-1 mb-1" @bind-Value="newMusicPatternName" Label="New Music Pattern Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            <MudButton OnClick="AddMusicPattern" Class="mr-1 mt-1 mb-1" Variant="Variant.Outlined" Color="Color.Primary">Add New Pattern</MudButton>
+        </MudStack>
+    </MudPaper>
+</MudStack>
+
+@if (selectedMusicPatternName != null)
+{
+    <MudPaper Style="min-height:calc(100vh - 157px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
+        <MudPaper Class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
+            <MudStack Row="true">
+                <MudSelect Class="ma-1" T="Guid?" Label="Song Category" Value="selectedSongCategoryId" ValueChanged="OnSongCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                    @foreach (var songCategory in filteredSongCategories)
+                    {
+                        <MudSelectItem Value="@(songCategory.SongCategoryId as Guid?)">@songCategory.SongCategoryName</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddSongCategoryToPattern" Size="Size.Small">Add Song Category</MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
+            <MudTable Items="selectedPatternCategories" ReadOnly="false" Dense="true">
+                <HeaderContent>
+                    <MudTh>Song Category Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Song Category Name">@context.SongCategoryName</MudTd>
+                    <MudTd>
+                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveSongCategoryUp(@context))" />
+                        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveSongCategoryDown(@context))" />
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(()=>RemoveSongCategoryFromPattern(@context))">Delete</MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudPaper>
+}

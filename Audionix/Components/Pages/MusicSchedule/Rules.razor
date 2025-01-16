@@ -1,0 +1,48 @@
+﻿@page "/policies"
+@inject ApplicationDbContext DbContext
+
+<h3>Rules (Policies)</h3>
+
+<MudPaper Class="pa-4">
+    <MudTabs>
+        <MudTabPanel Text="Categories">
+            <MudTextField @bind-Value="newCategory" Label="New Category" Variant="Variant.Outlined" />
+            <MudButton OnClick="AddCategory" Color="Color.Primary" Variant="Variant.Filled">Add Category</MudButton>
+            <MudList T="string">
+                @foreach (var category in songSchedule.Category)
+                {
+                    <MudListItem>
+                        @category
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCategory(category)" />
+                    </MudListItem>
+                }
+            </MudList>
+        </MudTabPanel>
+        <MudTabPanel Text="Sound Codes">
+            <MudTextField @bind-Value="newSoundCode" Label="New Sound Code" Variant="Variant.Outlined" />
+            <MudButton OnClick="AddSoundCode" Color="Color.Primary" Variant="Variant.Filled">Add Sound Code</MudButton>
+            <MudList T="string">
+                @foreach (var soundCode in songSchedule.SoundCode)
+                {
+                    <MudListItem>
+                        @soundCode
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveSoundCode(soundCode)" />
+                    </MudListItem>
+                }
+            </MudList>
+        </MudTabPanel>
+        <MudTabPanel Text="Energy Levels">
+            <MudTextField @bind-Value="newEnergyLevel" Label="New Energy Level" Variant="Variant.Outlined" />
+            <MudButton OnClick="AddEnergyLevel" Color="Color.Primary" Variant="Variant.Filled">Add Energy Level</MudButton>
+            <MudList T="string">
+                @foreach (var energyLevel in songSchedule.EnergyLevel)
+                {
+                    <MudListItem>
+                        @energyLevel
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveEnergyLevel(energyLevel)" />
+                    </MudListItem>
+                }
+            </MudList>
+        </MudTabPanel>
+    </MudTabs>
+</MudPaper>
