@@ -28,6 +28,6 @@ namespace Audionix.Components.Pages.MusicSchedule
         public void RemoveEnergyLevel(string? energyLevel) { }
         public void AddEnergyLevelk(SongSchedule songSchedule) { }
         public void OnRowEnter(SongSchedule songSchedule) { }
-        public void AddEnergyLevel(SongSchedule songSchedule) { }
+        public void AddEnergyLevel() { }
     }
 }
