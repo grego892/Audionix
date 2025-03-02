@@ -28,7 +28,12 @@ namespace SharedLibrary.Models.MusicSchedule
             "None"
         };
 
-        public string? SoundCode { get; set; }
+        public List<string> SoundCode { get; set; } = new List<string>
+        {
+            "1",
+            "2",
+            "3"
+        };
         public List<string> Tempo { get; set; } = new List<string>
         {
             "Slow",

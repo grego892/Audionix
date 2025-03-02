@@ -65,9 +65,6 @@
   </ItemGroup>
 
 	<ItemGroup>
-    <Content Update="Components\Pages\MusicSchedule\SongCategories.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
     <Content Update="wwwroot\favicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -12,7 +12,7 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250117024606_InitialCreate")]
+    [Migration("20250228041220_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

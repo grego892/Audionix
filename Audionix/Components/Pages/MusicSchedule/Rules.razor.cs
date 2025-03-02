@@ -19,15 +19,65 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         public void AddCategory()
         {
-
+            if (!string.IsNullOrEmpty(newCategory))
+            {
+                songSchedule.Category.Add(newCategory);
+                newCategory = string.Empty;
+            }
         }
-        public void RemoveCategory(string? category) { }
-        public void AddSoundCode() { }
-        public void RemoveSoundCode(char soundCode) { }
-        public void NewEvergyLevel(SongSchedule songSchedule) { }
-        public void RemoveEnergyLevel(string? energyLevel) { }
-        public void AddEnergyLevelk(SongSchedule songSchedule) { }
-        public void OnRowEnter(SongSchedule songSchedule) { }
-        public void AddEnergyLevel() { }
+
+        public void RemoveCategory(string? category)
+        {
+            if (category != null)
+            {
+                songSchedule.Category.Remove(category);
+            }
+        }
+
+        public void AddSoundCode()
+        {
+            if (!string.IsNullOrEmpty(newSoundCode))
+            {
+                songSchedule.SoundCode.Add(newSoundCode);
+                newSoundCode = string.Empty;
+            }
+        }
+
+        public void RemoveSoundCode(string soundCode)
+        {
+            songSchedule.SoundCode.Remove(soundCode);
+        }
+
+        public void AddEnergyLevel()
+        {
+            if (!string.IsNullOrEmpty(newEnergyLevel))
+            {
+                songSchedule.EnergyLevel.Add(newEnergyLevel);
+                newEnergyLevel = string.Empty;
+            }
+        }
+
+        public void RemoveEnergyLevel(string? energyLevel)
+        {
+            if (energyLevel != null)
+            {
+                songSchedule.EnergyLevel.Remove(energyLevel);
+            }
+        }
+
+        private void RemoveCategoryHandler(string category)
+        {
+            RemoveCategory(category);
+        }
+
+        private void RemoveSoundCodeHandler(string soundCode)
+        {
+            RemoveSoundCode(soundCode);
+        }
+
+        private void RemoveEnergyLevelHandler(string energyLevel)
+        {
+            RemoveEnergyLevel(energyLevel);
+        }
     }
 }

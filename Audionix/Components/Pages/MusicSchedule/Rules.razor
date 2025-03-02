@@ -1,48 +1,93 @@
 ﻿@page "/policies"
 @inject ApplicationDbContext DbContext
 
-<h3>Rules (Policies)</h3>
 
-<MudPaper Class="pa-4">
-    <MudTabs>
+<MudPaper Class="pa-2 ma-2">
+    <MudTabs Border="true" Elevation="1">
         <MudTabPanel Text="Categories">
-            <MudTextField @bind-Value="newCategory" Label="New Category" Variant="Variant.Outlined" />
-            <MudButton OnClick="AddCategory" Color="Color.Primary" Variant="Variant.Filled">Add Category</MudButton>
-            <MudList T="string">
-                @foreach (var category in songSchedule.Category)
-                {
-                    <MudListItem>
-                        @category
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCategory(category)" />
-                    </MudListItem>
-                }
-            </MudList>
+            <MudGrid Class="ma=2 pa-2">
+                <MudItem xs="5">
+                    <MudStack Row="true">
+                        <MudTextField @bind-Value="newCategory" Label="New Category" Variant="Variant.Outlined" />
+                        <MudButton OnClick="AddCategory" Color="Color.Primary" Variant="Variant.Filled">Add Category</MudButton>
+                    </MudStack>
+                </MudItem>
+                <MudFlexBreak />
+                <MudItem xs="6">
+                    <MudTable 
+                            Items="songSchedule.Category"
+                            Bordered="true"
+                            Dense="true"
+                            Outlined="true">
+                        <HeaderContent>
+                            <MudTh>Category</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Category">@context</MudTd>
+                            <MudTd DataLabel="Actions">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context))" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
         </MudTabPanel>
         <MudTabPanel Text="Sound Codes">
-            <MudTextField @bind-Value="newSoundCode" Label="New Sound Code" Variant="Variant.Outlined" />
-            <MudButton OnClick="AddSoundCode" Color="Color.Primary" Variant="Variant.Filled">Add Sound Code</MudButton>
-            <MudList T="string">
-                @foreach (var soundCode in songSchedule.SoundCode)
-                {
-                    <MudListItem>
-                        @soundCode
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveSoundCode(soundCode)" />
-                    </MudListItem>
-                }
-            </MudList>
+            <MudGrid Class="ma=2 pa-2">
+                <MudItem xs="5">
+                    <MudStack Row="true">
+                        <MudTextField @bind-Value="newSoundCode" Label="New Sound Code" Variant="Variant.Outlined" />
+                        <MudButton OnClick="AddSoundCode" Color="Color.Primary" Variant="Variant.Filled">Add Sound Code</MudButton>
+                    </MudStack>
+                </MudItem>
+                <MudFlexBreak />
+                <MudItem xs="6">
+                    <MudTable Items="songSchedule.SoundCode"
+                                Bordered="true"
+                                Dense="true"
+                                Outlined="true">
+                        <HeaderContent>
+                            <MudTh>Category</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Category">@context</MudTd>
+                            <MudTd DataLabel="Actions">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveSoundCodeHandler(@context))" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
         </MudTabPanel>
-        <MudTabPanel Text="Energy Levels">
-            <MudTextField @bind-Value="newEnergyLevel" Label="New Energy Level" Variant="Variant.Outlined" />
-            <MudButton OnClick="AddEnergyLevel" Color="Color.Primary" Variant="Variant.Filled">Add Energy Level</MudButton>
-            <MudList T="string">
-                @foreach (var energyLevel in songSchedule.EnergyLevel)
-                {
-                    <MudListItem>
-                        @energyLevel
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveEnergyLevel(energyLevel)" />
-                    </MudListItem>
-                }
-            </MudList>
+        <MudTabPanel Text="Categories">
+            <MudGrid Class="ma=2 pa-2">
+                <MudItem xs="5">
+                    <MudStack Row="true">
+                        <MudTextField @bind-Value="newEnergyLevel" Label="New Energy Level" Variant="Variant.Outlined" />
+                        <MudButton OnClick="AddEnergyLevel" Color="Color.Primary" Variant="Variant.Filled">Add Energy Level</MudButton>
+                    </MudStack>
+                </MudItem>
+                <MudFlexBreak />
+                <MudItem xs="6">
+                    <MudTable Items="songSchedule.EnergyLevel"
+                                Bordered="true"
+                                Dense="true"
+                                Outlined="true">
+                        <HeaderContent>
+                            <MudTh>Energy Level</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Category">@context</MudTd>
+                            <MudTd DataLabel="Actions">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveEnergyLevelHandler(@context))" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
         </MudTabPanel>
     </MudTabs>
 </MudPaper>
