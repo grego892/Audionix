@@ -5,6 +5,7 @@ using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SharedLibrary.Services;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -40,6 +41,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(songCategoryList, songCategoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
+                await ProgramLogRepository.RemoveOlderDaysFromDbLogAsync(1);
                 await LogBuilderPickerOk();
             }
 

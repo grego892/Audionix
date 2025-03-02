@@ -272,5 +272,29 @@ namespace SharedLibrary.Repositories
                 throw;
             }
         }
+
+        public async Task RemoveOlderDaysFromDbLogAsync(int daysBack)
+        {
+            try
+            {
+                using var context = _dbContextFactory.CreateDbContext();
+                var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+                var logsToRemove = await context.Log
+                    .Where(log => log.Date < currentDate)
+                    .ToListAsync();
+
+                if (logsToRemove.Any())
+                {
+                    context.Log.RemoveRange(logsToRemove);
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in RemoveOlderDaysFromDbLogAsync");
+                throw;
+            }
+        }
     }
 }

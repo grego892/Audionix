@@ -15,5 +15,6 @@ namespace SharedLibrary.Repositories
         Task ShiftLogItemsUpAsync(Guid stationId, int startIndex);
         Task<ProgramLogItem> GetProgramLogItemAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate);
         Task AdvanceLogNextPlayAsync(Guid stationId);
+        Task RemoveOlderDaysFromDbLogAsync(int daysBack);
     }
 }
