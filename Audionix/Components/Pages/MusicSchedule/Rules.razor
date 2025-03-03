@@ -1,7 +1,6 @@
 ﻿@page "/policies"
 @inject ApplicationDbContext DbContext
 
-
 <MudPaper Class="pa-2 ma-2">
     <MudTabs Border="true" Elevation="1">
         <MudTabPanel Text="Categories">
@@ -14,11 +13,10 @@
                 </MudItem>
                 <MudFlexBreak />
                 <MudItem xs="6">
-                    <MudTable 
-                            Items="songSchedule.Category"
-                            Bordered="true"
-                            Dense="true"
-                            Outlined="true">
+                    <MudTable Items="songSchedule.Category"
+                              Bordered="true"
+                              Dense="true"
+                              Outlined="true">
                         <HeaderContent>
                             <MudTh>Category</MudTh>
                             <MudTh>Actions</MudTh>
@@ -44,15 +42,15 @@
                 <MudFlexBreak />
                 <MudItem xs="6">
                     <MudTable Items="songSchedule.SoundCode"
-                                Bordered="true"
-                                Dense="true"
-                                Outlined="true">
+                              Bordered="true"
+                              Dense="true"
+                              Outlined="true">
                         <HeaderContent>
-                            <MudTh>Category</MudTh>
+                            <MudTh>Sound Code</MudTh>
                             <MudTh>Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Category">@context</MudTd>
+                            <MudTd DataLabel="Sound Code">@context</MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveSoundCodeHandler(@context))" />
                             </MudTd>
@@ -61,7 +59,7 @@
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
-        <MudTabPanel Text="Categories">
+        <MudTabPanel Text="Energy Levels">
             <MudGrid Class="ma=2 pa-2">
                 <MudItem xs="5">
                     <MudStack Row="true">
@@ -72,15 +70,15 @@
                 <MudFlexBreak />
                 <MudItem xs="6">
                     <MudTable Items="songSchedule.EnergyLevel"
-                                Bordered="true"
-                                Dense="true"
-                                Outlined="true">
+                              Bordered="true"
+                              Dense="true"
+                              Outlined="true">
                         <HeaderContent>
                             <MudTh>Energy Level</MudTh>
-                            <MudTh></MudTh>
+                            <MudTh>Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Category">@context</MudTd>
+                            <MudTd DataLabel="Energy Level">@context</MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveEnergyLevelHandler(@context))" />
                             </MudTd>
@@ -91,3 +89,7 @@
         </MudTabPanel>
     </MudTabs>
 </MudPaper>
+
+@code {
+
+}

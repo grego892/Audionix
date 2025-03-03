@@ -15,39 +15,5 @@ namespace SharedLibrary.Models.MusicSchedule
         //Play history
         public int PlayCount { get; set; }
         public int LastPlayed { get; set; }
-        public List<string> Category { get; set; } = new List<string>
-        {
-            "Current",
-            "Recurrent",
-            "Gold",
-            "Power",
-            "Specialty",
-            "Holiday",
-            "Liner",
-            "Custom",
-            "None"
-        };
-
-        public List<string> SoundCode { get; set; } = new List<string>
-        {
-            "1",
-            "2",
-            "3"
-        };
-        public List<string> Tempo { get; set; } = new List<string>
-        {
-            "Slow",
-            "Medium",
-            "Fast"
-        };
-        public List<string> EnergyLevel { get; set; } = new List<string>
-        {
-            "Low",
-            "Medium",
-            "High"
-        };
-        public string? Daypart { get; set; }
-        public string? Level { get; set; }
-        public string? Soundwave { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using SharedLibrary.Data;
+using SharedLibrary.Models.MusicSchedule.Rules;
 
 namespace SharedLibrary.Data
 {
@@ -31,6 +32,10 @@ namespace SharedLibrary.Data
         public DbSet<MusicPattern> MusicPatterns { get; set; }
         public DbSet<PatternCategory> PatternCategories { get; set; }
         public DbSet<MusicGridItem> MusicGridItems { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<SoundCode> SoundCodes { get; set; }
+        public DbSet<EnergyLevel> EnergyLevels { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -90,6 +95,40 @@ namespace SharedLibrary.Data
             // Configure composite key for ProgramLogItem
             modelBuilder.Entity<ProgramLogItem>()
                 .HasKey(pl => new { pl.Date, pl.LogOrderID });
+
+            // Seed data for Categories
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Current" },
+                new Category { Id = 2, Name = "Recurrent" },
+                new Category { Id = 3, Name = "Gold" },
+                new Category { Id = 4, Name = "Power" },
+                new Category { Id = 5, Name = "Specialty" },
+                new Category { Id = 6, Name = "Holiday" },
+                new Category { Id = 7, Name = "Liner" },
+                new Category { Id = 8, Name = "Custom" },
+                new Category { Id = 9, Name = "None" }
+                );
+
+            // Seed data for SoundCodes
+            modelBuilder.Entity<SoundCode>().HasData(
+                new SoundCode { Id = 1, Code = "M", Description = "Music" },
+                new SoundCode { Id = 2, Code = "S", Description = "Sweep" },
+                new SoundCode { Id = 3, Code = "V", Description = "Voice" },
+                new SoundCode { Id = 4, Code = "P", Description = "Promo" },
+                new SoundCode { Id = 5, Code = "L", Description = "Liner" },
+                new SoundCode { Id = 6, Code = "I", Description = "ID" },
+                new SoundCode { Id = 7, Code = "J", Description = "Jingle" },
+                new SoundCode { Id = 8, Code = "C", Description = "Commercial" },
+                new SoundCode { Id = 9, Code = "E", Description = "Element" },
+                new SoundCode { Id = 10, Code = "X", Description = "Unknown" }
+                );
+
+            // Seed data for EnergyLevels
+            modelBuilder.Entity<EnergyLevel>().HasData(
+                new EnergyLevel { Id = 1, Level = "Low" },
+                new EnergyLevel { Id = 2, Level = "Medium" },
+                new EnergyLevel { Id = 3, Level = "High" }
+                );
         }
     }
 }

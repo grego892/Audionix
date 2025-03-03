@@ -1,83 +1,69 @@
-﻿using Microsoft.AspNetCore.Components;
-using MudBlazor;
-using SharedLibrary.Models.MusicSchedule;
-using SharedLibrary.Repositories;
-using System.Threading.Tasks;
-
-namespace Audionix.Components.Pages.MusicSchedule
+﻿namespace Audionix.Components.Pages.MusicSchedule
 {
     public partial class Rules
     {
-        private string? newCategory;
-        private string? newSoundCode;
-        private string? newTempo;
-        private string? newEnergyLevel;
-        private string? newDaypart;
-        private string? newLevel;
-        private string? newSoundwave;
-        private SongSchedule songSchedule = new();
+        private string newCategory;
+        private string newSoundCode;
+        private string newEnergyLevel;
+        private SongSchedule songSchedule = new SongSchedule();
 
-        public void AddCategory()
+        protected override async Task OnInitializedAsync()
         {
-            if (!string.IsNullOrEmpty(newCategory))
+            async Task LoadTables();
+        }
+
+        private asymc Task LoadTables()
+        {
+            
+        }
+
+        private void AddCategory()
+        {
+            if (!string.IsNullOrWhiteSpace(newCategory))
             {
                 songSchedule.Category.Add(newCategory);
                 newCategory = string.Empty;
             }
         }
 
-        public void RemoveCategory(string? category)
+        private void RemoveCategoryHandler(string category)
         {
-            if (category != null)
-            {
-                songSchedule.Category.Remove(category);
-            }
+            songSchedule.Category.Remove(category);
         }
 
-        public void AddSoundCode()
+        private void AddSoundCode()
         {
-            if (!string.IsNullOrEmpty(newSoundCode))
+            if (!string.IsNullOrWhiteSpace(newSoundCode))
             {
                 songSchedule.SoundCode.Add(newSoundCode);
                 newSoundCode = string.Empty;
             }
         }
 
-        public void RemoveSoundCode(string soundCode)
+        private void RemoveSoundCodeHandler(string soundCode)
         {
             songSchedule.SoundCode.Remove(soundCode);
         }
 
-        public void AddEnergyLevel()
+        private void AddEnergyLevel()
         {
-            if (!string.IsNullOrEmpty(newEnergyLevel))
+            if (!string.IsNullOrWhiteSpace(newEnergyLevel))
             {
                 songSchedule.EnergyLevel.Add(newEnergyLevel);
                 newEnergyLevel = string.Empty;
             }
         }
 
-        public void RemoveEnergyLevel(string? energyLevel)
-        {
-            if (energyLevel != null)
-            {
-                songSchedule.EnergyLevel.Remove(energyLevel);
-            }
-        }
-
-        private void RemoveCategoryHandler(string category)
-        {
-            RemoveCategory(category);
-        }
-
-        private void RemoveSoundCodeHandler(string soundCode)
-        {
-            RemoveSoundCode(soundCode);
-        }
-
         private void RemoveEnergyLevelHandler(string energyLevel)
         {
-            RemoveEnergyLevel(energyLevel);
+            songSchedule.EnergyLevel.Remove(energyLevel);
+        }
+
+        private class SongSchedule
+        {
+            public List<string> Category { get; set; } = new List<string>();
+            public List<string> SoundCode { get; set; } = new List<string>();
+            public List<string> EnergyLevel { get; set; } = new List<string>();
         }
     }
 }

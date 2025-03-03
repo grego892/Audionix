@@ -9,7 +9,7 @@ namespace SharedLibrary.Models.MusicSchedule.Rules
     public class SoundCode
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
-        public Guid StationId { get; set; }
+        public string? Code { get; set; }
+        public string? Description { get; set; }
     }
 }
