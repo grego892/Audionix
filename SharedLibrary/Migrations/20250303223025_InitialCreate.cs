@@ -162,7 +162,8 @@ namespace SharedLibrary.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Code = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true)
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -473,19 +474,19 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.InsertData(
                 table: "SoundCodes",
-                columns: new[] { "Id", "Code", "Description" },
+                columns: new[] { "Id", "Code", "Description", "StationId" },
                 values: new object[,]
                 {
-                    { 1, "M", "Music" },
-                    { 2, "S", "Sweep" },
-                    { 3, "V", "Voice" },
-                    { 4, "P", "Promo" },
-                    { 5, "L", "Liner" },
-                    { 6, "I", "ID" },
-                    { 7, "J", "Jingle" },
-                    { 8, "C", "Commercial" },
-                    { 9, "E", "Element" },
-                    { 10, "X", "Unknown" }
+                    { 1, "M", "Music", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 2, "S", "Sweep", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 3, "V", "Voice", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 4, "P", "Promo", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 5, "L", "Liner", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 6, "I", "ID", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 7, "J", "Jingle", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 8, "C", "Commercial", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 9, "E", "Element", new Guid("00000000-0000-0000-0000-000000000000") },
+                    { 10, "X", "Unknown", new Guid("00000000-0000-0000-0000-000000000000") }
                 });
 
             migrationBuilder.CreateIndex(

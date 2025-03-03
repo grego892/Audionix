@@ -10,7 +10,7 @@ var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
         // LOGGING
-        string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
+        string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Audionix", "Logging", "AudioServer", "AudionixAudioServer.log");
         var configuration = hostContext.Configuration;
         var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
         Log.Logger = new LoggerConfiguration()

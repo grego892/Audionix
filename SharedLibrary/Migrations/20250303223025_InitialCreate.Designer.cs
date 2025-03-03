@@ -12,7 +12,7 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250303043618_InitialCreate")]
+    [Migration("20250303223025_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -579,6 +579,9 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.ToTable("SoundCodes");
@@ -588,61 +591,71 @@ namespace SharedLibrary.Migrations
                         {
                             Id = 1,
                             Code = "M",
-                            Description = "Music"
+                            Description = "Music",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 2,
                             Code = "S",
-                            Description = "Sweep"
+                            Description = "Sweep",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 3,
                             Code = "V",
-                            Description = "Voice"
+                            Description = "Voice",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 4,
                             Code = "P",
-                            Description = "Promo"
+                            Description = "Promo",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 5,
                             Code = "L",
-                            Description = "Liner"
+                            Description = "Liner",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 6,
                             Code = "I",
-                            Description = "ID"
+                            Description = "ID",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 7,
                             Code = "J",
-                            Description = "Jingle"
+                            Description = "Jingle",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 8,
                             Code = "C",
-                            Description = "Commercial"
+                            Description = "Commercial",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 9,
                             Code = "E",
-                            Description = "Element"
+                            Description = "Element",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         },
                         new
                         {
                             Id = 10,
                             Code = "X",
-                            Description = "Unknown"
+                            Description = "Unknown",
+                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
                         });
                 });
 

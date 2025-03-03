@@ -110,6 +110,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IProgramLogRepository, ProgramLogRepository>();
     builder.Services.AddScoped<IStationRepository, StationRepository>();
     builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+    builder.Services.AddScoped<ISongScheduleRepository, SongScheduleRepository>();
     builder.Services.AddScoped<AppStateService>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddScoped<LogService>();
@@ -151,7 +152,7 @@ void ConfigureIdentity(WebApplicationBuilder builder)
 
 void ConfigureLogger(WebApplicationBuilder builder)
 {
-    string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Logging", "AudionixWebServer", "Audionix.log");
+    string _logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Audionix", "Audionix", "Logging", "AudionixWebServer", "Audionix.log");
     var configuration = builder.Configuration;
     var options = new ConfigurationReaderOptions(typeof(Serilog.LoggerConfiguration).Assembly);
     Log.Logger = new LoggerConfiguration()
