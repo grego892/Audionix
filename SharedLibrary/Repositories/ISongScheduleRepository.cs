@@ -13,6 +13,7 @@
             Task RemoveCategoryAsync(Category category);
             Task AddSoundCodeAsync(SoundCode soundcode);
             Task RemoveSoundCodeAsync(SoundCode soundcode);
-            Task<SongScheduleSettings> GetSongScheduleSettingsAsync(); // Updated return type
+            Task<SongScheduleSettings> GetSongScheduleSettingsAsync();
+            Task UpdateSongScheduleSettingsAsync(SongScheduleSettings settings);
         }
     }

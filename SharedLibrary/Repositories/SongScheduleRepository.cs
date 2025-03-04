@@ -59,5 +59,10 @@ namespace SharedLibrary.Repositories
             // Assuming there is only one SongScheduleSettings record
             return await _context.SongScheduleSettings.FirstOrDefaultAsync();
         }
+        public async Task UpdateSongScheduleSettingsAsync()
+        {
+            _context.SongScheduleSettings.Update(settings);
+            await _context.SaveChangesAsync();
+        }
     }
 }
