@@ -156,6 +156,19 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SongScheduleSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ArtistSeperation = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SongScheduleSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SoundCodes",
                 columns: table => new
                 {
@@ -473,6 +486,11 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "SongScheduleSettings",
+                columns: new[] { "Id", "ArtistSeperation" },
+                values: new object[] { 1, 10 });
+
+            migrationBuilder.InsertData(
                 table: "SoundCodes",
                 columns: new[] { "Id", "Code", "Description", "StationId" },
                 values: new object[,]
@@ -566,6 +584,12 @@ namespace SharedLibrary.Migrations
                 name: "IX_SongCategories_TemplatePatternId",
                 table: "SongCategories",
                 column: "TemplatePatternId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SongScheduleSettings_Id",
+                table: "SongScheduleSettings",
+                column: "Id",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -609,6 +633,9 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "PatternCategories");
+
+            migrationBuilder.DropTable(
+                name: "SongScheduleSettings");
 
             migrationBuilder.DropTable(
                 name: "SoundCodes");

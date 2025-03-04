@@ -15,16 +15,18 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<string> categories = new List<string>();
         private List<string> soundCodes = new List<string>();
         private List<string> energyLevels = new List<string>();
+        private int artistSeperation;
 
         [Inject]
-        private ISongScheduleRepository SongScheduleRepository { get; set; }
+        private ISongScheduleRepository? SongScheduleRepository { get; set; }
 
         [Inject]
-        private AppStateService AppStateService { get; set; }
+        private AppStateService? AppStateService { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
             await LoadTables();
+            await LoadSongScheduleSettings();
         }
 
         private async Task LoadTables()
@@ -32,6 +34,10 @@ namespace Audionix.Components.Pages.MusicSchedule
             categories = (await SongScheduleRepository.GetAllCategoriesAsync()).Select(c => c.Name).ToList();
             soundCodes = (await SongScheduleRepository.GetAllSoundCodesAsync()).Select(sc => sc.Code).ToList();
             energyLevels = (await SongScheduleRepository.GetAllEnergyLevelsAsync()).Select(el => el.Level).ToList();
+        }
+        private async Task LoadSongScheduleSettings()
+        {
+            artistSeperation = (await SongScheduleRepository.GetSongScheduleSettingsAsync()).ArtistSeperation;
         }
 
         private async Task AddCategory()

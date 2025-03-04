@@ -35,6 +35,7 @@ namespace SharedLibrary.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<SoundCode> SoundCodes { get; set; }
         public DbSet<EnergyLevel> EnergyLevels { get; set; }
+        public DbSet<SongScheduleSettings> SongScheduleSettings { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -92,6 +93,20 @@ namespace SharedLibrary.Data
                 }
             );
 
+            // Add unique constraint to SongScheduleSettings Id
+            modelBuilder.Entity<SongScheduleSettings>()
+                .HasIndex(a => a.Id)
+                .IsUnique();
+
+            // Seed data for SongScheduleSettings
+            modelBuilder.Entity<SongScheduleSettings>().HasData(
+                new SongScheduleSettings
+                {
+                    Id = 1,
+                    ArtistSeperation = 10
+                }
+            );
+
             // Configure composite key for ProgramLogItem
             modelBuilder.Entity<ProgramLogItem>()
                 .HasKey(pl => new { pl.Date, pl.LogOrderID });
@@ -111,16 +126,16 @@ namespace SharedLibrary.Data
 
             // Seed data for SoundCodes
             modelBuilder.Entity<SoundCode>().HasData(
-                new SoundCode { Id = 1, Code = "M", Description = "Music", StationId = stationId },
-                new SoundCode { Id = 2, Code = "S", Description = "Sweep", StationId = stationId },
-                new SoundCode { Id = 3, Code = "V", Description = "Voice", StationId = stationId },
-                new SoundCode { Id = 4, Code = "P", Description = "Promo", StationId = stationId },
-                new SoundCode { Id = 5, Code = "L", Description = "Liner", StationId = stationId },
-                new SoundCode { Id = 6, Code = "I", Description = "ID", StationId = stationId },
-                new SoundCode { Id = 7, Code = "J", Description = "Jingle", StationId = stationId },
-                new SoundCode { Id = 8, Code = "C", Description = "Commercial", StationId = stationId },
-                new SoundCode { Id = 9, Code = "E", Description = "Element", StationId = stationId },
-                new SoundCode { Id = 10, Code = "X", Description = "Unknown", StationId = stationId }
+                new SoundCode { Id = 1, Code = "M", Description = "Music" },
+                new SoundCode { Id = 2, Code = "S", Description = "Sweep" },
+                new SoundCode { Id = 3, Code = "V", Description = "Voice" },
+                new SoundCode { Id = 4, Code = "P", Description = "Promo" },
+                new SoundCode { Id = 5, Code = "L", Description = "Liner" },
+                new SoundCode { Id = 6, Code = "I", Description = "ID" },
+                new SoundCode { Id = 7, Code = "J", Description = "Jingle" },
+                new SoundCode { Id = 8, Code = "C", Description = "Commercial" },
+                new SoundCode { Id = 9, Code = "E", Description = "Element" },
+                new SoundCode { Id = 10, Code = "X", Description = "Unknown" }
             );
 
             // Seed data for EnergyLevels

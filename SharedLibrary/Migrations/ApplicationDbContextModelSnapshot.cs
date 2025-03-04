@@ -562,6 +562,32 @@ namespace SharedLibrary.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.SongScheduleSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArtistSeperation")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("SongScheduleSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ArtistSeperation = 10
+                        });
+                });
+
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.SoundCode", b =>
                 {
                     b.Property<int>("Id")

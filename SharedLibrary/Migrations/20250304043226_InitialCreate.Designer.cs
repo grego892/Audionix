@@ -12,7 +12,7 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250303223025_InitialCreate")]
+    [Migration("20250304043226_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -562,6 +562,32 @@ namespace SharedLibrary.Migrations
                         {
                             Id = 3,
                             Level = "High"
+                        });
+                });
+
+            modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.SongScheduleSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArtistSeperation")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("SongScheduleSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ArtistSeperation = 10
                         });
                 });
 

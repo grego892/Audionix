@@ -35,6 +35,7 @@ namespace SharedLibrary.Repositories
             await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
         }
+
         public async Task RemoveCategoryAsync(Category category)
         {
             _context.Categories.Remove(category);
@@ -46,10 +47,17 @@ namespace SharedLibrary.Repositories
             await _context.SoundCodes.AddAsync(soundcode);
             await _context.SaveChangesAsync();
         }
+
         public async Task RemoveSoundCodeAsync(SoundCode soundcode)
         {
             _context.SoundCodes.Remove(soundcode);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<SongScheduleSettings> GetSongScheduleSettingsAsync()
+        {
+            // Assuming there is only one SongScheduleSettings record
+            return await _context.SongScheduleSettings.FirstOrDefaultAsync();
         }
     }
 }
