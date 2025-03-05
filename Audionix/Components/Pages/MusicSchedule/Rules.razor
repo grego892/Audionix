@@ -90,7 +90,7 @@
         <MudTabPanel Text="Music Schedule Settings">
             <MudGrid Class="ma=2 pa-2">
                 <MudItem xs="5">
-                    <MudNumericField Value="artistSeperation" Label="Autist Seperation" ValueChanged="UpdateSongScheduleSettings" Variant="Variant.Outlined" />
+                    <MudNumericField Value="artistSeperation" Label="Artist Seperation" Variant="Variant.Outlined" ValueChanged="@(e => UpdateSongScheduleSettings(e))" />
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
