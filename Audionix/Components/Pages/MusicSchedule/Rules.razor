@@ -89,14 +89,10 @@
         </MudTabPanel>
         <MudTabPanel Text="Music Schedule Settings">
             <MudGrid Class="ma=2 pa-2">
-                <MudItem xs="5">
-                    <MudNumericField Value="artistSeperation" Label="Artist Seperation" Variant="Variant.Outlined" ValueChanged="@(e => UpdateSongScheduleSettings(e))" />
+                <MudItem xs="1">
+                    <MudNumericField Value="artistSeperation" Label="Artist Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateSongScheduleSettings))" />
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
     </MudTabs>
 </MudPaper>
-
-@code {
-
-}

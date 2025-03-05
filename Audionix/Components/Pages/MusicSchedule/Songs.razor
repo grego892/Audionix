@@ -1,5 +1,6 @@
 ﻿@page "/songs"
 @using SharedLibrary.Models.MusicSchedule
+@using SharedLibrary.Repositories
 @rendermode InteractiveServer
 
 <PageTitle>Song Structure</PageTitle>
@@ -9,7 +10,7 @@
         <MudPaper Class="ml-1 mr-1 mb-1">
             <h2 Class="ptb-2 ml-2">File Manager</h2>
         </MudPaper>
-        <MudStack Row="true" >
+        <MudStack Row="true">
             <MudPaper Width="300px">
                 <MudSelect Class="pl-2" Margin="Margin.Dense" T="string" Label="Folders" Value="SelectedFolder" ValueChanged="GetFolderFileList" Variant="Variant.Outlined">
                     @foreach (var folder in folders ?? Enumerable.Empty<string>())
@@ -34,29 +35,18 @@
                 <Columns>
                     <PropertyColumn Property="x => x.Title" />
                     <PropertyColumn Property="x => x.Artist" />
+
                     <TemplateColumn>
                         <HeaderTemplate>
                             <MudText>Duration</MudText>
                         </HeaderTemplate>
                         <CellTemplate>
-                            <MudText>@context.Item.Duration.ToString(@"mm\:ss")</MudText>
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <PropertyColumn Property="x => x.Filename" />
-                    <TemplateColumn>
-                        <HeaderTemplate>
-                            <MudText>Intro</MudText>
-                        </HeaderTemplate>
-                        <CellTemplate>
-                            <MudText>@(((double)context.Item.Intro / 1000).ToString("F1"))</MudText>
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <TemplateColumn>
-                        <HeaderTemplate>
-                            <MudText>Segue</MudText>
-                        </HeaderTemplate>
-                        <CellTemplate>
-                            <MudText>@(((double)context.Item.Segue / 1000).ToString("F1"))</MudText>
+                            <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="selectedSongCategory" Variant="Variant.Outlined">
+                                @foreach (var category in categories ?? Enumerable.Empty<Category>())
+                                {
+                                    <MudSelectItem Value="@category.Name">@category.Name</MudSelectItem>
+                                }
+                            </MudSelect>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>

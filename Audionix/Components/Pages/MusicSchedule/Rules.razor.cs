@@ -111,13 +111,12 @@ namespace Audionix.Components.Pages.MusicSchedule
             energyLevels.Remove(energyLevel);
         }
 
-        private void UpdateSongScheduleSettings(int newArtistSeperation)
+        private async Task UpdateSongScheduleSettings(int newArtistSeperation)
         {
-            //artistSeperation = newArtistSeperation;
-            //var settings = SongScheduleRepository.GetSongScheduleSettingsAsync();
-            //settings.ArtistSeperation = newArtistSeperation;
-            //await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+            artistSeperation = newArtistSeperation;
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            settings.ArtistSeperation = newArtistSeperation;
+            await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
         }
-
     }
 }
