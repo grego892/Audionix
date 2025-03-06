@@ -82,18 +82,17 @@ namespace Audionix.Components.Pages.MusicSchedule
 
                 await SongScheduleRepository.AddSoundCodeAsync(soundCode);
 
-
                 newSoundCode = string.Empty;
             }
         }
 
         private async Task RemoveSoundCodeHandler(string soundcodeName)
         {
-            var soundcode = (await SongScheduleRepository.GetAllCategoriesAsync()).FirstOrDefault(c => c.Name == soundcodeName);
+            var soundcode = (await SongScheduleRepository.GetAllSoundCodesAsync()).FirstOrDefault(sc => sc.Code == soundcodeName);
             if (soundcode != null)
             {
-                categories.Remove(soundcodeName);
-                await SongScheduleRepository.RemoveCategoryAsync(soundcode);
+                soundCodes.Remove(soundcodeName);
+                await SongScheduleRepository.RemoveSoundCodeAsync(soundcode);
             }
         }
 

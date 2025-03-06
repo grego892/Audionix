@@ -1,56 +1,41 @@
-﻿@page "/songs"
-@using SharedLibrary.Models.MusicSchedule
-@using SharedLibrary.Repositories
-@rendermode InteractiveServer
+﻿<TemplateColumn>
+    <HeaderTemplate>
+        <MudText>Category</MudText>
+    </HeaderTemplate>
+    <CellTemplate>
+        <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="selectedSongCategory" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await UpdateCategory(value, context))">
+            @foreach (var category in categories)
+            {
+                <MudSelectItem Value="@category.Name">@category.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </CellTemplate>
+</TemplateColumn>
 
-<PageTitle>Song Structure</PageTitle>
+<TemplateColumn>
+    <HeaderTemplate>
+        <MudText>Sound Code</MudText>
+    </HeaderTemplate>
+    <CellTemplate>
+        <MudSelect Margin="Margin.Dense" T="string" Label="Sound Code" Value="selectedSoundCode" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await UpdateSoundCode(value, context))">
+            @foreach (var soundCode in soundCodes)
+            {
+                <MudSelectItem Value="@soundCode.Code">@soundCode.Code</MudSelectItem>
+            }
+        </MudSelect>
+    </CellTemplate>
+</TemplateColumn>
 
-<MudPaper Style="min-height:calc(100vh - 68px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
-    <MudPaper>
-        <MudPaper Class="ml-1 mr-1 mb-1">
-            <h2 Class="ptb-2 ml-2">File Manager</h2>
-        </MudPaper>
-        <MudStack Row="true">
-            <MudPaper Width="300px">
-                <MudSelect Class="pl-2" Margin="Margin.Dense" T="string" Label="Folders" Value="SelectedFolder" ValueChanged="GetFolderFileList" Variant="Variant.Outlined">
-                    @foreach (var folder in folders ?? Enumerable.Empty<string>())
-                    {
-                        <MudSelectItem Value="@folder" />
-                    }
-                </MudSelect>
-            </MudPaper>
-        </MudStack>
-    </MudPaper>
-
-    @if (filesInDirectory.Any())
-    {
-        <MudPaper Class="border-solid border-2 mud-border-primary ma-1" Style="overflow:auto">
-            <MudDataGrid Items="filesInDirectory"
-                         Bordered="true"
-                         T="AudioMetadata"
-                         SortMode="SortMode.None"
-                         FixedHeader="true"
-                         Virtualize="false"
-                         Dense="true">
-                <Columns>
-                    <PropertyColumn Property="x => x.Title" />
-                    <PropertyColumn Property="x => x.Artist" />
-
-                    <TemplateColumn>
-                        <HeaderTemplate>
-                            <MudText>Duration</MudText>
-                        </HeaderTemplate>
-                        <CellTemplate>
-                            <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="selectedSongCategory" Variant="Variant.Outlined">
-                                @foreach (var category in categories ?? Enumerable.Empty<Category>())
-                                {
-                                    <MudSelectItem Value="@category.Name">@category.Name</MudSelectItem>
-                                }
-                            </MudSelect>
-                        </CellTemplate>
-                    </TemplateColumn>
-                </Columns>
-            </MudDataGrid>
-        </MudPaper>
-    }
-</MudPaper>
+<TemplateColumn>
+    <HeaderTemplate>
+        <MudText>Energy Level</MudText>
+    </HeaderTemplate>
+    <CellTemplate>
+        <MudSelect Margin="Margin.Dense" T="string" Label="Energy Level" Value="selectedEnergyLevel" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await UpdateEnergyLevel(value, context))">
+            @foreach (var energyLevel in energyLevels)
+            {
+                <MudSelectItem Value="@energyLevel.Level">@energyLevel.Level</MudSelectItem>
+            }
+        </MudSelect>
+    </CellTemplate>
+</TemplateColumn>
