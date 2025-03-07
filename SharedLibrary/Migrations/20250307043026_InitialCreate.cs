@@ -349,11 +349,17 @@ namespace SharedLibrary.Migrations
                     StationId = table.Column<Guid>(type: "uuid", nullable: false),
                     Folder = table.Column<string>(type: "text", nullable: true),
                     SongCategory = table.Column<string>(type: "text", nullable: true),
-                    EventType = table.Column<int>(type: "integer", nullable: false)
+                    EventType = table.Column<int>(type: "integer", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AudioFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AudioFiles_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AudioFiles_Stations_StationId",
                         column: x => x.StationId,
@@ -551,6 +557,11 @@ namespace SharedLibrary.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_AudioFiles_CategoryId",
+                table: "AudioFiles",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AudioFiles_StationId",
                 table: "AudioFiles",
                 column: "StationId");
@@ -617,9 +628,6 @@ namespace SharedLibrary.Migrations
                 name: "AudioFiles");
 
             migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
                 name: "EnergyLevels");
 
             migrationBuilder.DropTable(
@@ -645,6 +653,9 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Rotator");

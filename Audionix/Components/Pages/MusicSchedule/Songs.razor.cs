@@ -85,39 +85,40 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-        private async Task UpdateCategory(string newCategory, AudioMetadata audioMetadata)
+        private async Task OnCategoryChanged(string newCategory, AudioMetadata audioMetadata)
         {
             if (audioMetadata != null)
             {
-                audioMetadata.SongCategory = newCategory;
-                await SaveChangesAsync(audioMetadata);
+                var category = categories?.FirstOrDefault(c => c.Name == newCategory);
+                if (category != null)
+                {
+                    audioMetadata.Category = category;
+                    await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
+                }
             }
         }
-
-        private async Task UpdateSoundCode(string newSoundCode, AudioMetadata audioMetadata)
+        private async Task OnSoundCodeChanged(string newSoundCode, AudioMetadata audioMetadata)
         {
             if (audioMetadata != null)
             {
-                audioMetadata.SoundCode = newSoundCode;
-                await SaveChangesAsync(audioMetadata);
+                var soundCode = soundCodes?.FirstOrDefault(c => c.Code == newSoundCode);
+                if (soundCode != null)
+                {
+                    audioMetadata.SoundCode = soundCode;
+                    await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
+                }
             }
         }
-
-        private async Task UpdateEnergyLevel(string newEnergyLevel, AudioMetadata audioMetadata)
+        private async Task OnEnergyLevelChanged(string newEnergyLevel, AudioMetadata audioMetadata)
         {
             if (audioMetadata != null)
             {
-                audioMetadata.EnergyLevel = newEnergyLevel;
-                await SaveChangesAsync(audioMetadata);
-            }
-        }
-
-        private async Task SaveChangesAsync(AudioMetadata audioMetadata)
-        {
-            if (AudioMetadataRepository != null)
-            {
-                await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
-                Snackbar?.Add("Changes saved successfully.", Severity.Success);
+                var energyLevel = energyLevels?.FirstOrDefault(c => c.Level == newEnergyLevel);
+                if (energyLevel != null)
+                {
+                    audioMetadata.EnergyLevel = energyLevel;
+                    await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
+                }
             }
         }
 

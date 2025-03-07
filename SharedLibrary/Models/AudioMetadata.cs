@@ -1,4 +1,6 @@
-﻿namespace SharedLibrary.Models
+﻿using SharedLibrary.Models.MusicSchedule.Rules;
+
+namespace SharedLibrary.Models
 {
     public class AudioMetadata
     {
@@ -21,6 +23,10 @@
         public string? Folder { get; set; }
         public string? SongCategory { get; set; }
         public EventType EventType { get; set; }
+        public int? CategoryId { get; set; }
+        public Category? Category { get; set; }
+        public SoundCode? SoundCode;
+        public EnergyLevel? EnergyLevel;
     }
     public enum EventType
     {

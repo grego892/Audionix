@@ -260,6 +260,9 @@ namespace SharedLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("integer");
+
                     b.Property<TimeSpan>("Duration")
                         .HasColumnType("interval");
 
@@ -308,6 +311,8 @@ namespace SharedLibrary.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("StationId");
 
@@ -910,11 +915,17 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.AudioMetadata", b =>
                 {
+                    b.HasOne("SharedLibrary.Models.MusicSchedule.Rules.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("SharedLibrary.Models.Station", "Station")
                         .WithMany("AudioFiles")
                         .HasForeignKey("StationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("Station");
                 });

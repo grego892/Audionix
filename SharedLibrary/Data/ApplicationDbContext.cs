@@ -74,6 +74,17 @@ namespace SharedLibrary.Data
                 .WithMany(s => s.ProgramLogItems)
                 .HasForeignKey(pl => pl.StationId);
 
+            modelBuilder.Entity<AudioMetadata>()
+                .HasOne(am => am.Station)
+                .WithMany(s => s.AudioFiles)
+                .HasForeignKey(am => am.StationId);
+
+            modelBuilder.Entity<AudioMetadata>()
+                .HasOne(am => am.Category)
+                .WithMany()
+                .HasForeignKey(am => am.CategoryId);
+
+
             // Configure MusicGridItem entity
             modelBuilder.Entity<MusicGridItem>()
                 .HasKey(mgi => mgi.Id);
