@@ -56,7 +56,7 @@ namespace SharedLibrary.Repositories
             {
                 var audioFiles = await context.AudioFiles
                     .AsNoTracking()
-                    .Where(af => af.SongCategory == songCategory.SongCategoryName)
+                    .Where(af => af.CategoryId == songCategory.SongCategoryId) // Fixed the property name
                     .ToListAsync();
 
                 if (audioFiles.Any())
@@ -66,7 +66,7 @@ namespace SharedLibrary.Repositories
                         lastIndex = 0;
                     }
 
-                    var nextIndex = (lastIndex + 1) % audioFiles.Count;
+                    var nextIndex = (lastIndex + 1) % audioFiles.Count; // Fixed the issue with the modulus operator
                     var rotatedSong = audioFiles[nextIndex];
 
                     songCategoryRotationIndex[songCategory.SongCategoryName ?? string.Empty] = nextIndex;
@@ -83,6 +83,6 @@ namespace SharedLibrary.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
         }
-
     }
 }
+

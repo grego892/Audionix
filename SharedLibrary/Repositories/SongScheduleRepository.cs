@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using SharedLibrary.Data;
 using SharedLibrary.Models.MusicSchedule.Rules;
 using System.Collections.Generic;
@@ -64,6 +65,10 @@ namespace SharedLibrary.Repositories
         {
             _context.SongScheduleSettings.Update(settings);
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<Category>> GetCategoriesAsync(Guid stationId)
+        {
+            return await _context.Categories.Where(c => c.StationId == stationId).ToListAsync();
         }
     }
 }

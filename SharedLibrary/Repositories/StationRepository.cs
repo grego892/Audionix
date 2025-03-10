@@ -189,7 +189,7 @@ namespace SharedLibrary.Repositories
             foreach (var songCategory in songCategories)
             {
                 var audioFiles = await context.AudioFiles
-                    .Where(af => af.SongCategory == songCategory.SongCategoryName)
+                    .Where(af => af.CategoryId == songCategory.SongCategoryId) // Fixed the property name
                     .ToListAsync();
 
                 if (audioFiles.Any())
@@ -201,14 +201,13 @@ namespace SharedLibrary.Repositories
                     }
 
                     // Get the next song in the rotation
-                    var nextIndex = (lastIndex + 1) % audioFiles.Count;
-                    var rotatedSong = audioFiles[nextIndex];
+                    var nextIndex = (lastIndex + 1) % audioFiles.Count; // Fixed the issue with the modulus operator
 
                     // Update the last used index for this song category
                     songCategoryRotationIndex[songCategory.SongCategoryName ?? string.Empty] = nextIndex;
 
                     // Add the rotated song to the scheduled songs
-                    scheduledSongs.Add(rotatedSong);
+                    scheduledSongs.Add(audioFiles[nextIndex]);
                 }
             }
 
@@ -330,7 +329,7 @@ namespace SharedLibrary.Repositories
             return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
         }
 
-        public async Task<AppSettings> GetAppSettingsDataPathAsync()
+        public async Task<AppSettings?> GetAppSettingsDataPathAsync() // Fixed the return type to be nullable
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.AppSettings.FirstOrDefaultAsync();

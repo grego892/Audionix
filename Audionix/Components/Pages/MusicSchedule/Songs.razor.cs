@@ -68,6 +68,15 @@ namespace Audionix.Components.Pages.MusicSchedule
             if (FileManagerService != null && AppStateService?.station != null)
             {
                 filesInDirectory = await FileManagerService.GetFolderFileList(AppStateService.station.StationId, selectedFolder);
+
+                // Populate the Category information for each AudioMetadata
+                foreach (var file in filesInDirectory)
+                {
+                    if (file.CategoryId.HasValue)
+                    {
+                        file.Category = categories?.FirstOrDefault(c => c.CategoryId == file.CategoryId.Value);
+                    }
+                }
             }
         }
 
@@ -89,7 +98,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             if (audioMetadata != null)
             {
-                var category = categories?.FirstOrDefault(c => c.Name == newCategory);
+                var category = categories?.FirstOrDefault(c => c.CategoryName == newCategory);
                 if (category != null)
                 {
                     audioMetadata.Category = category;
@@ -104,7 +113,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 var soundCode = soundCodes?.FirstOrDefault(c => c.Code == newSoundCode);
                 if (soundCode != null)
                 {
-                    audioMetadata.SoundCode = soundCode;
+                    audioMetadata.SoundCodeId = soundCode.Id;
                     await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 }
             }
@@ -116,12 +125,11 @@ namespace Audionix.Components.Pages.MusicSchedule
                 var energyLevel = energyLevels?.FirstOrDefault(c => c.Level == newEnergyLevel);
                 if (energyLevel != null)
                 {
-                    audioMetadata.EnergyLevel = energyLevel;
+                    audioMetadata.EnergyLevelId = energyLevel.Id; // Updated to use EnergyLevelId
                     await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 }
             }
         }
-
 
         public void Dispose()
         {
@@ -132,3 +140,4 @@ namespace Audionix.Components.Pages.MusicSchedule
         }
     }
 }
+

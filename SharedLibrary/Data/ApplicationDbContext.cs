@@ -82,8 +82,7 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<AudioMetadata>()
                 .HasOne(am => am.Category)
                 .WithMany()
-                .HasForeignKey(am => am.CategoryId);
-
+                .HasForeignKey(am => am.CategoryId); // No changes needed here
 
             // Configure MusicGridItem entity
             modelBuilder.Entity<MusicGridItem>()
@@ -122,19 +121,6 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<ProgramLogItem>()
                 .HasKey(pl => new { pl.Date, pl.LogOrderID });
 
-            // Seed data for Categories
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Current" },
-                new Category { Id = 2, Name = "Recurrent" },
-                new Category { Id = 3, Name = "Gold" },
-                new Category { Id = 4, Name = "Power" },
-                new Category { Id = 5, Name = "Specialty" },
-                new Category { Id = 6, Name = "Holiday" },
-                new Category { Id = 7, Name = "Liner" },
-                new Category { Id = 8, Name = "Custom" },
-                new Category { Id = 9, Name = "None" }
-                );
-
             // Seed data for SoundCodes
             modelBuilder.Entity<SoundCode>().HasData(
                 new SoundCode { Id = 1, Code = "M", Description = "Music" },
@@ -154,7 +140,7 @@ namespace SharedLibrary.Data
                 new EnergyLevel { Id = 1, Level = "Low" },
                 new EnergyLevel { Id = 2, Level = "Medium" },
                 new EnergyLevel { Id = 3, Level = "High" }
-                );
+            );
         }
     }
 }

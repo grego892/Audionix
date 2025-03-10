@@ -43,7 +43,6 @@ namespace SharedLibrary.Models
                     Segue = af.Segue,
                     StartDate = af.StartDate,
                     EndDate = af.EndDate,
-                    NoFade = af.NoFade,
                     ProtectNextIntro = af.ProtectNextIntro,
                     IntroSeconds = af.IntroSeconds,
                     SegueSeconds = af.SegueSeconds,

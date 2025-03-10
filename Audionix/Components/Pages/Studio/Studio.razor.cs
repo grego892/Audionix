@@ -19,7 +19,6 @@ namespace Audionix.Components.Pages.Studio
         private ProgramLogItem? selectedLogItem;
         private HubConnection? _hubConnection;
         private string timeDifferenceFormatted = string.Empty;
-        private bool _isFirstRender = true;
         private System.Timers.Timer? _timer;
         private DateTime _currentStationTime;
         private bool _isRendered = false;
@@ -131,7 +130,6 @@ namespace Audionix.Components.Pages.Studio
             if (firstRender)
             {
                 await ScrollToCurrentPlayingItem();
-                _isFirstRender = false;
             }
 
             if (!_isRendered)
@@ -326,7 +324,7 @@ namespace Audionix.Components.Pages.Studio
                         Title = selectedAudioFile.Title,
                         Artist = selectedAudioFile.Artist,
                         Name = selectedAudioFile.Filename,
-                        SongCategory = selectedAudioFile.SongCategory,
+                        SongCategory = selectedAudioFile.Category?.CategoryName, // Fixed the property name
                         Progress = 0.0,
                         Cue = "AutoStart",
                         Intro = selectedAudioFile.Intro,
@@ -402,7 +400,7 @@ namespace Audionix.Components.Pages.Studio
 
             try
             {
-                Station station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
+                Station? station = await StationRepository.GetStationByIdAsync(AppStateService.station.StationId);
 
                 if (station == null)
                 {
@@ -475,3 +473,4 @@ namespace Audionix.Components.Pages.Studio
         }
     }
 }
+

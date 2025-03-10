@@ -15,5 +15,6 @@
             Task RemoveSoundCodeAsync(SoundCode soundcode);
             Task<SongScheduleSettings> GetSongScheduleSettingsAsync();
             Task UpdateSongScheduleSettingsAsync(SongScheduleSettings settings);
+            Task<List<Category>> GetCategoriesAsync(Guid stationId);
         }
     }

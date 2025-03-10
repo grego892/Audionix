@@ -25,7 +25,7 @@
                         <RowTemplate>
                             <MudTd DataLabel="Category">@context</MudTd>
                             <MudTd DataLabel="Actions">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context.CategoryName))" />
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
