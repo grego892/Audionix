@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Repositories;
-using SharedLibrary.Models.MusicSchedule;
 using SharedLibrary.Models.MusicSchedule.Rules;
 using Audionix.Services;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -13,9 +14,8 @@ namespace Audionix.Components.Pages.MusicSchedule
         private string? newSoundCode;
         private string? newEnergyLevel;
         private List<Category> categories = new();
-        private List<Category> filteredCategories = new();
-        private List<string> soundCodes = new List<string>();
-        private List<string> energyLevels = new List<string>();
+        private List<string> soundCodes = new();
+        private List<string> energyLevels = new();
         private int artistSeperation;
 
         [Inject]
@@ -26,11 +26,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         protected override async Task OnInitializedAsync()
         {
-
             AppStateService.OnStationChanged += HandleStationChanged;
-
-
-
             await LoadTables();
             await LoadSongScheduleSettings();
         }
@@ -42,42 +38,31 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task LoadTables()
         {
-            categories = (await SongScheduleRepository.GetCategoriesAsync(AppStateService.station.StationId));
-            soundCodes = (await SongScheduleRepository.GetAllSoundCodesAsync()).Select(sc => sc.Code).ToList();
-            energyLevels = (await SongScheduleRepository.GetAllEnergyLevelsAsync()).Select(el => el.Level).ToList();
+            if (AppStateService?.station != null)
+            {
+                categories = await SongScheduleRepository.GetCategoriesAsync(AppStateService.station.StationId);
+                soundCodes = (await SongScheduleRepository.GetSoundCodesAsync(AppStateService.station.StationId)).Select(sc => sc.Code).ToList();
+                energyLevels = (await SongScheduleRepository.GetEnergyLevelsAsync(AppStateService.station.StationId)).Select(el => el.Level).ToList();
+            }
         }
+
         private async Task LoadSongScheduleSettings()
         {
-            artistSeperation = (await SongScheduleRepository.GetSongScheduleSettingsAsync()).ArtistSeperation;
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                artistSeperation = settings.ArtistSeperation;
+            }
         }
-
-        //private async Task AddCategory()
-        //{
-        //    if (!string.IsNullOrWhiteSpace(newCategory) && AppStateService.station?.StationId != null)
-        //    {
-        //        categories.Add(newCategory);
-
-        //        var category = new Category
-        //        {
-        //            Name = newCategory,
-        //            StationId = (Guid)AppStateService.station?.StationId
-        //        };
-
-        //        await SongScheduleRepository.AddCategoryAsync(category);
-
-        //        newCategory = string.Empty;
-        //    }
-        //}
 
         private async Task AddCategory()
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(newCategory))
+            if (AppStateService?.station != null && !string.IsNullOrEmpty(newCategory))
             {
                 var category = new Category
                 {
                     CategoryName = newCategory,
-                    StationId = AppStateService.station.StationId,
-                    CategoryId = Guid.NewGuid()
+                    StationId = AppStateService.station.StationId
                 };
                 await SongScheduleRepository.AddCategoryAsync(category);
                 categories.Add(category);
@@ -85,15 +70,6 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-        //private async Task RemoveCategoryHandler(string categoryName)
-        //{
-        //    var category = (await SongScheduleRepository.GetCategoriesAsync(AppStateService.station.StationId));
-        //    if (category != null)
-        //    {
-        //        categories.Remove(category);
-        //        await SongScheduleRepository.RemoveCategoryAsync(category);
-        //    }
-        //}
         private async Task RemoveCategoryHandler(string categoryName)
         {
             if (AppStateService?.station != null)
@@ -109,14 +85,14 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         private async Task AddSoundCode()
         {
-            if (!string.IsNullOrWhiteSpace(newSoundCode) && AppStateService.station?.StationId != null)
+            if (!string.IsNullOrWhiteSpace(newSoundCode) && AppStateService?.station?.StationId != null)
             {
                 soundCodes.Add(newSoundCode);
 
                 var soundCode = new SoundCode
                 {
                     Code = newSoundCode,
-                    StationId = (Guid)AppStateService.station?.StationId
+                    StationId = AppStateService.station.StationId
                 };
 
                 await SongScheduleRepository.AddSoundCodeAsync(soundCode);
@@ -153,8 +129,11 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             artistSeperation = newArtistSeperation;
             var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
-            settings.ArtistSeperation = newArtistSeperation;
-            await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+            if (settings != null)
+            {
+                settings.ArtistSeperation = newArtistSeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+            }
         }
     }
 }

@@ -4,8 +4,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace SharedLibrary.Migrations
 {
     /// <inheritdoc />
@@ -488,36 +486,9 @@ namespace SharedLibrary.Migrations
                 values: new object[] { 1, "C:\\Program Files\\Audionix\\AudionixAudio", false });
 
             migrationBuilder.InsertData(
-                table: "EnergyLevels",
-                columns: new[] { "Id", "Level" },
-                values: new object[,]
-                {
-                    { 1, "Low" },
-                    { 2, "Medium" },
-                    { 3, "High" }
-                });
-
-            migrationBuilder.InsertData(
                 table: "SongScheduleSettings",
                 columns: new[] { "Id", "ArtistSeperation" },
                 values: new object[] { 1, 10 });
-
-            migrationBuilder.InsertData(
-                table: "SoundCodes",
-                columns: new[] { "Id", "Code", "Description", "StationId" },
-                values: new object[,]
-                {
-                    { 1, "M", "Music", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 2, "S", "Sweep", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 3, "V", "Voice", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 4, "P", "Promo", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 5, "L", "Liner", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 6, "I", "ID", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 7, "J", "Jingle", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 8, "C", "Commercial", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 9, "E", "Element", new Guid("00000000-0000-0000-0000-000000000000") },
-                    { 10, "X", "Unknown", new Guid("00000000-0000-0000-0000-000000000000") }
-                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppSettings_Id",
