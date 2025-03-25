@@ -438,9 +438,6 @@ namespace SharedLibrary.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("MusicPatternId")
                         .HasColumnType("uuid");
 
@@ -458,8 +455,6 @@ namespace SharedLibrary.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("MusicPatternId");
 
@@ -480,15 +475,7 @@ namespace SharedLibrary.Migrations
                     b.Property<Guid>("StationId")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("TemplateId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("TemplatePatternId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("CategoryId");
-
-                    b.HasIndex("TemplatePatternId");
 
                     b.ToTable("Categories");
                 });
@@ -503,6 +490,9 @@ namespace SharedLibrary.Migrations
 
                     b.Property<string>("Level")
                         .HasColumnType("text");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -544,9 +534,6 @@ namespace SharedLibrary.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<Guid>("StationId")
@@ -825,10 +812,6 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.PatternCategory", b =>
                 {
-                    b.HasOne("SharedLibrary.Models.MusicSchedule.Rules.Category", null)
-                        .WithMany("PatternCategories")
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("SharedLibrary.Models.MusicSchedule.MusicPattern", "MusicPattern")
                         .WithMany("PatternCategories")
                         .HasForeignKey("MusicPatternId")
@@ -844,15 +827,6 @@ namespace SharedLibrary.Migrations
                     b.Navigation("MusicPattern");
 
                     b.Navigation("SongCategory");
-                });
-
-            modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.Category", b =>
-                {
-                    b.HasOne("SharedLibrary.Models.MusicSchedule.MusicPattern", "Template")
-                        .WithMany()
-                        .HasForeignKey("TemplatePatternId");
-
-                    b.Navigation("Template");
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.SongCategory", b =>
@@ -882,11 +856,6 @@ namespace SharedLibrary.Migrations
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.MusicPattern", b =>
-                {
-                    b.Navigation("PatternCategories");
-                });
-
-            modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.Category", b =>
                 {
                     b.Navigation("PatternCategories");
                 });
