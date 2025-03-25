@@ -10,5 +10,6 @@ namespace SharedLibrary.Models.MusicSchedule.Rules
     {
         public int Id { get; set; }
         public string? Name { get; set; }
+        public Guid StationId { get; set; }
     }
 }

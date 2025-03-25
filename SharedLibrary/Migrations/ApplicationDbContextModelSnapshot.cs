@@ -507,23 +507,6 @@ namespace SharedLibrary.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EnergyLevels");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Level = "Low"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Level = "Medium"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Level = "High"
-                        });
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.SongScheduleSettings", b =>
@@ -572,78 +555,6 @@ namespace SharedLibrary.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SoundCodes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "M",
-                            Description = "Music",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "S",
-                            Description = "Sweep",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "V",
-                            Description = "Voice",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "P",
-                            Description = "Promo",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "L",
-                            Description = "Liner",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "I",
-                            Description = "ID",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "J",
-                            Description = "Jingle",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Code = "C",
-                            Description = "Commercial",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Code = "E",
-                            Description = "Element",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Code = "X",
-                            Description = "Unknown",
-                            StationId = new Guid("00000000-0000-0000-0000-000000000000")
-                        });
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.SongCategory", b =>

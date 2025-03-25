@@ -37,7 +37,6 @@ namespace SharedLibrary.Data
         public DbSet<EnergyLevel> EnergyLevels { get; set; }
         public DbSet<SongScheduleSettings> SongScheduleSettings { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -93,7 +92,7 @@ namespace SharedLibrary.Data
                 .HasIndex(a => a.Id)
                 .IsUnique();
 
-            // Seed data for AppSettings
+            // Remove seed data for AppSettings
             modelBuilder.Entity<AppSettings>().HasData(
                 new AppSettings
                 {
@@ -108,7 +107,7 @@ namespace SharedLibrary.Data
                 .HasIndex(a => a.Id)
                 .IsUnique();
 
-            // Seed data for SongScheduleSettings
+            // Remove seed data for SongScheduleSettings
             modelBuilder.Entity<SongScheduleSettings>().HasData(
                 new SongScheduleSettings
                 {
@@ -121,26 +120,6 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<ProgramLogItem>()
                 .HasKey(pl => new { pl.Date, pl.LogOrderID });
 
-            // Seed data for SoundCodes
-            modelBuilder.Entity<SoundCode>().HasData(
-                new SoundCode { Id = 1, Code = "M", Description = "Music" },
-                new SoundCode { Id = 2, Code = "S", Description = "Sweep" },
-                new SoundCode { Id = 3, Code = "V", Description = "Voice" },
-                new SoundCode { Id = 4, Code = "P", Description = "Promo" },
-                new SoundCode { Id = 5, Code = "L", Description = "Liner" },
-                new SoundCode { Id = 6, Code = "I", Description = "ID" },
-                new SoundCode { Id = 7, Code = "J", Description = "Jingle" },
-                new SoundCode { Id = 8, Code = "C", Description = "Commercial" },
-                new SoundCode { Id = 9, Code = "E", Description = "Element" },
-                new SoundCode { Id = 10, Code = "X", Description = "Unknown" }
-            );
-
-            // Seed data for EnergyLevels
-            modelBuilder.Entity<EnergyLevel>().HasData(
-                new EnergyLevel { Id = 1, Level = "Low" },
-                new EnergyLevel { Id = 2, Level = "Medium" },
-                new EnergyLevel { Id = 3, Level = "High" }
-            );
         }
     }
 }
