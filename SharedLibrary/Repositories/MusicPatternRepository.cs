@@ -151,7 +151,7 @@ namespace SharedLibrary.Repositories
             return await context.MusicPatterns.Select(mp => mp.Name!).ToListAsync();
         }
 
-        public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
+        public async Task<List<int>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicGridItems = await context.MusicGridItems
@@ -168,10 +168,15 @@ namespace SharedLibrary.Repositories
                 DayOfWeek.Thursday => item.ThursdayPatternId,
                 DayOfWeek.Friday => item.FridayPatternId,
                 DayOfWeek.Saturday => item.SaturdayPatternId,
-                _ => null
-            }).Where(id => id.HasValue).Select(id => id!.Value).ToList();
+                _ => (int?)null
+            }).Where(id => id.HasValue).Select(id => id.Value).ToList();
 
-            return patternIds;
+            var musicPatterns = await context.MusicPatterns
+                .Where(mp => patternIds.Contains(mp.PatternId))
+                .Select(mp => mp.StationId)
+                .ToListAsync();
+
+            return musicPatterns;
         }
 
         public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId)

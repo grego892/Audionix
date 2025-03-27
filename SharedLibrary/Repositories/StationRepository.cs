@@ -135,28 +135,6 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            var musicGridItems = await context.MusicGridItems
-                .Where(item => item.StationId == stationId)
-                .ToListAsync();
-
-            var patternIds = musicGridItems.Select(item => day switch
-            {
-                DayOfWeek.Sunday => item.SundayPatternId,
-                DayOfWeek.Monday => item.MondayPatternId,
-                DayOfWeek.Tuesday => item.TuesdayPatternId,
-                DayOfWeek.Wednesday => item.WednesdayPatternId,
-                DayOfWeek.Thursday => item.ThursdayPatternId,
-                DayOfWeek.Friday => item.FridayPatternId,
-                DayOfWeek.Saturday => item.SaturdayPatternId,
-                _ => null
-            }).Where(id => id.HasValue).Select(id => id!.Value).ToList();
-
-            return patternIds;
-        }
-
         public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns)
         {
             using var context = _dbContextFactory.CreateDbContext();
@@ -236,6 +214,39 @@ namespace SharedLibrary.Repositories
             {
                 Log.Error("+++ StationRepository - AddNewDayLogToDbLogAsync() -- NewDaysLog is null or empty.");
             }
+        }
+        public async Task<AppSettings?> GetAppSettingsDataPathAsync() // Fixed the return type to be nullable
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AppSettings.FirstOrDefaultAsync();
+        }
+
+        public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
+        }
+
+        public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            var musicGridItems = await context.MusicGridItems
+                .Where(item => item.StationId == stationId)
+                .ToListAsync();
+
+            var patternIds = musicGridItems.Select(item => day switch
+            {
+                DayOfWeek.Sunday => item.SundayPatternId,
+                DayOfWeek.Monday => item.MondayPatternId,
+                DayOfWeek.Tuesday => item.TuesdayPatternId,
+                DayOfWeek.Wednesday => item.WednesdayPatternId,
+                DayOfWeek.Thursday => item.ThursdayPatternId,
+                DayOfWeek.Friday => item.FridayPatternId,
+                DayOfWeek.Saturday => item.SaturdayPatternId,
+                _ => 0 // Default value for int
+            }).Where(id => id != 0).Select(id => new Guid(id.ToString())).ToList();
+
+            return patternIds;
         }
 
         public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId)
@@ -321,18 +332,6 @@ namespace SharedLibrary.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             context.MusicGridItems.Update(musicGridItem);
             await context.SaveChangesAsync();
-        }
-
-        public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
-        }
-
-        public async Task<AppSettings?> GetAppSettingsDataPathAsync() // Fixed the return type to be nullable
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            return await context.AppSettings.FirstOrDefaultAsync();
         }
 
         public async Task UpdateProgramLogItemAsync(ProgramLogItem logItem)

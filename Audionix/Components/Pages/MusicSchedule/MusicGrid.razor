@@ -16,7 +16,7 @@
         <MudSelect Style="min-width: 200px;" Class="ml-2" FullWidth="true" T="Guid?" Label="Music Pattern" Value="selectedMusicPatternId" ValueChanged="OnMusicPatternChanged" Placeholder="Select Music Pattern" Margin="Margin.Dense" Variant="Variant.Outlined">
             @foreach (var pattern in musicPatterns)
             {
-                <MudSelectItem Value="@(pattern.PatternId as Guid?)">@pattern.Name</MudSelectItem>
+                <MudSelectItem Value="@(pattern.PatternId)">@pattern.Name</MudSelectItem>
             }
         </MudSelect>
     </MudStack>
