@@ -8,7 +8,7 @@ namespace SharedLibrary.Models.MusicSchedule.Rules
 {
     public class Category
     {
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public Guid StationId { get; set; }
     }

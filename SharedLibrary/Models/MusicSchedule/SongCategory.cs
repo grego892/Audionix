@@ -2,7 +2,7 @@
 {
     public class SongCategory
     {
-        public Guid SongCategoryId { get; set; }
+        public int SongCategoryId { get; set; }
         public string? SongCategoryName { get; set; }
         public Guid StationId { get; set; }
         public int? TemplateId { get; set; }

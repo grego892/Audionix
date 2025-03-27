@@ -124,7 +124,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task DeleteSongCategoryAsync(Guid songCategoryId)
+        public async Task DeleteSongCategoryAsync(int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var songCategory = await context.SongCategories.FindAsync(songCategoryId);
@@ -157,7 +157,7 @@ namespace SharedLibrary.Repositories
             return patternIds;
         }
 
-        public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<Guid> musicPatterns)
+        public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var songCategories = new List<SongCategory>();

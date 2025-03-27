@@ -20,7 +20,7 @@ namespace SharedLibrary.Models
         public Station? Station { get; set; }
         public string? Folder { get; set; }
         public EventType EventType { get; set; }
-        public Guid? CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public Category? Category { get; set; }
         public int? SoundCodeId { get; set; }
         public SoundCode? SoundCode { get; set; }

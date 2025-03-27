@@ -1,6 +1,7 @@
 ﻿using SharedLibrary.Data;
 using SharedLibrary.Models.MusicSchedule;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Models;
 
 namespace SharedLibrary.Repositories
 {
@@ -26,7 +27,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task DeleteSongCategoryAsync(Guid songCategoryId)
+        public async Task DeleteSongCategoryAsync(int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var songCategory = await context.SongCategories.FindAsync(songCategoryId);
@@ -37,7 +38,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<SongCategory?> GetSongCategoryByIdAsync(Guid songCategoryId)
+        public async Task<SongCategory?> GetSongCategoryByIdAsync(int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.SongCategories.FindAsync(songCategoryId);
@@ -49,29 +50,35 @@ namespace SharedLibrary.Repositories
             return await context.SongCategories.Select(c => c.SongCategoryName!).ToListAsync();
         }
 
-        public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<Guid> musicPatterns)
+        public async Task<List<AudioMetadata>> GetScheduledSongsAsync(List<SongCategory> songCategories, Dictionary<string, int> songCategoryRotationIndex)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            var songCategories = new List<SongCategory>();
+            var scheduledSongs = new List<AudioMetadata>();
 
-            foreach (var patternId in musicPatterns)
+            foreach (var songCategory in songCategories)
             {
-                var patternCategories = await context.PatternCategories
+                var audioFiles = await context.AudioFiles
                     .AsNoTracking()
-                    .Where(pc => pc.MusicPatternId == patternId)
-                    .Include(pc => pc.SongCategory)
+                    .Where(af => af.CategoryId == songCategory.SongCategoryId)
                     .ToListAsync();
 
-                foreach (var patternCategory in patternCategories)
+                if (audioFiles.Any())
                 {
-                    if (patternCategory.SongCategory != null)
+                    if (!songCategoryRotationIndex.TryGetValue(songCategory.SongCategoryName ?? string.Empty, out int lastIndex))
                     {
-                        songCategories.Add(patternCategory.SongCategory);
+                        lastIndex = 0;
                     }
+
+                    var nextIndex = (lastIndex + 1) % audioFiles.Count; // Fixed the issue with the modulus operator
+                    var rotatedSong = audioFiles[nextIndex];
+
+                    songCategoryRotationIndex[songCategory.SongCategoryName ?? string.Empty] = nextIndex;
+
+                    scheduledSongs.Add(rotatedSong);
                 }
             }
 
-            return songCategories;
+            return scheduledSongs;
         }
     }
 }

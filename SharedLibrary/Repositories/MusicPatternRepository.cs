@@ -40,7 +40,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task AddSongCategoryToPatternAsync(Guid musicPatternId, Guid songCategoryId)
+        public async Task AddSongCategoryToPatternAsync(int musicPatternId, int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicPattern = await context.MusicPatterns.Include(mp => mp.PatternCategories).FirstOrDefaultAsync(mp => mp.PatternId == musicPatternId);
@@ -121,7 +121,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(Guid musicPatternId)
+        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(int musicPatternId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.PatternCategories

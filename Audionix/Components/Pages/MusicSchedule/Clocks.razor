@@ -44,7 +44,7 @@
                 <MudSelect Class="ma-1" T="Guid?" Label="Song Category" Value="selectedSongCategoryId" ValueChanged="OnSongCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
                     @foreach (var songCategory in filteredSongCategories)
                     {
-                        <MudSelectItem Value="@(songCategory.SongCategoryId as Guid?)">@songCategory.SongCategoryName</MudSelectItem>
+                        <MudSelectItem Value="@(songCategory.SongCategoryId)">@songCategory.SongCategoryName</MudSelectItem>
                     }
                 </MudSelect>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddSongCategoryToPattern" Size="Size.Small">Add Song Category</MudButton>
