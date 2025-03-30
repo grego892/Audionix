@@ -11,7 +11,7 @@ namespace Audionix.Components.Pages
 {
     public partial class Setup
     {
-        private Guid StationEditing { get; set; }
+        private int StationEditing { get; set; }
         private Station newStation = new();
         private Station tempEditStation = new();
         string? oldDataPath;
@@ -193,7 +193,7 @@ namespace Audionix.Components.Pages
             {
                 Log.Error("++++++ Setup - SaveEditedStation() -- " + ex.Message);
             }
-            StationEditing = Guid.Empty;
+            StationEditing = 0;
         }
 
         private void CancelStationEdit(Station editingStation)
@@ -202,7 +202,7 @@ namespace Audionix.Components.Pages
             editingStation.StationId = tempEditStation.StationId;
             editingStation.Slogan = tempEditStation.Slogan;
             editingStation.CallLetters = tempEditStation.CallLetters;
-            StationEditing = Guid.Empty;
+            StationEditing = 0;
         }
 
         private async Task AddFolder()

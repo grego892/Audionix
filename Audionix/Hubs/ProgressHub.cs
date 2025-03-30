@@ -12,12 +12,12 @@ namespace Audionix.Hubs
             await Clients.All.SendAsync("ReceiveProgress", logOrderId, logOrderDate, currentTime, totalTime);
         }
 
-        public async Task PlayNextAudio(Guid stationId)
+        public async Task PlayNextAudio(int stationId)
         {
             await Clients.All.SendAsync("PlayNextAudio", stationId);
         }
 
-        public async Task StopAudio(Guid stationId)
+        public async Task StopAudio(int stationId)
         {
             await Clients.All.SendAsync("StopAudio", stationId);
         }

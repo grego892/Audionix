@@ -37,7 +37,7 @@ namespace SharedLibrary.Models
         public double Progress { get; set; }
 
         // Foreign key to Station
-        public Guid StationId { get; set; }
+        public int StationId { get; set; }
         public Station? Station { get; set; }
     }
 
@@ -67,6 +67,6 @@ namespace SharedLibrary.Models
         public Int16 Intro { get; set; }
         public Int16 Segue { get; set; }
         public string? Description { get; set; }
-        public Guid StationId { get; set; }
+        public int StationId { get; set; }
     }
 }

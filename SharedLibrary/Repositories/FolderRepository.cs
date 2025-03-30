@@ -13,7 +13,7 @@ namespace SharedLibrary.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<List<Folder>> GetFoldersForStationAsync(Guid stationId)
+        public async Task<List<Folder>> GetFoldersForStationAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Folders.Where(f => f.StationId == stationId).ToListAsync();

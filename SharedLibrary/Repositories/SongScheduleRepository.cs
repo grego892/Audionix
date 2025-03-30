@@ -66,17 +66,17 @@ namespace SharedLibrary.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Category>> GetCategoriesAsync(Guid stationId)
+        public async Task<List<Category>> GetCategoriesAsync(int stationId)
         {
             return await _context.Categories.Where(c => c.StationId == stationId).ToListAsync();
         }
 
-        public async Task<List<SoundCode>> GetSoundCodesAsync(Guid stationId)
+        public async Task<List<SoundCode>> GetSoundCodesAsync(int stationId)
         {
             return await _context.SoundCodes.Where(sc => sc.StationId == stationId).ToListAsync();
         }
 
-        public async Task<List<EnergyLevel>> GetEnergyLevelsAsync(Guid stationId)
+        public async Task<List<EnergyLevel>> GetEnergyLevelsAsync(int stationId)
         {
             return await _context.EnergyLevels.Where(el => el.StationId == stationId).ToListAsync();
         }

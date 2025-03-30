@@ -7,22 +7,22 @@ namespace SharedLibrary.Repositories
     public interface IStationRepository
     {
         Task<List<Station>> GetStationsAsync();
-        Task<Station?> GetStationByIdAsync(Guid stationId);
+        Task<Station?> GetStationByIdAsync(int stationId);
         Task AddStationAsync(Station station);
         Task UpdateStationAsync(Station station);
-        Task DeleteStationAsync(Guid stationId);
-        Task<List<Folder>> GetFoldersForStationAsync(Guid stationId);
-        Task UpdateStationNextPlayAsync(Guid stationId, int logOrderID, DateOnly Date);
-        Task<List<SongCategory>> GetSongCategoriesAsync(Guid stationId);
+        Task DeleteStationAsync(int stationId);
+        Task<List<Folder>> GetFoldersForStationAsync(int stationId);
+        Task UpdateStationNextPlayAsync(int stationId, int logOrderID, DateOnly Date);
+        Task<List<SongCategory>> GetSongCategoriesAsync(int stationId);
         Task AddSongCategoryAsync(SongCategory songCategory);
-        Task DeleteSongCategoryAsync(Guid songCategoryId);
-        Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day);
-        Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<Guid> musicPatterns);
+        Task DeleteSongCategoryAsync(int songCategoryId);
+        Task<List<int>> GetMusicPatternsForDayAsync(int stationId, DayOfWeek day);
+        Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns);
         Task<List<AudioMetadata>> GetScheduledSongsAsync(List<SongCategory> categories, Dictionary<string, int> songCategoryRotationIndex);
         Task AddNewDayLogToDbLogAsync(List<ProgramLogItem> newDaysLog);
-        Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId);
+        Task<List<MusicGridItem>> GetMusicGridItemsAsync(int stationId);
         Task AddMusicGridItemAsync(MusicGridItem item);
-        Task<List<MusicPattern>> GetMusicPatternsAsync(Guid stationId);
+        Task<List<MusicPattern>> GetMusicPatternsAsync(int stationId);
         Task<List<AudioMetadata>> GetAudioFilesAsync();
         Task<AudioMetadata?> GetAudioFileByIdAsync(int id);
         Task AddAudioFileAsync(AudioMetadata audioMetadata);
@@ -34,7 +34,7 @@ namespace SharedLibrary.Repositories
         Task UpdateMusicGridItemAsync(MusicGridItem musicGridItem);
         Task<AppSettings> GetAppSettingsDataPathAsync();
         Task<AudioMetadata> GetAudioFileByFilenameAsync(string filename);
-        //Task<ProgramLogItem?> GetProgramLogItemAsync(Guid stationId, int logOrderID);
+        //Task<ProgramLogItem?> GetProgramLogItemAsync(int stationId, int logOrderID);
         Task UpdateProgramLogItemAsync(ProgramLogItem logItem);
 
     }

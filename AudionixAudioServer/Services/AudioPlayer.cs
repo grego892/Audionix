@@ -29,7 +29,7 @@ namespace AudionixAudioServer.Services
             _isPlayNextTriggered = true;
         }
 
-        public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
+        public Task PlayAudioAsync(int stationId, CancellationToken stoppingToken)
         {
             Log.Debug("--- AudioPlayer.cs -- PlayAudioAsync() - Starting PlayAudioAsync()");
 
@@ -54,7 +54,7 @@ namespace AudionixAudioServer.Services
             }, stoppingToken);
         }
 
-        private async Task<Station?> GetStationAsync(Guid stationId, CancellationToken stoppingToken)
+        private async Task<Station?> GetStationAsync(int stationId, CancellationToken stoppingToken)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace AudionixAudioServer.Services
             }
         }
 
-        private async Task<ProgramLogItem?> GetLogItemAsync(Guid stationId, Station station, CancellationToken stoppingToken)
+        private async Task<ProgramLogItem?> GetLogItemAsync(int stationId, Station station, CancellationToken stoppingToken)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace AudionixAudioServer.Services
             }
         }
 
-        private async Task PlayLogItemAsync(Guid stationId, Station station, ProgramLogItem logItem, CancellationToken stoppingToken)
+        private async Task PlayLogItemAsync(int stationId, Station station, ProgramLogItem logItem, CancellationToken stoppingToken)
         {
             if (!string.IsNullOrEmpty(logItem.Name))
             {
@@ -171,7 +171,7 @@ namespace AudionixAudioServer.Services
             }
         }
 
-        private async Task PlayAudioFileAsync(Guid stationId, Station station, ProgramLogItem logItem, AudioMetadata audioMetadata, string filePath, CancellationToken stoppingToken)
+        private async Task PlayAudioFileAsync(int stationId, Station station, ProgramLogItem logItem, AudioMetadata audioMetadata, string filePath, CancellationToken stoppingToken)
         {
             try
             {

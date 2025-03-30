@@ -14,7 +14,7 @@ namespace SharedLibrary.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<ProgramLogItem> GetProgramLogItemAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate)
+        public async Task<ProgramLogItem> GetProgramLogItemAsync(int stationId, int nextPlayId, DateOnly? nextPlayDate)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<ProgramLogItem>> GetFullProgramLogForStationAsync(Guid stationId)
+        public async Task<List<ProgramLogItem>> GetFullProgramLogForStationAsync(int stationId)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, DateOnly? date)
+        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(int stationId, DateOnly? date)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(Guid stationId, int nextPlayId, DateOnly? nextPlayDate)
+        public async Task<List<ProgramLogItem>> GetProgramLogItemsAsync(int stationId, int nextPlayId, DateOnly? nextPlayDate)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<bool> HasLogEntriesAsync(Guid stationId)
+        public async Task<bool> HasLogEntriesAsync(int stationId)
         {
             try
             {
@@ -156,7 +156,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task ShiftLogItemsDownAsync(Guid stationId, int startIndex)
+        public async Task ShiftLogItemsDownAsync(int stationId, int startIndex)
         {
             try
             {
@@ -187,7 +187,7 @@ namespace SharedLibrary.Repositories
         }
 
 
-        //public async Task ShiftLogItemsDownAsync(Guid stationId, int startIndex)
+        //public async Task ShiftLogItemsDownAsync(int stationId, int startIndex)
         //{
         //    try
         //    {
@@ -212,7 +212,7 @@ namespace SharedLibrary.Repositories
         //    }
         //}
 
-        public async Task ShiftLogItemsUpAsync(Guid stationId, int startIndex)
+        public async Task ShiftLogItemsUpAsync(int stationId, int startIndex)
         {
             try
             {
@@ -237,7 +237,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task AdvanceLogNextPlayAsync(Guid stationId)
+        public async Task AdvanceLogNextPlayAsync(int stationId)
         {
             Log.Debug($"--- ProgramLogRepository - AdvanceLogNextPlayAsync() -- Method Starting.   StationId: {stationId}");
             try

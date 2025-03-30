@@ -34,7 +34,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<Station?> GetStationByIdAsync(Guid stationId)
+        public async Task<Station?> GetStationByIdAsync(int stationId)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task DeleteStationAsync(Guid stationId)
+        public async Task DeleteStationAsync(int stationId)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<SongCategory>> GetSongCategoriesAsync(Guid stationId)
+        public async Task<List<SongCategory>> GetSongCategoriesAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.SongCategories.Where(c => c.StationId == stationId).ToListAsync();
@@ -124,7 +124,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task DeleteSongCategoryAsync(Guid songCategoryId)
+        public async Task DeleteSongCategoryAsync(int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var songCategory = await context.SongCategories.FindAsync(songCategoryId);
@@ -135,7 +135,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
+        public async Task<List<int>> GetMusicPatternsForDayAsync(int stationId, DayOfWeek day)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicGridItems = await context.MusicGridItems
@@ -157,7 +157,7 @@ namespace SharedLibrary.Repositories
             return patternIds;
         }
 
-        public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<Guid> musicPatterns)
+        public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var songCategories = new List<SongCategory>();
@@ -238,7 +238,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId)
+        public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.MusicGridItems.Where(mgi => mgi.StationId == stationId).ToListAsync();
@@ -251,7 +251,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<MusicPattern>> GetMusicPatternsAsync(Guid stationId)
+        public async Task<List<MusicPattern>> GetMusicPatternsAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.MusicPatterns.Where(mp => mp.StationId == stationId).ToListAsync();
@@ -283,7 +283,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<Folder>> GetFoldersForStationAsync(Guid stationId)
+        public async Task<List<Folder>> GetFoldersForStationAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.Folders.Where(f => f.StationId == stationId).ToListAsync();
@@ -342,7 +342,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task UpdateStationNextPlayAsync(Guid stationId, int logOrderID, DateOnly Date)
+        public async Task UpdateStationNextPlayAsync(int stationId, int logOrderID, DateOnly Date)
         {
             try
             {

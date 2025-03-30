@@ -16,10 +16,10 @@
     <MudNavMenu>
         @if (AppStateService.AppSettings?.IsDatapathSetup == true && stations.Count > 0)
         {
-            <MudSelect Class="pb-1 pa-2" Margin="Margin.Dense" T="Guid" Label="Station" Value="@(AppStateService.station?.StationId ?? Guid.Empty)" ValueChanged="OnStationChanged" Variant="Variant.Outlined" Placeholder="Select a station">
+            <MudSelect Class="pb-1 pa-2" Margin="Margin.Dense" T="int" Label="Station" Value="@(AppStateService.station.StationId)" ValueChanged="OnStationChanged" Variant="Variant.Outlined" Placeholder="Select a station">
                 @foreach (var station in stations)
                 {
-                    <MudSelectItem Value="@station.StationId">@(station.CallLetters ?? null)</MudSelectItem>
+                    <MudSelectItem Value="@station.StationId">@(station.CallLetters)</MudSelectItem>
                 }
             </MudSelect>
             <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
@@ -59,7 +59,7 @@
         AppStateService.OnStationChanged += HandleStationChanged;
     }
 
-    private async Task OnStationChanged(Guid stationId)
+    private async Task OnStationChanged(int stationId)
     {
         AppStateService.station = stations.FirstOrDefault(s => s.StationId == stationId) ?? new Station();
         await Task.CompletedTask;

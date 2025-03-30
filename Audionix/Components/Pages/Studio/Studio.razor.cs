@@ -163,7 +163,7 @@ namespace Audionix.Components.Pages.Studio
             {
                 try
                 {
-                    await _hubConnection.InvokeAsync("PlayNextAudio", AppStateService?.station?.StationId ?? Guid.Empty);
+                    await _hubConnection.InvokeAsync("PlayNextAudio", AppStateService?.station?.StationId ?? 0);
                 }
                 catch (Exception ex)
                 {

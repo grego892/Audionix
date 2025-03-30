@@ -69,9 +69,10 @@ namespace SharedLibrary.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CategoryName = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,7 +86,7 @@ namespace SharedLibrary.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Level = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -106,14 +107,14 @@ namespace SharedLibrary.Migrations
                     Thursday = table.Column<string>(type: "text", nullable: false),
                     Friday = table.Column<string>(type: "text", nullable: false),
                     Saturday = table.Column<string>(type: "text", nullable: false),
-                    SundayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    MondayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    TuesdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    WednesdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    ThursdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    FridayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    SaturdayPatternId = table.Column<Guid>(type: "uuid", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    SundayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    MondayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    TuesdayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    WednesdayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    ThursdayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    FridayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    SaturdayPatternId = table.Column<int>(type: "integer", nullable: true),
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,9 +125,10 @@ namespace SharedLibrary.Migrations
                 name: "MusicPatterns",
                 columns: table => new
                 {
-                    PatternId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PatternId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -146,7 +148,7 @@ namespace SharedLibrary.Migrations
                     Intro = table.Column<short>(type: "smallint", nullable: false),
                     Segue = table.Column<short>(type: "smallint", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -173,7 +175,7 @@ namespace SharedLibrary.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Code = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -184,7 +186,8 @@ namespace SharedLibrary.Migrations
                 name: "Stations",
                 columns: table => new
                 {
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StationSortOrder = table.Column<int>(type: "integer", nullable: false),
                     CallLetters = table.Column<string>(type: "text", nullable: true),
                     Slogan = table.Column<string>(type: "text", nullable: true),
@@ -309,18 +312,18 @@ namespace SharedLibrary.Migrations
                 name: "SongCategories",
                 columns: table => new
                 {
-                    SongCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SongCategoryId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     SongCategoryName = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TemplateId = table.Column<int>(type: "integer", nullable: true),
-                    TemplatePatternId = table.Column<Guid>(type: "uuid", nullable: true)
+                    StationId = table.Column<int>(type: "integer", nullable: false),
+                    TemplateId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SongCategories", x => x.SongCategoryId);
                     table.ForeignKey(
-                        name: "FK_SongCategories_MusicPatterns_TemplatePatternId",
-                        column: x => x.TemplatePatternId,
+                        name: "FK_SongCategories_MusicPatterns_TemplateId",
+                        column: x => x.TemplateId,
                         principalTable: "MusicPatterns",
                         principalColumn: "PatternId");
                 });
@@ -342,10 +345,10 @@ namespace SharedLibrary.Migrations
                     IntroSeconds = table.Column<double>(type: "double precision", nullable: false),
                     SegueSeconds = table.Column<double>(type: "double precision", nullable: false),
                     Duration = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StationId = table.Column<int>(type: "integer", nullable: false),
                     Folder = table.Column<string>(type: "text", nullable: true),
                     EventType = table.Column<int>(type: "integer", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CategoryId = table.Column<int>(type: "integer", nullable: true),
                     SoundCodeId = table.Column<int>(type: "integer", nullable: true),
                     EnergyLevelId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -382,7 +385,7 @@ namespace SharedLibrary.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -420,7 +423,7 @@ namespace SharedLibrary.Migrations
                     Status = table.Column<int>(type: "integer", nullable: true),
                     Device = table.Column<int>(type: "integer", nullable: true),
                     Progress = table.Column<double>(type: "double precision", nullable: false),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -445,10 +448,10 @@ namespace SharedLibrary.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MusicPatternSortOrder = table.Column<int>(type: "integer", nullable: false),
-                    MusicPatternId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SongCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MusicPatternId = table.Column<int>(type: "integer", nullable: false),
+                    SongCategoryId = table.Column<int>(type: "integer", nullable: false),
                     SongCategoryName = table.Column<string>(type: "text", nullable: false),
-                    StationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -566,9 +569,9 @@ namespace SharedLibrary.Migrations
                 column: "SongCategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SongCategories_TemplatePatternId",
+                name: "IX_SongCategories_TemplateId",
                 table: "SongCategories",
-                column: "TemplatePatternId");
+                column: "TemplateId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SongScheduleSettings_Id",

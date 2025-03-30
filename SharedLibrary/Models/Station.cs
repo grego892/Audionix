@@ -4,7 +4,7 @@ namespace SharedLibrary.Models
 {
     public class Station
     {
-        public Guid StationId { get; set; } = Guid.Empty;
+        public int StationId { get; set; }
         public int StationSortOrder { get; set; }
         public string? CallLetters { get; set; }
         public string? Slogan { get; set; }
@@ -18,10 +18,6 @@ namespace SharedLibrary.Models
         public ICollection<AudioMetadata>? AudioFiles { get; set; }
         public ICollection<Folder>? Folders { get; set; }
         public ICollection<ProgramLogItem>? ProgramLogItems { get; set; } // Navigation property
-        public Station()
-        {
-            StationId = Guid.NewGuid(); // Automatically generate a new GUID
-        }
 
         public Station DeepCopy()
         {

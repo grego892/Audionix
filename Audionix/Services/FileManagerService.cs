@@ -27,7 +27,7 @@ namespace Audionix.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
+        public async Task<List<IBrowserFile>> UploadFiles(IReadOnlyList<IBrowserFile> selectedFiles, int selectedStation, string selectedFolder, List<IBrowserFile> filesToUpload, IList<AudioMetadata> filesInDirectory, Action<int> updateProgress)
         {
             Log.Information("--- FileManager - UploadFiles() -- UploadFiles: {Count}", selectedFiles.Count);
 
@@ -44,7 +44,7 @@ namespace Audionix.Services
             return existingFiles;
         }
 
-        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, Guid selectedStation, string selectedFolder, Action<int> updateProgress)
+        public async Task LoadFiles(IReadOnlyList<IBrowserFile> selectedFiles, int selectedStation, string selectedFolder, Action<int> updateProgress)
         {
             Log.Information("--- FileManager - LoadFiles() -- LoadFiles: {Count}", selectedFiles.Count);
 
@@ -231,16 +231,16 @@ namespace Audionix.Services
 
         public async Task<List<string>> GetFoldersForStation(string stationId)
         {
-            if (!Guid.TryParse(stationId, out var stationGuid))
+            if (!int.TryParse(stationId, out var stationint))
             {
                 throw new ArgumentException("Invalid station ID format", nameof(stationId));
             }
 
-            var folders = await _stationRepository.GetFoldersForStationAsync(stationGuid);
+            var folders = await _stationRepository.GetFoldersForStationAsync(stationint);
             return folders.Select(f => f.Name).ToList();
         }
 
-        public async Task<List<AudioMetadata>> GetFolderFileList(Guid selectedStation, string selectedFolder)
+        public async Task<List<AudioMetadata>> GetFolderFileList(int selectedStation, string selectedFolder)
         {
             Log.Information("--- StationService - GetFolderFileList() -- Start");
             var filesInDirectory = await _audioMetadataRepository.GetAudioFilesAsync();

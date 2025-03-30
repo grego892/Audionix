@@ -13,14 +13,14 @@
         public string Saturday { get; set; } = string.Empty;
 
         // Add properties to store PatternId
-        public Guid? SundayPatternId { get; set; }
-        public Guid? MondayPatternId { get; set; }
-        public Guid? TuesdayPatternId { get; set; }
-        public Guid? WednesdayPatternId { get; set; }
-        public Guid? ThursdayPatternId { get; set; }
-        public Guid? FridayPatternId { get; set; }
-        public Guid? SaturdayPatternId { get; set; }
+        public int? SundayPatternId { get; set; }
+        public int? MondayPatternId { get; set; }
+        public int? TuesdayPatternId { get; set; }
+        public int? WednesdayPatternId { get; set; }
+        public int? ThursdayPatternId { get; set; }
+        public int? FridayPatternId { get; set; }
+        public int? SaturdayPatternId { get; set; }
 
-        public Guid StationId { get; set; }
+        public int StationId { get; set; }
     }
 }

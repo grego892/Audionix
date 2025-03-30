@@ -69,7 +69,7 @@ namespace Audionix.Services
             }
         }
 
-        public async Task SaveAudioMetadata(AudioMetadata audioMetadata, string fileName, Guid selectedStation)
+        public async Task SaveAudioMetadata(AudioMetadata audioMetadata, string fileName, int selectedStation)
         {
             // Create a new AudioMetadata instance and set its properties
             var audioMetadataForDb = new AudioMetadata

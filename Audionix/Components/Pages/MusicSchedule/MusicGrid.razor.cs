@@ -9,7 +9,7 @@ namespace Audionix.Components.Pages.MusicSchedule
     {
         private List<MusicGridItem> musicGridItems = new();
         private List<MusicPattern> musicPatterns = new();
-        private Guid? selectedMusicPatternId;
+        private int? selectedMusicPatternId;
         [Inject] private AppStateService? AppStateService { get; set; }
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
@@ -77,7 +77,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             selectedMusicPatternId = null;
         }
 
-        private Task OnMusicPatternChanged(Guid? patternId)
+        private Task OnMusicPatternChanged(int? patternId)
         {
             selectedMusicPatternId = patternId;
             return Task.CompletedTask;

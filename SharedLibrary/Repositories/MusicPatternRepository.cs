@@ -14,7 +14,7 @@ namespace SharedLibrary.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<List<MusicPattern>> GetMusicPatternsAsync(Guid stationId)
+        public async Task<List<MusicPattern>> GetMusicPatternsAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.MusicPatterns.Where(m => m.StationId == stationId).ToListAsync();
@@ -40,7 +40,7 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task AddSongCategoryToPatternAsync(Guid musicPatternId, Guid songCategoryId)
+        public async Task AddSongCategoryToPatternAsync(int musicPatternId, int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicPattern = await context.MusicPatterns.Include(mp => mp.PatternCategories).FirstOrDefaultAsync(mp => mp.PatternId == musicPatternId);
@@ -121,7 +121,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(Guid musicPatternId)
+        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(int musicPatternId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.PatternCategories
@@ -131,7 +131,7 @@ namespace SharedLibrary.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(Guid stationId, string patternName)
+        public async Task<List<SongCategory>> GetSelectedPatternCategoriesAsync(int stationId, string patternName)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicPattern = await context.MusicPatterns
@@ -151,7 +151,7 @@ namespace SharedLibrary.Repositories
             return await context.MusicPatterns.Select(mp => mp.Name!).ToListAsync();
         }
 
-        public async Task<List<Guid>> GetMusicPatternsForDayAsync(Guid stationId, DayOfWeek day)
+        public async Task<List<int>> GetMusicPatternsForDayAsync(int stationId, DayOfWeek day)
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicGridItems = await context.MusicGridItems
@@ -174,7 +174,7 @@ namespace SharedLibrary.Repositories
             return patternIds;
         }
 
-        public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(Guid stationId)
+        public async Task<List<MusicGridItem>> GetMusicGridItemsAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.MusicGridItems.Where(m => m.StationId == stationId).ToListAsync();
@@ -192,6 +192,11 @@ namespace SharedLibrary.Repositories
             using var context = _dbContextFactory.CreateDbContext();
             context.MusicGridItems.Update(musicGridItem);
             await context.SaveChangesAsync();
+        }
+        public async Task<int> GetNextPatternIdAsync()
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+            return await context.MusicPatterns.MaxAsync(mp => (int?)mp.PatternId) + 1 ?? 1;
         }
     }
 }

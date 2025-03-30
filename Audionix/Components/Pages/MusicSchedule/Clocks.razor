@@ -41,10 +41,10 @@
     <MudPaper Style="min-height:calc(100vh - 157px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
         <MudPaper Class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
             <MudStack Row="true">
-                <MudSelect Class="ma-1" T="Guid?" Label="Song Category" Value="selectedSongCategoryId" ValueChanged="OnSongCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                <MudSelect Class="ma-1" T="int?" Label="Song Category" Value="selectedSongCategoryId" ValueChanged="OnSongCategoryChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
                     @foreach (var songCategory in filteredSongCategories)
                     {
-                        <MudSelectItem Value="@(songCategory.SongCategoryId as Guid?)">@songCategory.SongCategoryName</MudSelectItem>
+                        <MudSelectItem Value="@(songCategory.SongCategoryId as int?)">@songCategory.SongCategoryName</MudSelectItem>
                     }
                 </MudSelect>
                 <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddSongCategoryToPattern" Size="Size.Small">Add Song Category</MudButton>

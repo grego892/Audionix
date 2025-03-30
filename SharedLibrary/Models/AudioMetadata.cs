@@ -16,11 +16,11 @@ namespace SharedLibrary.Models
         public double IntroSeconds { get; set; }
         public double SegueSeconds { get; set; }
         public TimeSpan Duration { get; set; }
-        public Guid StationId { get; set; }
+        public int StationId { get; set; }
         public Station? Station { get; set; }
         public string? Folder { get; set; }
         public EventType EventType { get; set; }
-        public Guid? CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public Category? Category { get; set; }
         public int? SoundCodeId { get; set; }
         public SoundCode? SoundCode { get; set; }

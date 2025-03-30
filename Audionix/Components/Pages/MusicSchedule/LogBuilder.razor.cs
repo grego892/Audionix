@@ -22,7 +22,7 @@ namespace Audionix.Components.Pages.MusicSchedule
 
 
         private MudDatePicker _logBuilderPicker;
-        private List<Guid> musicPatterns = new();
+        private List<int> musicPatterns = new();
         private List<SongCategory> songCategoryList = new();
         private List<AudioMetadata> scheduledSongs = new();
         private List<ProgramLogItem> log = new();

@@ -15,7 +15,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<string> MusicPatternNames = new List<string>();
         private List<SongCategory> MusicPatternDataList = new List<SongCategory>();
         private List<SongCategory> selectedPatternCategories = new();
-        private Guid? selectedSongCategoryId;
+        private int? selectedSongCategoryId;
         private List<SongCategory> filteredSongCategories = new();
         private List<string> songCategories = new();
         [Inject] private AppStateService AppStateService { get; set; } = default!;
@@ -74,7 +74,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 {
                     Name = newMusicPatternName,
                     StationId = AppStateService.station.StationId,
-                    PatternId = Guid.NewGuid()
+                    PatternId = await MusicPatternRepository.GetNextPatternIdAsync() // Use a method to get the next unique int ID
                 };
                 await MusicPatternRepository.AddMusicPatternAsync(newMusicPattern);
                 newMusicPatternName = string.Empty;
@@ -144,7 +144,6 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-
         private async Task FilterSongCategories()
         {
             if (AppStateService.station != null && SongCategoryRepository != null)
@@ -153,7 +152,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-        private void OnSongCategoryChanged(Guid? songCategoryId)
+        private void OnSongCategoryChanged(int? songCategoryId)
         {
             selectedSongCategoryId = songCategoryId;
         }

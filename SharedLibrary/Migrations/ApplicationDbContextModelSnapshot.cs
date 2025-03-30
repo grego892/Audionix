@@ -260,8 +260,8 @@ namespace SharedLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("integer");
 
                     b.Property<TimeSpan>("Duration")
                         .HasColumnType("interval");
@@ -303,8 +303,8 @@ namespace SharedLibrary.Migrations
                     b.Property<int>("StartDate")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -334,8 +334,8 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -356,8 +356,8 @@ namespace SharedLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("FridayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("FridayPatternId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Hour")
                         .HasColumnType("text");
@@ -366,46 +366,46 @@ namespace SharedLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("MondayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("MondayPatternId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Saturday")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("SaturdayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("SaturdayPatternId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Sunday")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("SundayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("SundayPatternId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Thursday")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("ThursdayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("ThursdayPatternId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Tuesday")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("TuesdayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("TuesdayPatternId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Wednesday")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("WednesdayPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("WednesdayPatternId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -414,16 +414,18 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.MusicPattern", b =>
                 {
-                    b.Property<Guid>("PatternId")
+                    b.Property<int>("PatternId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PatternId"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("PatternId");
 
@@ -438,21 +440,21 @@ namespace SharedLibrary.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("MusicPatternId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("MusicPatternId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("MusicPatternSortOrder")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SongCategoryId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("SongCategoryId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("SongCategoryName")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -465,15 +467,17 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.Rules.Category", b =>
                 {
-                    b.Property<Guid>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CategoryId"));
 
                     b.Property<string>("CategoryName")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("CategoryId");
 
@@ -491,8 +495,8 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("Level")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -536,8 +540,8 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -546,25 +550,24 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.SongCategory", b =>
                 {
-                    b.Property<Guid>("SongCategoryId")
+                    b.Property<int>("SongCategoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SongCategoryId"));
 
                     b.Property<string>("SongCategoryName")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("TemplateId")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("TemplatePatternId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("SongCategoryId");
 
-                    b.HasIndex("TemplatePatternId");
+                    b.HasIndex("TemplateId");
 
                     b.ToTable("SongCategories");
                 });
@@ -619,8 +622,8 @@ namespace SharedLibrary.Migrations
                     b.Property<string>("SongCategory")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("Status")
                         .HasColumnType("integer");
@@ -675,8 +678,8 @@ namespace SharedLibrary.Migrations
                     b.Property<short>("Segue")
                         .HasColumnType("smallint");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("StationId")
+                        .HasColumnType("integer");
 
                     b.HasKey("RotatorID");
 
@@ -685,9 +688,11 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.Station", b =>
                 {
-                    b.Property<Guid>("StationId")
+                    b.Property<int>("StationId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StationId"));
 
                     b.Property<string>("AudioDeviceId")
                         .IsRequired()
@@ -833,7 +838,7 @@ namespace SharedLibrary.Migrations
                 {
                     b.HasOne("SharedLibrary.Models.MusicSchedule.MusicPattern", "Template")
                         .WithMany()
-                        .HasForeignKey("TemplatePatternId");
+                        .HasForeignKey("TemplateId");
 
                     b.Navigation("Template");
                 });

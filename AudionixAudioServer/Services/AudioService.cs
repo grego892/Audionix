@@ -87,7 +87,7 @@ namespace AudionixAudioServer.Services
                 await RetryConnectionAsync();
             };
 
-            _hubConnection.On<Guid>("PlayNextAudio", async (stationId) =>
+            _hubConnection.On<int>("PlayNextAudio", async (stationId) =>
             {
                 await PlayNextAudioAsync(stationId);
             });
@@ -113,9 +113,9 @@ namespace AudionixAudioServer.Services
             }
         }
 
-        public Task PlayAudioAsync(Guid stationId, CancellationToken stoppingToken)
+        public Task PlayAudioAsync(int stationId, CancellationToken stoppingToken)
         {
-            if (stationId == Guid.Empty)
+            if (stationId == int.Empty)
             {
                 throw new ArgumentException("Invalid station ID.");
             }
@@ -123,9 +123,9 @@ namespace AudionixAudioServer.Services
             return _audioPlayer.PlayAudioAsync(stationId, stoppingToken);
         }
 
-        public async Task PlayNextAudioAsync(Guid stationId)
+        public async Task PlayNextAudioAsync(int stationId)
         {
-            if (stationId == Guid.Empty)
+            if (stationId == int.Empty)
             {
                 throw new ArgumentException("Invalid station ID.");
             }
