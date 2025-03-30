@@ -6,6 +6,7 @@ public interface ISongScheduleRepository
     Task<List<SoundCode>> GetAllSoundCodesAsync();
     Task<List<EnergyLevel>> GetAllEnergyLevelsAsync();
     Task AddCategoryAsync(Category category);
+    Task AddEnergyLevelAsync(EnergyLevel energyLevel);
     Task RemoveCategoryAsync(Category category);
     Task AddSoundCodeAsync(SoundCode soundcode);
     Task RemoveSoundCodeAsync(SoundCode soundcode);

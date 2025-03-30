@@ -69,16 +69,25 @@ namespace Audionix.Components.Pages.MusicSchedule
             {
                 filesInDirectory = await FileManagerService.GetFolderFileList(AppStateService.station.StationId, selectedFolder);
 
-                // Populate the Category information for each AudioMetadata
+                // Populate the Category, SoundCode, and EnergyLevel information for each AudioMetadata
                 foreach (var file in filesInDirectory)
                 {
                     if (file.CategoryId.HasValue)
                     {
                         file.Category = categories?.FirstOrDefault(c => c.CategoryId == file.CategoryId.Value);
                     }
+                    if (file.SoundCodeId.HasValue)
+                    {
+                        file.SoundCode = soundCodes?.FirstOrDefault(sc => sc.Id == file.SoundCodeId.Value);
+                    }
+                    if (file.EnergyLevelId.HasValue)
+                    {
+                        file.EnergyLevel = energyLevels?.FirstOrDefault(el => el.Id == file.EnergyLevelId.Value);
+                    }
                 }
             }
         }
+
 
         public string SelectedFolder
         {
@@ -106,6 +115,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 }
             }
         }
+
         private async Task OnSoundCodeChanged(string newSoundCode, AudioMetadata audioMetadata)
         {
             if (audioMetadata != null)
@@ -113,11 +123,13 @@ namespace Audionix.Components.Pages.MusicSchedule
                 var soundCode = soundCodes?.FirstOrDefault(c => c.Code == newSoundCode);
                 if (soundCode != null)
                 {
+                    audioMetadata.SoundCode = soundCode; // Update the SoundCode property
                     audioMetadata.SoundCodeId = soundCode.Id;
                     await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 }
             }
         }
+
         private async Task OnEnergyLevelChanged(string newEnergyLevel, AudioMetadata audioMetadata)
         {
             if (audioMetadata != null)
@@ -125,7 +137,8 @@ namespace Audionix.Components.Pages.MusicSchedule
                 var energyLevel = energyLevels?.FirstOrDefault(c => c.Level == newEnergyLevel);
                 if (energyLevel != null)
                 {
-                    audioMetadata.EnergyLevelId = energyLevel.Id; // Updated to use EnergyLevelId
+                    audioMetadata.EnergyLevel = energyLevel; // Update the EnergyLevel property
+                    audioMetadata.EnergyLevelId = energyLevel.Id;
                     await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 }
             }

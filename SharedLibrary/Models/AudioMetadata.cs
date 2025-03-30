@@ -19,7 +19,7 @@ namespace SharedLibrary.Models
         public int StationId { get; set; }
         public Station? Station { get; set; }
         public string? Folder { get; set; }
-        public EventType EventType { get; set; }
+        //public EventType EventType { get; set; }
         public int? CategoryId { get; set; }
         public Category? Category { get; set; }
         public int? SoundCodeId { get; set; }
@@ -28,12 +28,12 @@ namespace SharedLibrary.Models
         public EnergyLevel? EnergyLevel { get; set; }
     }
 
-    public enum EventType
-    {
-        song,
-        liner,
-        promo,
-        spot,
-        macro
-    }
+    //public enum EventType
+    //{
+    //    song,
+    //    liner,
+    //    promo,
+    //    spot,
+    //    macro
+    //}
 }

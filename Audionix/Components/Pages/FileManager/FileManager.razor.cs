@@ -21,7 +21,7 @@ namespace Audionix.Components.Pages.FileManager
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<string>? folders;
         private List<SongCategory>? songCategories;
-        private List<EventType>? eventTypes;
+        //private List<EventType>? eventTypes;
         private bool editorEnabled = false;
         public AudioMetadata? audioMetadata { get; set; } = new AudioMetadata();
 
@@ -48,7 +48,7 @@ namespace Audionix.Components.Pages.FileManager
             {
                 folders = await FileManagerService.GetFoldersForStation(AppStateService.station.StationId.ToString());
                 songCategories = await SongCategoryRepository.GetSongCategoriesAsync(AppStateService.station.StationId);
-                eventTypes = Enum.GetValues(typeof(EventType)).Cast<EventType>().ToList();
+                //eventTypes = Enum.GetValues(typeof(EventType)).Cast<EventType>().ToList();
                 AppStateService.OnStationChanged += HandleStationChanged;
             }
         }

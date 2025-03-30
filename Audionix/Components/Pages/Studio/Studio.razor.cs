@@ -329,7 +329,7 @@ namespace Audionix.Components.Pages.Studio
                         Cue = "AutoStart",
                         Intro = selectedAudioFile.Intro,
                         Segue = selectedAudioFile.Segue,
-                        EventType = selectedAudioFile.EventType,
+                        //EventType = selectedAudioFile.EventType,
                         TimeScheduled = logItem.TimeScheduled, // Use the TimeScheduled of the item being shifted down
                         Status = StatusType.notPlayed,
                         StationId = logItem.StationId,

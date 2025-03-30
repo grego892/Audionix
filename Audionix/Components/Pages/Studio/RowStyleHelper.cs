@@ -17,15 +17,15 @@ namespace Audionix.Components.Pages.Studio
             }
             else if (x.Status == StatusType.notPlayed)
             {
-                return x.EventType switch
-                {
-                    EventType.song => $"background: {Colors.Indigo.Lighten1};",
-                    EventType.promo => $"background: {Colors.Indigo.Lighten2};",
-                    EventType.liner => $"background: {Colors.Blue.Lighten1};",
-                    EventType.macro => $"background: {Colors.BlueGray.Lighten1};",
-                    EventType.spot => $"background: {Colors.Green.Lighten1};",
-                    _ => "background: #000000;"
-                };
+                //return x.EventType switch
+                //{
+                //EventType.song => $"background: {Colors.Indigo.Lighten1};",
+                //EventType.promo => $"background: {Colors.Indigo.Lighten2};",
+                //EventType.liner => $"background: {Colors.Blue.Lighten1};",
+                //EventType.macro => $"background: {Colors.BlueGray.Lighten1};",
+                //EventType.spot => $"background: {Colors.Green.Lighten1};",
+                //_ => "background: #000000;"
+                //};
             }
 
             return "background: #000000;";

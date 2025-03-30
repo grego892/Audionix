@@ -111,11 +111,20 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-        private void AddEnergyLevel()
+        private async Task AddEnergyLevel()
         {
             if (!string.IsNullOrWhiteSpace(newEnergyLevel))
             {
                 energyLevels.Add(newEnergyLevel);
+
+                var energryLevel = new EnergyLevel
+                {
+                    Level = newEnergyLevel,
+                    StationId = AppStateService.station.StationId
+                };
+
+                await SongScheduleRepository.AddEnergyLevelAsync(energryLevel);
+
                 newEnergyLevel = string.Empty;
             }
         }

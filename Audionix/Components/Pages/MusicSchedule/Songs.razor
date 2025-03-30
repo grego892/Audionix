@@ -55,7 +55,7 @@
                             <MudText>Sound Code</MudText>
                         </HeaderTemplate>
                         <CellTemplate>
-                            <MudSelect Margin="Margin.Dense" T="string" Label="Sound Code" Value="selectedSoundCode" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await OnSoundCodeChanged(value, context.Item))">
+                            <MudSelect Margin="Margin.Dense" T="string" Label="Sound Code" Value="context.Item.SoundCode?.Code" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await OnSoundCodeChanged(value, context.Item))">
                                 @foreach (var soundCode in soundCodes)
                                 {
                                     <MudSelectItem Value="@soundCode.Code">@soundCode.Code</MudSelectItem>
@@ -69,7 +69,7 @@
                             <MudText>Energy Level</MudText>
                         </HeaderTemplate>
                         <CellTemplate>
-                            <MudSelect Margin="Margin.Dense" T="string" Label="Energy Level" Value="selectedEnergyLevel" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await OnEnergyLevelChanged(value, context.Item))">
+                            <MudSelect Margin="Margin.Dense" T="string" Label="Energy Level" Value="context.Item.EnergyLevel?.Level" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await OnEnergyLevelChanged(value, context.Item))">
                                 @foreach (var energyLevel in energyLevels)
                                 {
                                     <MudSelectItem Value="@energyLevel.Level">@energyLevel.Level</MudSelectItem>

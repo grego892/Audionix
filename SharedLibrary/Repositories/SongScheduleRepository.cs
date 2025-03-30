@@ -49,6 +49,12 @@ namespace SharedLibrary.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddEnergyLevelAsync(EnergyLevel energyLevel)
+        {
+            await _context.EnergyLevels.AddAsync(energyLevel);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task RemoveSoundCodeAsync(SoundCode soundcode)
         {
             _context.SoundCodes.Remove(soundcode);
