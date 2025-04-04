@@ -166,14 +166,15 @@ namespace SharedLibrary.Repositories
             {
                 var patternCategories = await context.PatternCategories
                     .Where(pc => pc.MusicPatternId == patternId)
-                    .Include(pc => pc.SongCategory)
+                    .Include(pc => context.SongCategories.FirstOrDefault(sc => sc.StationId == pc.StationId))
                     .ToListAsync();
 
                 foreach (var patternCategory in patternCategories)
                 {
-                    if (patternCategory.SongCategory != null)
+                    var songCategory = context.SongCategories.FirstOrDefault(sc => sc.StationId == patternCategory.StationId);
+                    if (songCategory != null)
                     {
-                        songCategories.Add(patternCategory.SongCategory);
+                        songCategories.Add(songCategory);
                     }
                 }
             }
@@ -323,13 +324,13 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<AudioMetadata?> GetAudioFileByFilenameAsync(string filename)
+        public async Task<AudioMetadata> GetAudioFileByFilenameAsync(string filename)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.AudioFiles.AsNoTracking().FirstOrDefaultAsync(am => am.Filename == filename);
         }
 
-        public async Task<AppSettings?> GetAppSettingsDataPathAsync() // Fixed the return type to be nullable
+        public async Task<AppSettings> GetAppSettingsDataPathAsync()
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.AppSettings.FirstOrDefaultAsync();

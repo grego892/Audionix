@@ -59,14 +59,14 @@ namespace SharedLibrary.Repositories
                 var patternCategories = await context.PatternCategories
                     .AsNoTracking()
                     .Where(pc => pc.MusicPatternId == patternId)
-                    .Include(pc => pc.SongCategory)
                     .ToListAsync();
 
                 foreach (var patternCategory in patternCategories)
                 {
-                    if (patternCategory.SongCategory != null)
+                    var songCategory = await context.SongCategories.FirstOrDefaultAsync(sc => sc.StationId == patternCategory.StationId);
+                    if (songCategory != null)
                     {
-                        songCategories.Add(patternCategory.SongCategory);
+                        songCategories.Add(songCategory);
                     }
                 }
             }
