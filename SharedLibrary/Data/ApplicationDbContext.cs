@@ -47,15 +47,15 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<PatternCategory>()
                 .HasKey(pc => pc.Id); // Set Id as the primary key
 
-            modelBuilder.Entity<PatternCategory>()
-                .HasOne<MusicPattern>()
-                .WithMany(mp => mp.PatternCategories)
-                .HasForeignKey(pc => pc.MusicPatternId);
+            //modelBuilder.Entity<PatternCategory>()
+            //    .HasOne<MusicPattern>()
+            //    .WithMany(mp => mp.PatternCategories)
+            //    .HasForeignKey(pc => pc.MusicPatternId);
 
-            modelBuilder.Entity<PatternCategory>()
-                .HasOne<SongCategory>()
-                .WithMany(c => c.PatternCategories)
-                .HasForeignKey(pc => pc.StationId);
+            //modelBuilder.Entity<PatternCategory>()
+            //    .HasOne<SongCategory>()
+            //    .WithMany(c => c.PatternCategories)
+            //    .HasForeignKey(pc => pc.StationId);
 
             // Configure relationships if necessary
             modelBuilder.Entity<AudioMetadata>()

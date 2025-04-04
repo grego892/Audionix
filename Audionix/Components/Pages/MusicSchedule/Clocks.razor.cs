@@ -127,19 +127,31 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-        private async Task AddSongCategoryToPattern()
+        private async Task AddSongCategoryToPattern(int? selectedSongCategoryId)
         {
-            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedSongCategoryId.HasValue && MusicPatternRepository != null)
+            if (selectedSongCategoryId.HasValue && MusicPatternRepository != null && !string.IsNullOrEmpty(selectedMusicPatternName))
             {
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
                     await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId);
-                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }
         }
+
+
+        //if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedSongCategoryId.HasValue && MusicPatternRepository != null)
+        //{
+        //    var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+        //    if (musicPattern != null)
+        //    {
+        //        await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId);
+        //        selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+        //        StateHasChanged();
+        //    }
+        //}
+
 
         private async Task FilterSongCategories()
         {

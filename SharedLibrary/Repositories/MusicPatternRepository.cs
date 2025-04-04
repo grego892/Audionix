@@ -57,7 +57,8 @@ namespace SharedLibrary.Repositories
             {
                 MusicPatternId = musicPatternId,
                 MusicPatternSortOrder = context.PatternCategories.Count(pc => pc.MusicPatternId == musicPatternId) + 1,
-                StationId = musicPattern.StationId
+                StationId = musicPattern.StationId,
+                MusicPattern = musicPattern // Ensure the MusicPattern property is set
             };
 
             // Add the new PatternCategory to the database

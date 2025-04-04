@@ -47,7 +47,7 @@
                         <MudSelectItem Value="@(songCategory.CategoryId as int?)">@songCategory.CategoryName</MudSelectItem>
                     }
                 </MudSelect>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddSongCategoryToPattern" Size="Size.Small">Add Song Category</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(async () => await AddSongCategoryToPattern(selectedSongCategoryId))" Size="Size.Small">Add Song Category</MudButton>
             </MudStack>
         </MudPaper>
 
