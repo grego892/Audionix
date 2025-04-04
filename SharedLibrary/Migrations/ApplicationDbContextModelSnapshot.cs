@@ -272,9 +272,6 @@ namespace SharedLibrary.Migrations
                     b.Property<int?>("EnergyLevelId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("EventType")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Filename")
                         .IsRequired()
                         .HasColumnType("text");
@@ -590,9 +587,6 @@ namespace SharedLibrary.Migrations
                         .HasColumnType("text");
 
                     b.Property<int?>("Device")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("EventType")
                         .HasColumnType("integer");
 
                     b.Property<string>("From")

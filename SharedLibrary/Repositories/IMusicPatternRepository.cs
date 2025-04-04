@@ -9,7 +9,7 @@ namespace SharedLibrary.Repositories
         Task<MusicPattern?> GetMusicPatternByNameAsync(string name);
         Task DeleteMusicPatternAsync(MusicPattern musicPattern);
         //Task AddSongCategoryToPatternAsync(MusicPattern musicPattern, SongCategory songCategory);
-        Task AddSongCategoryToPatternAsync(int musicPatternId, int songCategoryId);
+        Task AddSongCategoryToPatternAsync(int musicPatternId);
         Task RemoveSongCategoryFromPatternAsync(MusicPattern musicPattern, SongCategory songCategory);
         Task MoveSongCategoryUpAsync(MusicPattern musicPattern, SongCategory songCategory);
         Task MoveSongCategoryDownAsync(MusicPattern musicPattern, SongCategory songCategory);

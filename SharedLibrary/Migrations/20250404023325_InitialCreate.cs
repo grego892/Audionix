@@ -347,7 +347,6 @@ namespace SharedLibrary.Migrations
                     Duration = table.Column<TimeSpan>(type: "interval", nullable: false),
                     StationId = table.Column<int>(type: "integer", nullable: false),
                     Folder = table.Column<string>(type: "text", nullable: true),
-                    EventType = table.Column<int>(type: "integer", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: true),
                     SoundCodeId = table.Column<int>(type: "integer", nullable: true),
                     EnergyLevelId = table.Column<int>(type: "integer", nullable: true)
@@ -416,7 +415,6 @@ namespace SharedLibrary.Migrations
                     Intro = table.Column<short>(type: "smallint", nullable: false),
                     Segue = table.Column<short>(type: "smallint", nullable: false),
                     SongCategory = table.Column<string>(type: "text", nullable: true),
-                    EventType = table.Column<int>(type: "integer", nullable: true),
                     From = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Passthrough = table.Column<string>(type: "text", nullable: true),

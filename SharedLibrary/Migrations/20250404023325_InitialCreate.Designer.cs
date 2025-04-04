@@ -12,7 +12,7 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250330032759_InitialCreate")]
+    [Migration("20250404023325_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -273,9 +273,6 @@ namespace SharedLibrary.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int?>("EnergyLevelId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EventType")
                         .HasColumnType("integer");
 
                     b.Property<string>("Filename")
@@ -593,9 +590,6 @@ namespace SharedLibrary.Migrations
                         .HasColumnType("text");
 
                     b.Property<int?>("Device")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("EventType")
                         .HasColumnType("integer");
 
                     b.Property<string>("From")

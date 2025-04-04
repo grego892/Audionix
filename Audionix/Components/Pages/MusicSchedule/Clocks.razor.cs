@@ -4,6 +4,7 @@ using Audionix.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Audionix.Components.Pages.LogBuilder;
+using SharedLibrary.Models.MusicSchedule.Rules;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -17,11 +18,13 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<SongCategory> selectedPatternCategories = new();
         private int? selectedSongCategoryId;
         private List<SongCategory> filteredSongCategories = new();
-        private List<string> songCategories = new();
+        private List<Category> songCategories = new();
+
         [Inject] private AppStateService AppStateService { get; set; } = default!;
         [Inject] private IStationRepository? StationRepository { get; set; }
         [Inject] private IMusicPatternRepository? MusicPatternRepository { get; set; }
         [Inject] private ISongCategoryRepository? SongCategoryRepository { get; set; }
+        [Inject] private ISongScheduleRepository? SongScheduleRepository { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -29,6 +32,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             await FilterPatterns();
             await FilterSongCategories();
             AppStateService.OnStationChanged += HandleStationChanged;
+            songCategories = await SongScheduleRepository.GetCategoriesAsync(AppStateService.station.StationId);
         }
 
         private async void HandleStationChanged(object? sender, EventArgs e)
@@ -50,7 +54,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
             if (SongCategoryRepository != null)
             {
-                songCategories = await SongCategoryRepository.GetSongCategoryNamesAsync();
+                songCategories = await SongScheduleRepository.GetCategoriesAsync(AppStateService.station.StationId);
             }
         }
 
@@ -109,13 +113,6 @@ namespace Audionix.Components.Pages.MusicSchedule
             DialogService.Show<TemplateDeleteDialog>("Are you sure you want to delete this pattern?", parameters, options);
         }
 
-        private void SelectDefaultItem()
-        {
-            if (selectedMusicPatternName != null)
-            {
-                selectedMusicPatternName = MusicPatternNames.FirstOrDefault();
-            }
-        }
 
         private async Task OnPatternChanged(string? patternName)
         {
@@ -137,7 +134,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId, selectedSongCategoryId.Value);
+                    await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId);
                     selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
@@ -149,8 +146,14 @@ namespace Audionix.Components.Pages.MusicSchedule
             if (AppStateService.station != null && SongCategoryRepository != null)
             {
                 filteredSongCategories = await SongCategoryRepository.GetSongCategoriesAsync(AppStateService.station.StationId);
+                Console.WriteLine($"Filtered Song Categories: {filteredSongCategories.Count}");
+            }
+            else
+            {
+                Console.WriteLine("Station or SongCategoryRepository is null");
             }
         }
+
 
         private void OnSongCategoryChanged(int? songCategoryId)
         {

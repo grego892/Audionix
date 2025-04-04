@@ -40,30 +40,30 @@ namespace SharedLibrary.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task AddSongCategoryToPatternAsync(int musicPatternId, int songCategoryId)
+        public async Task AddSongCategoryToPatternAsync(int musicPatternId)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            var musicPattern = await context.MusicPatterns.Include(mp => mp.PatternCategories).FirstOrDefaultAsync(mp => mp.PatternId == musicPatternId);
-            var songCategory = await context.SongCategories.FirstOrDefaultAsync(c => c.SongCategoryId == songCategoryId);
 
-            if (musicPattern != null && songCategory != null)
+            // Retrieve the MusicPattern and SongCategory from the database
+            var musicPattern = await context.MusicPatterns.FindAsync(musicPatternId);
+            //var songCategory = await context.SongCategories.FindAsync(songCategoryId);
+
+            if (musicPattern == null)
             {
-                var maxSortOrder = musicPattern.PatternCategories.Any()
-                    ? musicPattern.PatternCategories.Max(pc => pc.MusicPatternSortOrder)
-                    : 0;
-
-                var patternCategory = new PatternCategory
-                {
-                    MusicPatternId = musicPattern.PatternId,
-                    SongCategoryId = songCategory.SongCategoryId,
-                    SongCategoryName = songCategory.SongCategoryName!,
-                    MusicPatternSortOrder = maxSortOrder + 1,
-                    StationId = musicPattern.StationId
-                };
-
-                musicPattern.PatternCategories.Add(patternCategory);
-                await context.SaveChangesAsync();
+                throw new ArgumentException("Invalid musicPatternId or songCategoryId");
             }
+
+            // Create a new PatternCategory
+            var patternCategory = new PatternCategory
+            {
+                MusicPatternId = musicPatternId,
+                MusicPatternSortOrder = context.PatternCategories.Count(pc => pc.MusicPatternId == musicPatternId) + 1,
+                StationId = musicPattern.StationId
+            };
+
+            // Add the new PatternCategory to the database
+            await context.PatternCategories.AddAsync(patternCategory);
+            await context.SaveChangesAsync();
         }
 
         public async Task RemoveSongCategoryFromPatternAsync(MusicPattern musicPattern, SongCategory songCategory)
