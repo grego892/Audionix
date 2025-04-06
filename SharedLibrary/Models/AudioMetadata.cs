@@ -1,4 +1,5 @@
-﻿using SharedLibrary.Models.MusicSchedule.Rules;
+﻿using SharedLibrary.Models.MusicSchedule;
+using SharedLibrary.Models.MusicSchedule.Rules;
 
 namespace SharedLibrary.Models
 {
@@ -21,7 +22,7 @@ namespace SharedLibrary.Models
         public string? Folder { get; set; }
         //public EventType EventType { get; set; }
         public int? CategoryId { get; set; }
-        public Category? Category { get; set; }
+        public SongCategory? SongCategory { get; set; }
         public int? SoundCodeId { get; set; }
         public SoundCode? SoundCode { get; set; }
         public int? EnergyLevelId { get; set; }

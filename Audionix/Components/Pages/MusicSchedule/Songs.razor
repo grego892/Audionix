@@ -40,10 +40,10 @@
                             <MudText>Category</MudText>
                         </HeaderTemplate>
                         <CellTemplate>
-                            <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="context.Item.Category?.CategoryName" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await OnCategoryChanged(value, context.Item))">
+                            <MudSelect Margin="Margin.Dense" T="string" Label="Category" Value="context.Item.SongCategory?.SongCategoryName" Variant="Variant.Outlined" ValueChanged="@(async (string value) => await OnCategoryChanged(value, context.Item))">
                                 @foreach (var category in categories)
                                 {
-                                    <MudSelectItem Value="@category.CategoryName">@category.CategoryName</MudSelectItem>
+                                    <MudSelectItem Value="@category.SongCategoryName">@category.SongCategoryName</MudSelectItem>
                                 }
                             </MudSelect>
                         </CellTemplate>

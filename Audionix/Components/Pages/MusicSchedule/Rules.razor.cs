@@ -5,6 +5,7 @@ using Audionix.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SharedLibrary.Models.MusicSchedule;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -13,7 +14,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private string? newCategory;
         private string? newSoundCode;
         private string? newEnergyLevel;
-        private List<Category> categories = new();
+        private List<SongCategory> categories = new();
         private List<string> soundCodes = new();
         private List<string> energyLevels = new();
         private int artistSeperation;
@@ -59,9 +60,10 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             if (AppStateService?.station != null && !string.IsNullOrEmpty(newCategory))
             {
-                var category = new Category
+                var category = new SongCategory
                 {
-                    CategoryName = newCategory,
+
+                    SongCategoryName = newCategory,
                     StationId = AppStateService.station.StationId
                 };
                 await SongScheduleRepository.AddCategoryAsync(category);
@@ -74,7 +76,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             if (AppStateService?.station != null)
             {
-                var category = categories.FirstOrDefault(c => c.CategoryName == categoryName);
+                var category = categories.FirstOrDefault(c => c.SongCategoryName == categoryName);
                 if (category != null)
                 {
                     categories.Remove(category);

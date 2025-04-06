@@ -324,7 +324,7 @@ namespace Audionix.Components.Pages.Studio
                         Title = selectedAudioFile.Title,
                         Artist = selectedAudioFile.Artist,
                         Name = selectedAudioFile.Filename,
-                        SongCategory = selectedAudioFile.Category?.CategoryName, // Fixed the property name
+                        SongCategory = selectedAudioFile.SongCategory?.SongCategoryName, // Fixed the property name
                         Progress = 0.0,
                         Cue = "AutoStart",
                         Intro = selectedAudioFile.Intro,

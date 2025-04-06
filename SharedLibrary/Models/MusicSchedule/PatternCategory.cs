@@ -19,7 +19,7 @@ namespace SharedLibrary.Models.MusicSchedule
         public int MusicPatternId { get; set; }
         public MusicPattern MusicPattern { get; set; } = null!;
         public int CategoryId { get; set; }
-        public Category Category { get; set; } = null!;
+        public SongCategory Category { get; set; } = null!;
         public string CategoryName { get; set; } = string.Empty;
         public int StationId { get; set; }
     }

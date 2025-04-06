@@ -32,7 +32,7 @@ namespace SharedLibrary.Data
         public DbSet<MusicPattern> MusicPatterns { get; set; }
         public DbSet<PatternCategory> PatternCategories { get; set; }
         public DbSet<MusicGridItem> MusicGridItems { get; set; }
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<SongCategory> Categories { get; set; }
         public DbSet<SoundCode> SoundCodes { get; set; }
         public DbSet<EnergyLevel> EnergyLevels { get; set; }
         public DbSet<SongScheduleSettings> SongScheduleSettings { get; set; }
@@ -79,7 +79,7 @@ namespace SharedLibrary.Data
                 .HasForeignKey(am => am.StationId);
 
             modelBuilder.Entity<AudioMetadata>()
-                .HasOne(am => am.Category)
+                .HasOne(am => am.SongCategory)
                 .WithMany()
                 .HasForeignKey(am => am.CategoryId); // No changes needed here
 

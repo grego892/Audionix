@@ -19,7 +19,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private string selectedEnergyLevel = string.Empty;
         IList<AudioMetadata> filesInDirectory = new List<AudioMetadata>();
         private List<string>? folders;
-        private List<Category>? categories;
+        private List<SongCategory>? categories;
         private List<SoundCode>? soundCodes;
         private List<EnergyLevel>? energyLevels;
 
@@ -74,7 +74,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 {
                     if (file.CategoryId.HasValue)
                     {
-                        file.Category = categories?.FirstOrDefault(c => c.CategoryId == file.CategoryId.Value);
+                        file.SongCategory = categories?.FirstOrDefault(c => c.SongCategoryId == file.CategoryId.Value);
                     }
                     if (file.SoundCodeId.HasValue)
                     {
@@ -107,10 +107,10 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             if (audioMetadata != null)
             {
-                var category = categories?.FirstOrDefault(c => c.CategoryName == newCategory);
+                var category = categories?.FirstOrDefault(c => c.SongCategoryName == newCategory);
                 if (category != null)
                 {
-                    audioMetadata.Category = category;
+                    audioMetadata.SongCategory = category;
                     await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 }
             }

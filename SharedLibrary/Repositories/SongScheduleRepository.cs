@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Data;
+using SharedLibrary.Models.MusicSchedule;
 using SharedLibrary.Models.MusicSchedule.Rules;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace SharedLibrary.Repositories
             _context = context;
         }
 
-        public async Task<List<Category>> GetAllCategoriesAsync()
+        public async Task<List<SongCategory>> GetAllCategoriesAsync()
         {
             return await _context.Categories.ToListAsync();
         }
@@ -31,13 +32,13 @@ namespace SharedLibrary.Repositories
             return await _context.EnergyLevels.ToListAsync();
         }
 
-        public async Task AddCategoryAsync(Category category)
+        public async Task AddCategoryAsync(SongCategory category)
         {
             await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveCategoryAsync(Category category)
+        public async Task RemoveCategoryAsync(SongCategory category)
         {
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
@@ -72,7 +73,7 @@ namespace SharedLibrary.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Category>> GetCategoriesAsync(int stationId)
+        public async Task<List<SongCategory>> GetCategoriesAsync(int stationId)
         {
             return await _context.Categories.Where(c => c.StationId == stationId).ToListAsync();
         }

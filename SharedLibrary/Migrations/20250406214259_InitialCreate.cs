@@ -66,20 +66,6 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    CategoryId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CategoryName = table.Column<string>(type: "text", nullable: true),
-                    StationId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.CategoryId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "EnergyLevels",
                 columns: table => new
                 {
@@ -309,7 +295,7 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SongCategories",
+                name: "SongCategory",
                 columns: table => new
                 {
                     SongCategoryId = table.Column<int>(type: "integer", nullable: false)
@@ -320,61 +306,12 @@ namespace SharedLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SongCategories", x => x.SongCategoryId);
+                    table.PrimaryKey("PK_SongCategory", x => x.SongCategoryId);
                     table.ForeignKey(
-                        name: "FK_SongCategories_MusicPatterns_TemplateId",
+                        name: "FK_SongCategory_MusicPatterns_TemplateId",
                         column: x => x.TemplateId,
                         principalTable: "MusicPatterns",
                         principalColumn: "PatternId");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AudioFiles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Filename = table.Column<string>(type: "text", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Artist = table.Column<string>(type: "text", nullable: false),
-                    Intro = table.Column<short>(type: "smallint", nullable: false),
-                    Segue = table.Column<short>(type: "smallint", nullable: false),
-                    StartDate = table.Column<int>(type: "integer", nullable: false),
-                    EndDate = table.Column<int>(type: "integer", nullable: false),
-                    ProtectNextIntro = table.Column<bool>(type: "boolean", nullable: false),
-                    IntroSeconds = table.Column<double>(type: "double precision", nullable: false),
-                    SegueSeconds = table.Column<double>(type: "double precision", nullable: false),
-                    Duration = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    StationId = table.Column<int>(type: "integer", nullable: false),
-                    Folder = table.Column<string>(type: "text", nullable: true),
-                    CategoryId = table.Column<int>(type: "integer", nullable: true),
-                    SoundCodeId = table.Column<int>(type: "integer", nullable: true),
-                    EnergyLevelId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AudioFiles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AudioFiles_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "CategoryId");
-                    table.ForeignKey(
-                        name: "FK_AudioFiles_EnergyLevels_EnergyLevelId",
-                        column: x => x.EnergyLevelId,
-                        principalTable: "EnergyLevels",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AudioFiles_SoundCodes_SoundCodeId",
-                        column: x => x.SoundCodeId,
-                        principalTable: "SoundCodes",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AudioFiles_Stations_StationId",
-                        column: x => x.StationId,
-                        principalTable: "Stations",
-                        principalColumn: "StationId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -440,6 +377,55 @@ namespace SharedLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AudioFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Filename = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Artist = table.Column<string>(type: "text", nullable: false),
+                    Intro = table.Column<short>(type: "smallint", nullable: false),
+                    Segue = table.Column<short>(type: "smallint", nullable: false),
+                    StartDate = table.Column<int>(type: "integer", nullable: false),
+                    EndDate = table.Column<int>(type: "integer", nullable: false),
+                    ProtectNextIntro = table.Column<bool>(type: "boolean", nullable: false),
+                    IntroSeconds = table.Column<double>(type: "double precision", nullable: false),
+                    SegueSeconds = table.Column<double>(type: "double precision", nullable: false),
+                    Duration = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    StationId = table.Column<int>(type: "integer", nullable: false),
+                    Folder = table.Column<string>(type: "text", nullable: true),
+                    CategoryId = table.Column<int>(type: "integer", nullable: true),
+                    SoundCodeId = table.Column<int>(type: "integer", nullable: true),
+                    EnergyLevelId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AudioFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AudioFiles_EnergyLevels_EnergyLevelId",
+                        column: x => x.EnergyLevelId,
+                        principalTable: "EnergyLevels",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AudioFiles_SongCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "SongCategory",
+                        principalColumn: "SongCategoryId");
+                    table.ForeignKey(
+                        name: "FK_AudioFiles_SoundCodes_SoundCodeId",
+                        column: x => x.SoundCodeId,
+                        principalTable: "SoundCodes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AudioFiles_Stations_StationId",
+                        column: x => x.StationId,
+                        principalTable: "Stations",
+                        principalColumn: "StationId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PatternCategories",
                 columns: table => new
                 {
@@ -449,18 +435,11 @@ namespace SharedLibrary.Migrations
                     MusicPatternId = table.Column<int>(type: "integer", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
                     CategoryName = table.Column<string>(type: "text", nullable: false),
-                    StationId = table.Column<int>(type: "integer", nullable: false),
-                    SongCategoryId = table.Column<int>(type: "integer", nullable: true)
+                    StationId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PatternCategories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PatternCategories_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PatternCategories_MusicPatterns_MusicPatternId",
                         column: x => x.MusicPatternId,
@@ -468,10 +447,11 @@ namespace SharedLibrary.Migrations
                         principalColumn: "PatternId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PatternCategories_SongCategories_SongCategoryId",
-                        column: x => x.SongCategoryId,
-                        principalTable: "SongCategories",
-                        principalColumn: "SongCategoryId");
+                        name: "FK_PatternCategories_SongCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "SongCategory",
+                        principalColumn: "SongCategoryId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -573,13 +553,8 @@ namespace SharedLibrary.Migrations
                 column: "MusicPatternId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PatternCategories_SongCategoryId",
-                table: "PatternCategories",
-                column: "SongCategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SongCategories_TemplateId",
-                table: "SongCategories",
+                name: "IX_SongCategory_TemplateId",
+                table: "SongCategory",
                 column: "TemplateId");
 
             migrationBuilder.CreateIndex(
@@ -647,10 +622,7 @@ namespace SharedLibrary.Migrations
                 name: "Stations");
 
             migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
-                name: "SongCategories");
+                name: "SongCategory");
 
             migrationBuilder.DropTable(
                 name: "MusicPatterns");

@@ -23,9 +23,9 @@
                             <MudTh>Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Category">@context.CategoryName</MudTd>
+                            <MudTd DataLabel="Category">@context.SongCategoryName</MudTd>
                             <MudTd DataLabel="Actions">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context.CategoryName))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context.SongCategoryName))" />
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
