@@ -123,7 +123,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                 var soundCode = soundCodes?.FirstOrDefault(c => c.Code == newSoundCode);
                 if (soundCode != null)
                 {
-                    audioMetadata.SoundCode = soundCode; // Update the SoundCode property
+                    audioMetadata.SoundCode = soundCode;
                     audioMetadata.SoundCodeId = soundCode.Id;
                     await AudioMetadataRepository.UpdateAudioMetadataAsync(audioMetadata);
                 }

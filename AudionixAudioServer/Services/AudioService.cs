@@ -115,7 +115,7 @@ namespace AudionixAudioServer.Services
 
         public Task PlayAudioAsync(int stationId, CancellationToken stoppingToken)
         {
-            if (stationId == int.Empty)
+            if (stationId == 0)
             {
                 throw new ArgumentException("Invalid station ID.");
             }
@@ -125,7 +125,7 @@ namespace AudionixAudioServer.Services
 
         public async Task PlayNextAudioAsync(int stationId)
         {
-            if (stationId == int.Empty)
+            if (stationId == 0)
             {
                 throw new ArgumentException("Invalid station ID.");
             }

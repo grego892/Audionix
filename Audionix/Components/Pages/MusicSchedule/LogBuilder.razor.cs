@@ -101,7 +101,7 @@ namespace Audionix.Components.Pages.MusicSchedule
                     Status = StatusType.notPlayed,
                     TimeScheduled = currentTime,
                     Cue = "AutoStart",
-                    //EventType = EventType.song
+                    SoundCodeId = song.SoundCodeId,
                 };
 
                 newDaysLog.Add(newLogItem);

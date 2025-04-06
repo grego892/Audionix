@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SharedLibrary.Models.MusicSchedule.Rules;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SharedLibrary.Models
@@ -39,6 +40,8 @@ namespace SharedLibrary.Models
         // Foreign key to Station
         public int StationId { get; set; }
         public Station? Station { get; set; }
+        public int? SoundCodeId { get; set; }
+        public SoundCode? SoundCode { get; set; }
     }
 
     public enum CueType
