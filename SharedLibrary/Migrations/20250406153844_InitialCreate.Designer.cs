@@ -12,7 +12,7 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250404220701_InitialCreate")]
+    [Migration("20250406153844_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -246,7 +246,7 @@ namespace SharedLibrary.Migrations
                         new
                         {
                             Id = 1,
-                            DataPath = "C:\\Program Files\\Audionix\\AudionixAudio",
+                            DataPath = "C:\\AudionixAudio",
                             IsDatapathSetup = false
                         });
                 });
@@ -440,16 +440,20 @@ namespace SharedLibrary.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("MusicPatternId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("MusicPatternPatternId")
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MusicPatternId")
                         .HasColumnType("integer");
 
                     b.Property<int>("MusicPatternSortOrder")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SongCategoryId")
+                    b.Property<int?>("SongCategoryId")
                         .HasColumnType("integer");
 
                     b.Property<int>("StationId")
@@ -457,13 +461,11 @@ namespace SharedLibrary.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("MusicPatternId");
 
-                    b.HasIndex("MusicPatternPatternId");
-
                     b.HasIndex("SongCategoryId");
-
-                    b.HasIndex("StationId");
 
                     b.ToTable("PatternCategories");
                 });
@@ -817,33 +819,25 @@ namespace SharedLibrary.Migrations
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.PatternCategory", b =>
                 {
-                    b.HasOne("SharedLibrary.Models.MusicSchedule.MusicPattern", null)
+                    b.HasOne("SharedLibrary.Models.MusicSchedule.Rules.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SharedLibrary.Models.MusicSchedule.MusicPattern", "MusicPattern")
                         .WithMany("PatternCategories")
                         .HasForeignKey("MusicPatternId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SharedLibrary.Models.MusicSchedule.MusicPattern", "MusicPattern")
-                        .WithMany()
-                        .HasForeignKey("MusicPatternPatternId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SharedLibrary.Models.MusicSchedule.SongCategory", "SongCategory")
-                        .WithMany()
-                        .HasForeignKey("SongCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SharedLibrary.Models.MusicSchedule.SongCategory", null)
                         .WithMany("PatternCategories")
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SongCategoryId");
+
+                    b.Navigation("Category");
 
                     b.Navigation("MusicPattern");
-
-                    b.Navigation("SongCategory");
                 });
 
             modelBuilder.Entity("SharedLibrary.Models.MusicSchedule.SongCategory", b =>

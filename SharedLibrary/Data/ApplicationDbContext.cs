@@ -97,7 +97,7 @@ namespace SharedLibrary.Data
                 new AppSettings
                 {
                     Id = 1,
-                    DataPath = "C:\\Program Files\\Audionix\\AudionixAudio",
+                    DataPath = "C:\\AudionixAudio",
                     IsDatapathSetup = false
                 }
             );

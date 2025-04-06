@@ -47,17 +47,17 @@
                         <MudSelectItem Value="@(songCategory.CategoryId as int?)">@songCategory.CategoryName</MudSelectItem>
                     }
                 </MudSelect>
-                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(async () => await AddSongCategoryToPattern(selectedSongCategoryId))" Size="Size.Small">Add Song Category</MudButton>
+                <MudButton Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(async () => await AddSongCategoryToPattern())" Size="Size.Small">Add Song Category</MudButton>
             </MudStack>
         </MudPaper>
 
         <MudPaper class="ma-2 border-solid border-2 mud-border-primary" MaxWidth="500px">
             <MudTable Items="selectedPatternCategories" ReadOnly="false" Dense="true">
                 <HeaderContent>
-                    <MudTh>Song Category Name</MudTh>
+                    <MudTh>Category Name</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Song Category Name">@context.SongCategoryName</MudTd>
+                    <MudTd DataLabel="Category Name">@context.CategoryName</MudTd>
                     <MudTd>
                         <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" OnClick="@(() => MoveSongCategoryUp(@context))" />
                         <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" OnClick="@(() => MoveSongCategoryDown(@context))" />
@@ -68,3 +68,4 @@
         </MudPaper>
     </MudPaper>
 }
+

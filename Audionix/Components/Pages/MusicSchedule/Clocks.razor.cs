@@ -14,8 +14,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         private string newMusicPatternName = string.Empty;
         private List<MusicPattern> filteredMusicPatternNames = new();
         private List<string> MusicPatternNames = new List<string>();
-        private List<SongCategory> MusicPatternDataList = new List<SongCategory>();
-        private List<SongCategory> selectedPatternCategories = new();
+        private List<PatternCategory> selectedPatternCategories = new();
         private int? selectedSongCategoryId;
         private List<SongCategory> filteredSongCategories = new();
         private List<Category> songCategories = new();
@@ -28,6 +27,12 @@ namespace Audionix.Components.Pages.MusicSchedule
 
         protected override async Task OnInitializedAsync()
         {
+            if (AppStateService == null || SongScheduleRepository == null || AppStateService.station == null)
+            {
+                Console.WriteLine("AppStateService, SongScheduleRepository, or AppStateService.station is null");
+                return;
+            }
+
             await LoadDataAsync();
             await FilterPatterns();
             await FilterSongCategories();
@@ -52,7 +57,7 @@ namespace Audionix.Components.Pages.MusicSchedule
             {
                 MusicPatternNames = await MusicPatternRepository.GetMusicPatternNamesAsync();
             }
-            if (SongCategoryRepository != null)
+            if (SongCategoryRepository != null && AppStateService.station != null)
             {
                 songCategories = await SongScheduleRepository.GetCategoriesAsync(AppStateService.station.StationId);
             }
@@ -113,45 +118,36 @@ namespace Audionix.Components.Pages.MusicSchedule
             DialogService.Show<TemplateDeleteDialog>("Are you sure you want to delete this pattern?", parameters, options);
         }
 
-
         private async Task OnPatternChanged(string? patternName)
         {
             selectedMusicPatternName = patternName;
             if (!string.IsNullOrEmpty(selectedMusicPatternName) && AppStateService.station != null && MusicPatternRepository != null)
             {
-                selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(AppStateService.station.StationId, selectedMusicPatternName);
+                var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
+                if (musicPattern != null)
+                {
+                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
+                }
             }
             else
             {
-                selectedPatternCategories = new List<SongCategory>();
+                selectedPatternCategories = new List<PatternCategory>();
             }
         }
 
-        private async Task AddSongCategoryToPattern(int? selectedSongCategoryId)
+        private async Task AddSongCategoryToPattern()
         {
-            if (selectedSongCategoryId.HasValue && MusicPatternRepository != null && !string.IsNullOrEmpty(selectedMusicPatternName))
+            if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedSongCategoryId.HasValue && MusicPatternRepository != null)
             {
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId);
+                    await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId, selectedSongCategoryId.Value);
+                    selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }
         }
-
-
-        //if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && selectedSongCategoryId.HasValue && MusicPatternRepository != null)
-        //{
-        //    var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
-        //    if (musicPattern != null)
-        //    {
-        //        await MusicPatternRepository.AddSongCategoryToPatternAsync(musicPattern.PatternId);
-        //        selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
-        //        StateHasChanged();
-        //    }
-        //}
-
 
         private async Task FilterSongCategories()
         {
@@ -166,48 +162,47 @@ namespace Audionix.Components.Pages.MusicSchedule
             }
         }
 
-
         private void OnSongCategoryChanged(int? songCategoryId)
         {
             selectedSongCategoryId = songCategoryId;
         }
 
-        public async Task RemoveSongCategoryFromPattern(SongCategory songCategory)
+        public async Task RemoveSongCategoryFromPattern(PatternCategory patternCategory)
         {
             if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await MusicPatternRepository.RemoveSongCategoryFromPatternAsync(musicPattern, songCategory);
+                    await MusicPatternRepository.RemoveSongCategoryFromPatternAsync(musicPattern, patternCategory);
                     selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }
         }
 
-        public async Task MoveSongCategoryUp(SongCategory songCategory)
+        public async Task MoveSongCategoryUp(PatternCategory patternCategory)
         {
             if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await MusicPatternRepository.MoveSongCategoryUpAsync(musicPattern, songCategory);
+                    await MusicPatternRepository.MoveSongCategoryUpAsync(musicPattern, patternCategory);
                     selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }
             }
         }
 
-        public async Task MoveSongCategoryDown(SongCategory songCategory)
+        public async Task MoveSongCategoryDown(PatternCategory patternCategory)
         {
             if (AppStateService.station != null && !string.IsNullOrEmpty(selectedMusicPatternName) && MusicPatternRepository != null)
             {
                 var musicPattern = await MusicPatternRepository.GetMusicPatternByNameAsync(selectedMusicPatternName);
                 if (musicPattern != null)
                 {
-                    await MusicPatternRepository.MoveSongCategoryDownAsync(musicPattern, songCategory);
+                    await MusicPatternRepository.MoveSongCategoryDownAsync(musicPattern, patternCategory);
                     selectedPatternCategories = await MusicPatternRepository.GetSelectedPatternCategoriesAsync(musicPattern.PatternId);
                     StateHasChanged();
                 }

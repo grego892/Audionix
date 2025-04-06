@@ -447,13 +447,20 @@ namespace SharedLibrary.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MusicPatternSortOrder = table.Column<int>(type: "integer", nullable: false),
                     MusicPatternId = table.Column<int>(type: "integer", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    CategoryName = table.Column<string>(type: "text", nullable: false),
                     StationId = table.Column<int>(type: "integer", nullable: false),
-                    MusicPatternPatternId = table.Column<int>(type: "integer", nullable: false),
-                    SongCategoryId = table.Column<int>(type: "integer", nullable: false)
+                    SongCategoryId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PatternCategories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PatternCategories_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "CategoryId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PatternCategories_MusicPatterns_MusicPatternId",
                         column: x => x.MusicPatternId,
@@ -461,29 +468,16 @@ namespace SharedLibrary.Migrations
                         principalColumn: "PatternId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PatternCategories_MusicPatterns_MusicPatternPatternId",
-                        column: x => x.MusicPatternPatternId,
-                        principalTable: "MusicPatterns",
-                        principalColumn: "PatternId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_PatternCategories_SongCategories_SongCategoryId",
                         column: x => x.SongCategoryId,
                         principalTable: "SongCategories",
-                        principalColumn: "SongCategoryId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PatternCategories_SongCategories_StationId",
-                        column: x => x.StationId,
-                        principalTable: "SongCategories",
-                        principalColumn: "SongCategoryId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "SongCategoryId");
                 });
 
             migrationBuilder.InsertData(
                 table: "AppSettings",
                 columns: new[] { "Id", "DataPath", "IsDatapathSetup" },
-                values: new object[] { 1, "C:\\Program Files\\Audionix\\AudionixAudio", false });
+                values: new object[] { 1, "C:\\AudionixAudio", false });
 
             migrationBuilder.InsertData(
                 table: "SongScheduleSettings",
@@ -569,24 +563,19 @@ namespace SharedLibrary.Migrations
                 column: "StationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PatternCategories_CategoryId",
+                table: "PatternCategories",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PatternCategories_MusicPatternId",
                 table: "PatternCategories",
                 column: "MusicPatternId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PatternCategories_MusicPatternPatternId",
-                table: "PatternCategories",
-                column: "MusicPatternPatternId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PatternCategories_SongCategoryId",
                 table: "PatternCategories",
                 column: "SongCategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PatternCategories_StationId",
-                table: "PatternCategories",
-                column: "StationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SongCategories_TemplateId",
@@ -646,9 +635,6 @@ namespace SharedLibrary.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
                 name: "EnergyLevels");
 
             migrationBuilder.DropTable(
@@ -659,6 +645,9 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "Stations");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "SongCategories");
