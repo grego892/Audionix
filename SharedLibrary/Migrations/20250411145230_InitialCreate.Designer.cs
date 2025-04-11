@@ -12,8 +12,8 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250411020138_AddSoundcode")]
-    partial class AddSoundcode
+    [Migration("20250411145230_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -495,6 +495,9 @@ namespace SharedLibrary.Migrations
                     b.Property<int>("ArtistSeperation")
                         .HasColumnType("integer");
 
+                    b.Property<int>("MaxEnergySeperation")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MaxSoundcodeSeperation")
                         .HasColumnType("integer");
 
@@ -513,8 +516,9 @@ namespace SharedLibrary.Migrations
                         {
                             Id = 1,
                             ArtistSeperation = 10,
-                            MaxSoundcodeSeperation = 0,
-                            TitleSeperation = 0
+                            MaxEnergySeperation = 3,
+                            MaxSoundcodeSeperation = 3,
+                            TitleSeperation = 10
                         });
                 });
 

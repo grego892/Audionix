@@ -513,9 +513,9 @@ namespace SharedLibrary.Migrations
                         {
                             Id = 1,
                             ArtistSeperation = 10,
-                            MaxEnergySeperation = 0,
-                            MaxSoundcodeSeperation = 0,
-                            TitleSeperation = 0
+                            MaxEnergySeperation = 3,
+                            MaxSoundcodeSeperation = 3,
+                            TitleSeperation = 10
                         });
                 });
 

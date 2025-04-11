@@ -147,7 +147,10 @@ namespace SharedLibrary.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ArtistSeperation = table.Column<int>(type: "integer", nullable: false)
+                    ArtistSeperation = table.Column<int>(type: "integer", nullable: false),
+                    TitleSeperation = table.Column<int>(type: "integer", nullable: false),
+                    MaxSoundcodeSeperation = table.Column<int>(type: "integer", nullable: false),
+                    MaxEnergySeperation = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -358,7 +361,8 @@ namespace SharedLibrary.Migrations
                     Status = table.Column<int>(type: "integer", nullable: true),
                     Device = table.Column<int>(type: "integer", nullable: true),
                     Progress = table.Column<double>(type: "double precision", nullable: false),
-                    StationId = table.Column<int>(type: "integer", nullable: false)
+                    StationId = table.Column<int>(type: "integer", nullable: false),
+                    SoundCodeId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -368,6 +372,11 @@ namespace SharedLibrary.Migrations
                         column: x => x.RotatorID,
                         principalTable: "Rotator",
                         principalColumn: "RotatorID");
+                    table.ForeignKey(
+                        name: "FK_Log_SoundCodes_SoundCodeId",
+                        column: x => x.SoundCodeId,
+                        principalTable: "SoundCodes",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Log_Stations_StationId",
                         column: x => x.StationId,
@@ -461,8 +470,8 @@ namespace SharedLibrary.Migrations
 
             migrationBuilder.InsertData(
                 table: "SongScheduleSettings",
-                columns: new[] { "Id", "ArtistSeperation" },
-                values: new object[] { 1, 10 });
+                columns: new[] { "Id", "ArtistSeperation", "MaxEnergySeperation", "MaxSoundcodeSeperation", "TitleSeperation" },
+                values: new object[] { 1, 10, 3, 3, 10 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppSettings_Id",
@@ -536,6 +545,11 @@ namespace SharedLibrary.Migrations
                 name: "IX_Log_RotatorID",
                 table: "Log",
                 column: "RotatorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Log_SoundCodeId",
+                table: "Log",
+                column: "SoundCodeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Log_StationId",
@@ -613,10 +627,10 @@ namespace SharedLibrary.Migrations
                 name: "EnergyLevels");
 
             migrationBuilder.DropTable(
-                name: "SoundCodes");
+                name: "Rotator");
 
             migrationBuilder.DropTable(
-                name: "Rotator");
+                name: "SoundCodes");
 
             migrationBuilder.DropTable(
                 name: "Stations");
