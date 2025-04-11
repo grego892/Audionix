@@ -18,6 +18,10 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<string> soundCodes = new();
         private List<string> energyLevels = new();
         private int artistSeperation;
+        private int titleSeperation;
+        private int maxSoundCodeSeperation;
+        private int maxEnergySeperation;
+
 
         [Inject]
         private ISongScheduleRepository? SongScheduleRepository { get; set; }
@@ -53,6 +57,9 @@ namespace Audionix.Components.Pages.MusicSchedule
             if (settings != null)
             {
                 artistSeperation = settings.ArtistSeperation;
+                titleSeperation = settings.TitleSeperation;
+                maxSoundCodeSeperation = settings.MaxSoundcodeSeperation;
+                maxEnergySeperation = settings.MaxEnergySeperation;
             }
         }
 
@@ -136,13 +143,43 @@ namespace Audionix.Components.Pages.MusicSchedule
             energyLevels.Remove(energyLevel);
         }
 
-        private async Task UpdateSongScheduleSettings(int newArtistSeperation)
+        private async Task UpdateArtistSeperationSettings(int newArtistSeperation)
         {
             artistSeperation = newArtistSeperation;
             var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
             if (settings != null)
             {
                 settings.ArtistSeperation = newArtistSeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+            }
+        }
+        private async Task UpdateTitleSeperationSettings(int newTitleSeperation)
+        {
+            titleSeperation = newTitleSeperation;
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                settings.TitleSeperation = newTitleSeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+            }
+        }
+        private async Task UpdateMaxSoundcodeSettings(int newMaxSoundcodeSeperation)
+        {
+            maxSoundCodeSeperation = newMaxSoundcodeSeperation;
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                settings.MaxSoundcodeSeperation = newMaxSoundcodeSeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+            }
+        }
+        private async Task UpdateMaxEnergySeperationSettings(int newMaxEnergySeperation)
+        {
+            maxEnergySeperation = newMaxEnergySeperation;
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                settings.MaxEnergySeperation = newMaxEnergySeperation;
                 await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
             }
         }

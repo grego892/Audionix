@@ -10,5 +10,8 @@ namespace SharedLibrary.Models.MusicSchedule.Rules
     {
         public int Id { get; set; }
         public int ArtistSeperation { get; set; }
+        public int TitleSeperation { get; set; }
+        public int MaxSoundcodeSeperation { get; set; }
+        public int MaxEnergySeperation { get; set; }
     }
 }

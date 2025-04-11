@@ -112,7 +112,10 @@ namespace SharedLibrary.Data
                 new SongScheduleSettings
                 {
                     Id = 1,
-                    ArtistSeperation = 10
+                    ArtistSeperation = 10,
+                    TitleSeperation = 10,
+                    MaxSoundcodeSeperation = 3,
+                    MaxEnergySeperation = 3
                 }
             );
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SharedLibrary.Data;
@@ -11,9 +12,11 @@ using SharedLibrary.Data;
 namespace SharedLibrary.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250411020138_AddSoundcode")]
+    partial class AddSoundcode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -492,9 +495,6 @@ namespace SharedLibrary.Migrations
                     b.Property<int>("ArtistSeperation")
                         .HasColumnType("integer");
 
-                    b.Property<int>("MaxEnergySeperation")
-                        .HasColumnType("integer");
-
                     b.Property<int>("MaxSoundcodeSeperation")
                         .HasColumnType("integer");
 
@@ -513,7 +513,6 @@ namespace SharedLibrary.Migrations
                         {
                             Id = 1,
                             ArtistSeperation = 10,
-                            MaxEnergySeperation = 0,
                             MaxSoundcodeSeperation = 0,
                             TitleSeperation = 0
                         });

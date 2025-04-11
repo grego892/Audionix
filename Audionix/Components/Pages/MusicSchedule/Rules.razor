@@ -1,8 +1,8 @@
-﻿@page "/policies"
+﻿@page "/rules"
 @using MudBlazor
 @inject ApplicationDbContext DbContext
 
-<MudPaper Class="pa-2 ma-2">
+<MudItem Class="pa-2 ma-2">
     <MudTabs Border="true" Elevation="1">
         <MudTabPanel Text="Categories">
             <MudGrid Class="ma=2 pa-2">
@@ -89,11 +89,20 @@
             </MudGrid>
         </MudTabPanel>
         <MudTabPanel Text="Music Schedule Settings">
-            <MudGrid Class="ma=2 pa-2">
-                <MudItem xs="1">
-                    <MudNumericField Value="artistSeperation" Label="Artist Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateSongScheduleSettings))" />
+            <MudGrid class="ma-1" Spacing="5" Justify="Justify.FlexStart">
+                <MudItem MaxWidth="200px">
+                        <MudNumericField Value="artistSeperation" Label="Artist Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateArtistSeperationSettings))" />
+                </MudItem>
+                <MudItem MaxWidth="200px">
+                    <MudNumericField Value="titleSeperation" Label="Title Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateTitleSeperationSettings))" />
+                </MudItem>
+                <MudItem MaxWidth="200px">
+                    <MudNumericField Value="maxSoundCodeSeperation" Label="Max Soundcode Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxSoundcodeSettings))" />
+                </MudItem>
+                <MudItem MaxWidth="200px">
+                        <MudNumericField Value="maxEnergySeperation" Label="Max Energy Level Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxEnergySeperationSettings))" />
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
     </MudTabs>
-</MudPaper>
+</MudItem>
