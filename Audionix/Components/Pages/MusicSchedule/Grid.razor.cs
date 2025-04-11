@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
-    public partial class MusicGrid
+    public partial class Grid
     {
         private List<MusicGridItem> musicGridItems = new();
         private List<MusicPattern> musicPatterns = new();

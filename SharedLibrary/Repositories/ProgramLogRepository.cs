@@ -145,8 +145,24 @@ namespace SharedLibrary.Repositories
                     logItem.LogOrderID = ++currentLogOrderID;
                 }
 
-                // Insert the new log items into the database
-                await context.Log.AddRangeAsync(newDaysLog);
+                // Check for existing records with the same Date and LogOrderID
+                var existingKeys = await context.Log
+                    .Where(log => log.Date == newLogDate)
+                    .Select(log => new { log.Date, log.LogOrderID })
+                    .ToListAsync();
+
+                var filteredLogItems = newDaysLog
+                    .Where(logItem => !existingKeys.Any(existing => existing.Date == logItem.Date && existing.LogOrderID == logItem.LogOrderID))
+                    .ToList();
+
+                if (filteredLogItems.Count == 0)
+                {
+                    Log.Warning("No new log items to add. All items already exist in the database.");
+                    return;
+                }
+
+                // Insert the filtered log items into the database
+                await context.Log.AddRangeAsync(filteredLogItems);
                 await context.SaveChangesAsync();
             }
             catch (Exception ex)
