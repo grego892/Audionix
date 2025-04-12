@@ -19,6 +19,7 @@ namespace Audionix.Components.Pages.MusicSchedule
         [Inject] private ISongCategoryRepository? SongCategoryRepository { get; set; }
         [Inject] private IAudioMetadataRepository? AudioMetadataRepository { get; set; }
         [Inject] private IProgramLogRepository? ProgramLogRepository { get; set; }
+        [Inject] ISnackbar? Snackbar { get; set; }
 
 
         private MudDatePicker _logBuilderPicker;
@@ -40,6 +41,14 @@ namespace Audionix.Components.Pages.MusicSchedule
                 songCategoryList = await SongCategoryRepository.GetSongCategoriesForPatternsAsync(musicPatterns);
                 scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(songCategoryList, songCategoryRotationIndex);
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
+
+                if (newDaysLog.Count == 0)
+                {
+                    Snackbar?.Add("No songs scheduled for this day.  Check clock grid.", Severity.Warning);
+                    return;
+                }
+
+
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
                 await ProgramLogRepository.RemoveOlderDaysFromDbLogAsync(1);
                 await LogBuilderPickerOk();
