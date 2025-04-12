@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SharedLibrary.Models.MusicSchedule;
+using MudBlazor;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -21,6 +22,9 @@ namespace Audionix.Components.Pages.MusicSchedule
         private int titleSeperation;
         private int maxSoundCodeSeperation;
         private int maxEnergySeperation;
+        private bool breakArtistSeperation;
+        private bool breakMaxSoundCodeSeperation;
+        private bool breakMaxEnergySeperation;
 
 
         [Inject]
@@ -60,6 +64,9 @@ namespace Audionix.Components.Pages.MusicSchedule
                 titleSeperation = settings.TitleSeperation;
                 maxSoundCodeSeperation = settings.MaxSoundcodeSeperation;
                 maxEnergySeperation = settings.MaxEnergySeperation;
+                breakArtistSeperation = settings.BreakArtistSeperation;
+                breakMaxSoundCodeSeperation = settings.BreakMaxSoundCodeSeperation;
+                breakMaxEnergySeperation = settings.BreakMaxEnergySeperation;
             }
         }
 
@@ -183,5 +190,38 @@ namespace Audionix.Components.Pages.MusicSchedule
                 await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
             }
         }
+        private async Task OnBreakArtistSeperationChanged(bool newBreakArtistSeperation)
+        {
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                settings.BreakArtistSeperation = newBreakArtistSeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+                breakArtistSeperation = newBreakArtistSeperation;
+            }
+        }
+
+        private async Task OnBreakMaxSoundCodeSeperationChanged(bool newBreakMaxSoundCodeSeperation)
+        {
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                settings.BreakMaxSoundCodeSeperation = newBreakMaxSoundCodeSeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+                breakMaxSoundCodeSeperation = newBreakMaxSoundCodeSeperation;
+            }
+        }
+
+        private async Task OnBreakMaxEnergySeperationChanged(bool newBreakMaxEnergySeperation)
+        {
+            var settings = await SongScheduleRepository.GetSongScheduleSettingsAsync();
+            if (settings != null)
+            {
+                settings.BreakMaxEnergySeperation = newBreakMaxEnergySeperation;
+                await SongScheduleRepository.UpdateSongScheduleSettingsAsync(settings);
+                breakMaxEnergySeperation = newBreakMaxEnergySeperation;
+            }
+        }
+
     }
 }

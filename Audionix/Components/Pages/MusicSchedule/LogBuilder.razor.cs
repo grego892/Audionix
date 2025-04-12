@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SharedLibrary.Services;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using static MudBlazor.CategoryTypes;
 
 namespace Audionix.Components.Pages.MusicSchedule
 {
@@ -35,11 +36,21 @@ namespace Audionix.Components.Pages.MusicSchedule
         {
             if (LogBuilderLogDate.HasValue && StationRepository != null && AppStateService?.station != null)
             {
-                var dayOfWeek = LogBuilderLogDate.Value.DayOfWeek;
                 var stationId = AppStateService.station.StationId;
+                Snackbar.Add($"Scheduling begin for: {AppStateService.station.CallLetters}", Severity.Normal);
+
+                var dayOfWeek = LogBuilderLogDate.Value.DayOfWeek;
+                Snackbar.Add($"Scheduling using grid for {dayOfWeek}", Severity.Normal);
+
                 musicPatterns = await MusicPatternRepository.GetMusicPatternsForDayAsync(stationId, dayOfWeek);
+                Snackbar.Add($"MusicPatterns {musicPatterns.Count}", Severity.Normal);
+
                 songCategoryList = await SongCategoryRepository.GetSongCategoriesForPatternsAsync(musicPatterns);
+                Snackbar.Add($"songCategoryList {songCategoryList.Count}", Severity.Normal);
+
                 scheduledSongs = await AudioMetadataRepository.GetScheduledSongsAsync(songCategoryList, songCategoryRotationIndex);
+                Snackbar.Add($"scheduledSongs {scheduledSongs.Count}", Severity.Normal);
+
                 newDaysLog = CreateProgramLogItems(scheduledSongs);
 
                 if (newDaysLog.Count == 0)
@@ -47,10 +58,21 @@ namespace Audionix.Components.Pages.MusicSchedule
                     Snackbar?.Add("No songs scheduled for this day.  Check clock grid.", Severity.Warning);
                     return;
                 }
+                else
+                {
+                    Snackbar.Add($"newDaysLog {newDaysLog.Count}", Severity.Normal);
+                }
 
 
                 await ProgramLogRepository.AddNewDayLogToDbLogAsync(newDaysLog);
-                await ProgramLogRepository.RemoveOlderDaysFromDbLogAsync(1);
+                Snackbar.Add($"Added new days log to Database.", Severity.Normal);
+
+                int removeOlderDays = 2;
+                await ProgramLogRepository.RemoveOlderDaysFromDbLogAsync(removeOlderDays);
+                Snackbar.Add($"Removed logs older than {removeOlderDays} days before now.", Severity.Normal);
+
+
+
                 await LogBuilderPickerOk();
             }
 

@@ -47,16 +47,6 @@ namespace SharedLibrary.Data
             modelBuilder.Entity<PatternCategory>()
                 .HasKey(pc => pc.Id); // Set Id as the primary key
 
-            //modelBuilder.Entity<PatternCategory>()
-            //    .HasOne<MusicPattern>()
-            //    .WithMany(mp => mp.PatternCategories)
-            //    .HasForeignKey(pc => pc.MusicPatternId);
-
-            //modelBuilder.Entity<PatternCategory>()
-            //    .HasOne<SongCategory>()
-            //    .WithMany(c => c.PatternCategories)
-            //    .HasForeignKey(pc => pc.StationId);
-
             // Configure relationships if necessary
             modelBuilder.Entity<AudioMetadata>()
                 .HasOne(am => am.Station)
@@ -115,7 +105,10 @@ namespace SharedLibrary.Data
                     ArtistSeperation = 10,
                     TitleSeperation = 10,
                     MaxSoundcodeSeperation = 3,
-                    MaxEnergySeperation = 3
+                    MaxEnergySeperation = 3,
+                    BreakArtistSeperation = true,
+                    BreakMaxSoundCodeSeperation = true,
+                    BreakMaxEnergySeperation = true
                 }
             );
 

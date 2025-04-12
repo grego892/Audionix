@@ -107,6 +107,11 @@
                 <MudItem MaxWidth="200px">
                     <MudNumericField Value="maxEnergySeperation" Label="Max Energy Level Seperation" Min="1" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxEnergySeperationSettings))" />
                 </MudItem>
+                <MudItem MaxWidth="200px">
+                    <MudCheckBox Value="breakArtistSeperation" ValueChanged="OnBreakArtistSeperationChanged" Label="Allow to break artist seperation" Color="Color.Primary" T="bool" />
+                    <MudCheckBox Value="breakMaxSoundCodeSeperation" ValueChanged="OnBreakMaxSoundCodeSeperationChanged" Label="Allow to break soundcode seperation" Color="Color.Primary" T="bool" />
+                    <MudCheckBox Value="breakMaxEnergySeperation" ValueChanged="OnBreakMaxEnergySeperationChanged" Label="Allow to break energy seperation" Color="Color.Primary" T="bool" />
+                </MudItem>
             </MudGrid>
         </MudTabPanel>
     </MudTabs>
