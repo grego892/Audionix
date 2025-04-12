@@ -4,11 +4,11 @@ namespace SharedLibrary.Repositories
 {
     public interface ISongCategoryRepository
     {
-        Task<List<SongCategory>> GetSongCategoriesAsync(int stationId);
-        Task AddSongCategoryAsync(SongCategory songCategory);
+        Task<List<Category>> GetSongCategoriesAsync(int stationId);
+        Task AddSongCategoryAsync(Category songCategory);
         Task DeleteSongCategoryAsync(int categoryId);
-        Task<SongCategory?> GetSongCategoryByIdAsync(int songCategoryId);
+        Task<Category?> GetSongCategoryByIdAsync(int songCategoryId);
         Task<List<string>> GetSongCategoryNamesAsync();
-        Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns);
+        Task<List<Category>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns);
     }
 }

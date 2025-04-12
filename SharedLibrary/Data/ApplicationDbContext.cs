@@ -16,7 +16,7 @@ namespace SharedLibrary.Data
             AudioFiles = Set<AudioMetadata>();
             Folders = Set<Folder>();
             Log = Set<ProgramLogItem>();
-            SongCategories = Set<SongCategory>();
+            SongCategories = Set<Category>();
             MusicPatterns = Set<MusicPattern>();
             PatternCategories = Set<PatternCategory>();
             MusicGridItems = Set<MusicGridItem>();
@@ -28,11 +28,11 @@ namespace SharedLibrary.Data
         public DbSet<AudioMetadata> AudioFiles { get; set; }
         public DbSet<Folder> Folders { get; set; }
         public DbSet<ProgramLogItem> Log { get; set; }
-        public DbSet<SongCategory> SongCategories { get; set; }
+        public DbSet<Category> SongCategories { get; set; }
         public DbSet<MusicPattern> MusicPatterns { get; set; }
         public DbSet<PatternCategory> PatternCategories { get; set; }
         public DbSet<MusicGridItem> MusicGridItems { get; set; }
-        public DbSet<SongCategory> Categories { get; set; }
+        public DbSet<Category> Categories { get; set; }
         public DbSet<SoundCode> SoundCodes { get; set; }
         public DbSet<EnergyLevel> EnergyLevels { get; set; }
         public DbSet<SongScheduleSettings> SongScheduleSettings { get; set; }

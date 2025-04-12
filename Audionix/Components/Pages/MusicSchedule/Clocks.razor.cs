@@ -15,8 +15,8 @@ namespace Audionix.Components.Pages.MusicSchedule
         private List<string> MusicPatternNames = new List<string>();
         private List<PatternCategory> selectedPatternCategories = new();
         private int? selectedSongCategoryId;
-        private List<SongCategory> filteredSongCategories = new();
-        private List<SongCategory> songCategories = new();
+        private List<Category> filteredSongCategories = new();
+        private List<Category> songCategories = new();
 
         [Inject] private AppStateService AppStateService { get; set; } = default!;
         [Inject] private IStationRepository? StationRepository { get; set; }

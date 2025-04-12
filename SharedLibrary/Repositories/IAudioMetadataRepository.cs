@@ -10,6 +10,6 @@ namespace SharedLibrary.Repositories
         Task AddAudioFileAsync(AudioMetadata audioMetadata);
         Task DeleteAudioFileAsync(AudioMetadata audioMetadata);
         Task UpdateAudioMetadataAsync(AudioMetadata audioMetadata);
-        Task<List<AudioMetadata>> GetScheduledSongsAsync(List<SongCategory> songCategories, Dictionary<string, int> categoryRotationIndex);
+        Task<List<AudioMetadata>> GetScheduledSongsAsync(List<Category> songCategories, Dictionary<string, int> categoryRotationIndex);
     }
 }

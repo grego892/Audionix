@@ -49,7 +49,7 @@ namespace SharedLibrary.Repositories
         }
 
         public async Task<List<AudioMetadata>> GetScheduledSongsAsync(
-            List<SongCategory> songCategories,
+            List<Category> songCategories,
             Dictionary<string, int> songCategoryRotationIndex)
         {
             using var context = _dbContextFactory.CreateDbContext();
@@ -83,21 +83,21 @@ namespace SharedLibrary.Repositories
 
             foreach (var songCategory in songCategories)
             {
-                Log.Information("Processing song category: {CategoryName} (ID: {CategoryId}).", songCategory.SongCategoryName, songCategory.SongCategoryId);
+                Log.Information("Processing song category: {CategoryName} (ID: {CategoryId}).", songCategory.CategoryName, songCategory.CategoryId);
 
                 // Retrieve audio files for the current category
                 var audioFiles = await context.AudioFiles
                     .AsNoTracking()
-                    .Where(af => af.CategoryId == songCategory.SongCategoryId)
+                    .Where(af => af.CategoryId == songCategory.CategoryId)
                     .ToListAsync();
 
                 if (!audioFiles.Any())
                 {
-                    Log.Warning("No audio files found for category: {CategoryName} (ID: {CategoryId}).", songCategory.SongCategoryName, songCategory.SongCategoryId);
+                    Log.Warning("No audio files found for category: {CategoryName} (ID: {CategoryId}).", songCategory.CategoryName, songCategory.CategoryId);
                     continue;
                 }
 
-                if (!songCategoryRotationIndex.TryGetValue(songCategory.SongCategoryName ?? string.Empty, out int lastIndex))
+                if (!songCategoryRotationIndex.TryGetValue(songCategory.CategoryName ?? string.Empty, out int lastIndex))
                 {
                     lastIndex = 0;
                 }
@@ -146,7 +146,7 @@ namespace SharedLibrary.Repositories
                 if (nextSong != null)
                 {
                     // Update rotation index
-                    songCategoryRotationIndex[songCategory.SongCategoryName ?? string.Empty] = lastIndex;
+                    songCategoryRotationIndex[songCategory.CategoryName ?? string.Empty] = lastIndex;
 
                     // Add the song to the scheduled list
                     scheduledSongs.Add(nextSong);
@@ -162,7 +162,7 @@ namespace SharedLibrary.Repositories
                 }
                 else
                 {
-                    Log.Warning("No valid song found for category: {CategoryName} (ID: {CategoryId}) after applying separation rules.", songCategory.SongCategoryName, songCategory.SongCategoryId);
+                    Log.Warning("No valid song found for category: {CategoryName} (ID: {CategoryId}) after applying separation rules.", songCategory.CategoryName, songCategory.CategoryId);
                 }
             }
 

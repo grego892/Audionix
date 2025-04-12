@@ -28,9 +28,9 @@
                             <MudTh>Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Category">@context.SongCategoryName</MudTd>
+                            <MudTd DataLabel="Category">@context.CategoryName</MudTd>
                             <MudTd DataLabel="Actions">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context.SongCategoryName))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(args => RemoveCategoryHandler(@context.CategoryName))" />
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
@@ -96,16 +96,16 @@
         <MudTabPanel Text="Music Schedule Settings">
             <MudGrid class="ma-1" Spacing="5" Justify="Justify.FlexStart">
                 <MudItem MaxWidth="200px">
-                        <MudNumericField Value="artistSeperation" Label="Artist Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateArtistSeperationSettings))" />
+                    <MudNumericField Value="artistSeperation" Label="Artist Seperation" Min="1" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateArtistSeperationSettings))" />
                 </MudItem>
                 <MudItem MaxWidth="200px">
-                    <MudNumericField Value="titleSeperation" Label="Title Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateTitleSeperationSettings))" />
+                    <MudNumericField Value="titleSeperation" Label="Title Seperation" Min="1" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateTitleSeperationSettings))" />
                 </MudItem>
                 <MudItem MaxWidth="200px">
-                    <MudNumericField Value="maxSoundCodeSeperation" Label="Max Soundcode Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxSoundcodeSettings))" />
+                    <MudNumericField Value="maxSoundCodeSeperation" Label="Max Soundcode Seperation" Min="1" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxSoundcodeSettings))" />
                 </MudItem>
                 <MudItem MaxWidth="200px">
-                        <MudNumericField Value="maxEnergySeperation" Label="Max Energy Level Seperation" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxEnergySeperationSettings))" />
+                    <MudNumericField Value="maxEnergySeperation" Label="Max Energy Level Seperation" Min="1" Variant="Variant.Outlined" ValueChanged="@(EventCallback.Factory.Create<int>(this, UpdateMaxEnergySeperationSettings))" />
                 </MudItem>
             </MudGrid>
         </MudTabPanel>

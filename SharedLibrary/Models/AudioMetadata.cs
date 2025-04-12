@@ -21,7 +21,7 @@ namespace SharedLibrary.Models
         public Station? Station { get; set; }
         public string? Folder { get; set; }
         public int? CategoryId { get; set; }
-        public SongCategory? SongCategory { get; set; }
+        public Category? SongCategory { get; set; }
         public int? SoundCodeId { get; set; }
         public SoundCode? SoundCode { get; set; }
         public int? EnergyLevelId { get; set; }

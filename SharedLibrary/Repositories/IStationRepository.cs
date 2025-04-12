@@ -13,12 +13,12 @@ namespace SharedLibrary.Repositories
         Task DeleteStationAsync(int stationId);
         Task<List<Folder>> GetFoldersForStationAsync(int stationId);
         Task UpdateStationNextPlayAsync(int stationId, int logOrderID, DateOnly Date);
-        Task<List<SongCategory>> GetSongCategoriesAsync(int stationId);
-        Task AddSongCategoryAsync(SongCategory songCategory);
+        Task<List<Category>> GetSongCategoriesAsync(int stationId);
+        Task AddSongCategoryAsync(Category songCategory);
         Task DeleteSongCategoryAsync(int songCategoryId);
         Task<List<int>> GetMusicPatternsForDayAsync(int stationId, DayOfWeek day);
-        Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns);
-        Task<List<AudioMetadata>> GetScheduledSongsAsync(List<SongCategory> categories, Dictionary<string, int> songCategoryRotationIndex);
+        Task<List<Category>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns);
+        Task<List<AudioMetadata>> GetScheduledSongsAsync(List<Category> categories, Dictionary<string, int> songCategoryRotationIndex);
         Task AddNewDayLogToDbLogAsync(List<ProgramLogItem> newDaysLog);
         Task<List<MusicGridItem>> GetMusicGridItemsAsync(int stationId);
         Task AddMusicGridItemAsync(MusicGridItem item);

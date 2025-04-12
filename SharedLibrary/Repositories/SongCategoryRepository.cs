@@ -13,13 +13,13 @@ namespace SharedLibrary.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<List<SongCategory>> GetSongCategoriesAsync(int stationId)
+        public async Task<List<Category>> GetSongCategoriesAsync(int stationId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.SongCategories.Where(c => c.StationId == stationId).ToListAsync();
         }
 
-        public async Task AddSongCategoryAsync(SongCategory songCategory)
+        public async Task AddSongCategoryAsync(Category songCategory)
         {
             using var context = _dbContextFactory.CreateDbContext();
             await context.SongCategories.AddAsync(songCategory);
@@ -37,7 +37,7 @@ namespace SharedLibrary.Repositories
             }
         }
 
-        public async Task<SongCategory?> GetSongCategoryByIdAsync(int songCategoryId)
+        public async Task<Category?> GetSongCategoryByIdAsync(int songCategoryId)
         {
             using var context = _dbContextFactory.CreateDbContext();
             return await context.SongCategories.FindAsync(songCategoryId);
@@ -46,13 +46,13 @@ namespace SharedLibrary.Repositories
         public async Task<List<string>> GetSongCategoryNamesAsync()
         {
             using var context = _dbContextFactory.CreateDbContext();
-            return await context.SongCategories.Select(c => c.SongCategoryName!).ToListAsync();
+            return await context.SongCategories.Select(c => c.CategoryName!).ToListAsync();
         }
 
-        public async Task<List<SongCategory>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns)
+        public async Task<List<Category>> GetSongCategoriesForPatternsAsync(List<int> musicPatterns)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            var songCategories = new List<SongCategory>();
+            var songCategories = new List<Category>();
 
             foreach (var patternId in musicPatterns)
             {
@@ -63,12 +63,13 @@ namespace SharedLibrary.Repositories
 
                 foreach (var patternCategory in patternCategories)
                 {
-                    var songCategory = await context.SongCategories.FirstOrDefaultAsync(sc => sc.StationId == patternCategory.StationId);
+                    var songCategory = await context.Categories.FirstOrDefaultAsync(sc => sc.CategoryId == patternCategory.CategoryId);
                     if (songCategory != null)
                     {
                         songCategories.Add(songCategory);
                     }
                 }
+
             }
 
             return songCategories;

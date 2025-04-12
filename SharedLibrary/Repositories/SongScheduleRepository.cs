@@ -17,7 +17,7 @@ namespace SharedLibrary.Repositories
             _context = context;
         }
 
-        public async Task<List<SongCategory>> GetAllCategoriesAsync()
+        public async Task<List<Category>> GetAllCategoriesAsync()
         {
             return await _context.Categories.ToListAsync();
         }
@@ -32,13 +32,13 @@ namespace SharedLibrary.Repositories
             return await _context.EnergyLevels.ToListAsync();
         }
 
-        public async Task AddCategoryAsync(SongCategory category)
+        public async Task AddCategoryAsync(Category category)
         {
             await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveCategoryAsync(SongCategory category)
+        public async Task RemoveCategoryAsync(Category category)
         {
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
@@ -73,7 +73,7 @@ namespace SharedLibrary.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<SongCategory>> GetCategoriesAsync(int stationId)
+        public async Task<List<Category>> GetCategoriesAsync(int stationId)
         {
             return await _context.Categories.Where(c => c.StationId == stationId).ToListAsync();
         }

@@ -1,9 +1,9 @@
 ﻿namespace SharedLibrary.Models.MusicSchedule
 {
-    public class SongCategory
+    public class Category
     {
-        public int SongCategoryId { get; set; }
-        public string? SongCategoryName { get; set; }
+        public int CategoryId { get; set; }
+        public string? CategoryName { get; set; }
         public int StationId { get; set; }
         public int? TemplateId { get; set; }
         public MusicPattern? Template { get; set; }

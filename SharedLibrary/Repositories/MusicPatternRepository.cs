@@ -44,7 +44,7 @@ namespace SharedLibrary.Repositories
         {
             using var context = _dbContextFactory.CreateDbContext();
             var musicPattern = await context.MusicPatterns.Include(mp => mp.PatternCategories).FirstOrDefaultAsync(mp => mp.PatternId == musicPatternId);
-            var category = await context.Categories.FirstOrDefaultAsync(c => c.SongCategoryId == categoryId);
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == categoryId);
 
             if (musicPattern != null && category != null)
             {
@@ -55,8 +55,8 @@ namespace SharedLibrary.Repositories
                 var patternCategory = new PatternCategory
                 {
                     MusicPatternId = musicPattern.PatternId,
-                    CategoryId = category.SongCategoryId,
-                    CategoryName = category.SongCategoryName!,
+                    CategoryId = category.CategoryId,
+                    CategoryName = category.CategoryName!,
                     MusicPatternSortOrder = maxSortOrder + 1,
                     StationId = musicPattern.StationId
                 };
