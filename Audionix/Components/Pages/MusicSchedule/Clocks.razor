@@ -9,30 +9,32 @@
 @inject NavigationManager _nav
 @inject IDialogService DialogService
 
-<PageTitle>Patterns</PageTitle>
+<PageTitle>Audionix - Clocks</PageTitle>
 
 <MudPaper Style="min-height:calc(100vh - 68px);max-height:calc(100vh - 68px);display:flex;flex-direction:column;" Class="border-solid border-2 mud-border-primary">
- 
-<MudStack Row="true">
-    <MudPaper class="ma-1" Elevation="8">
-        <MudStack Row="true">
-            <MudSelect Style="min-width: 200px;" T="string" Label="Select Template" Value="selectedMusicPatternName" ValueChanged="OnPatternChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
-                @foreach (var musicPatternName in filteredMusicPatternNames)
-                {
-                    <MudSelectItem Value="musicPatternName.Name">@musicPatternName.Name</MudSelectItem>
-                }
-            </MudSelect>
-            <MudButton OnClick="OpenDialogRemoveMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Remove Selected Pattern</MudButton>
-        </MudStack>
+    <MudPaper Class="ml-1 mr-1 mb-1">
+        <h2 Class="ptb-2 ml-2">Clocks</h2>
     </MudPaper>
+    <MudStack Row="true">
+        <MudPaper class="ma-1" Elevation="8">
+            <MudStack Row="true">
+                <MudSelect Style="min-width: 200px;" T="string" Label="Select Template" Value="selectedMusicPatternName" ValueChanged="OnPatternChanged" Margin="Margin.Dense" Variant="Variant.Outlined">
+                    @foreach (var musicPatternName in filteredMusicPatternNames)
+                    {
+                        <MudSelectItem Value="musicPatternName.Name">@musicPatternName.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton OnClick="OpenDialogRemoveMusicPattern" Class="ma-1" Variant="Variant.Outlined" Color="Color.Primary">Remove Selected Pattern</MudButton>
+            </MudStack>
+        </MudPaper>
 
-    <MudPaper Width="500px" Class="ma-1" Elevation="8">
-        <MudStack Row="true">
-            <MudTextField Class="ml-1 mt-1 mb-1" @bind-Value="newMusicPatternName" Label="New Music Pattern Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            <MudButton OnClick="AddMusicPattern" Class="mr-1 mt-1 mb-1" Variant="Variant.Outlined" Color="Color.Primary">Add New Pattern</MudButton>
-        </MudStack>
-    </MudPaper>
-</MudStack>
+        <MudPaper Width="500px" Class="ma-1" Elevation="8">
+            <MudStack Row="true">
+                <MudTextField Class="ml-1 mt-1 mb-1" @bind-Value="newMusicPatternName" Label="New Music Pattern Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                <MudButton OnClick="AddMusicPattern" Class="mr-1 mt-1 mb-1" Variant="Variant.Outlined" Color="Color.Primary">Add New Pattern</MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
 
 @if (selectedMusicPatternName != null)
 {
