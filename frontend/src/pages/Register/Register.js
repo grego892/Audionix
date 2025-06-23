@@ -1,4 +1,4 @@
-// pages/Login/Login.js
+// pages/Register/Register.js
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -12,22 +12,34 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Login = () => {
+const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await login(username, password);
-      navigate('/'); // Redirect to home after successful login
+      await register(username, password);
+      navigate('/'); // Redirect to home after successful registration
     } catch (err) {
       setError(err.message);
     } finally {
@@ -47,7 +59,7 @@ const Login = () => {
       >
         <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
           <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Sign In
+            Register
           </Typography>
           
           {error && (
@@ -77,9 +89,20 @@ const Login = () => {
               label="Password"
               type="password"
               id="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
             <Button
               type="submit"
@@ -88,12 +111,12 @@ const Login = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Creating Account...' : 'Register'}
             </Button>
             <Box textAlign="center">
-              <Link to="/register" style={{ textDecoration: 'none' }}>
+              <Link to="/login" style={{ textDecoration: 'none' }}>
                 <Typography variant="body2" color="primary">
-                  Don't have an account? Sign up
+                  Already have an account? Sign in
                 </Typography>
               </Link>
             </Box>
@@ -104,4 +127,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

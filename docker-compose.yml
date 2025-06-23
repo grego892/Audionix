@@ -1,10 +1,42 @@
 version: "3.9"
 services:
+  mongodb:
+    image: mongo:7
+    container_name: audionix_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: Audionix_db
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - audionix_network
+
   backend:
     build: ./backend
     ports:
       - "8000:8000"
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/Audionix_db?authSource=admin
+      SECRET_KEY: your-production-secret-key-here
+    depends_on:
+      - mongodb
+    networks:
+      - audionix_network
+
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
+    networks:
+      - audionix_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  audionix_network:
+    driver: bridge

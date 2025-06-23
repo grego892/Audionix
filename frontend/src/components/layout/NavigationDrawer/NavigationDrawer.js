@@ -13,13 +13,16 @@ import MicIcon from '@mui/icons-material/Mic';
 import AudioFileIcon from '@mui/icons-material/AudioFile';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 import ThemeContext from '../../../contexts/ThemeContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 function NavigationDrawer() {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   // Define theme-based styles
@@ -61,6 +64,17 @@ function NavigationDrawer() {
     }
   };
 
+  const handleAuthAction = () => {
+    if (user) {
+      // User is logged in, perform logout
+      logout();
+      navigate('/');
+    } else {
+      // User is not logged in, navigate to login
+      navigate('/login');
+    }
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -92,9 +106,11 @@ function NavigationDrawer() {
           sx={switchStyles}
         />
         </ListItem>
-        <ListItem button key="Login" sx={listItemStyles} onClick={() => navigate('/login')}>
-          <ListItemIcon><LoginIcon /></ListItemIcon>
-          <ListItemText primary="Login" />
+        <ListItem button key="AuthAction" sx={listItemStyles} onClick={handleAuthAction}>
+          <ListItemIcon>
+            {user ? <LogoutIcon /> : <LoginIcon />}
+          </ListItemIcon>
+          <ListItemText primary={user ? "Logout" : "Login"} />
         </ListItem>
       </List>
     </Drawer>

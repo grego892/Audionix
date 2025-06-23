@@ -5,7 +5,11 @@ import Home from './pages/Home/Home.js';
 import Studio from './pages/Studio/Studio.js';
 import FileManager from "./pages/FileManager/FileManager";
 import Setup from "./pages/Setup/Setup";
+import Login from './pages/Login/Login';
+import Register from './pages/Register/Register';
 import NavigationDrawer from './components/layout/NavigationDrawer/NavigationDrawer.js';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 import ThemeContext from './contexts/ThemeContext';
 
 function App() {
@@ -26,19 +30,32 @@ function App() {
   };
 
   return (
-    <Router>
-      <Box sx={appStyles}>
-        <NavigationDrawer />
-        <Box component="main" sx={mainStyles}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/studio" element={<Studio />} />
-            <Route path="/filemanager" element={<FileManager />} />
-            <Route path="/setup" element={<Setup />} />
-          </Routes>
-        </Box>
-      </Box>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Protected routes */}
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <Box sx={appStyles}>
+                <NavigationDrawer />
+                <Box component="main" sx={mainStyles}>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/studio" element={<Studio />} />
+                    <Route path="/filemanager" element={<FileManager />} />
+                    <Route path="/setup" element={<Setup />} />
+                  </Routes>
+                </Box>
+              </Box>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
