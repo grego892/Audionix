@@ -31,9 +31,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get('http://localhost:8000/api/me');
       setUser(response.data);
+      
+      // Trigger preference loading for other contexts
+      window.dispatchEvent(new CustomEvent('userLoggedIn'));
     } catch (error) {
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -79,6 +83,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
+    
+    // Trigger preference clearing for other contexts
+    window.dispatchEvent(new CustomEvent('userLoggedOut'));
   };
 
   const value = {

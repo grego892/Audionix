@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import Home from './pages/Home/Home.js';
 import Studio from './pages/Studio/Studio.js';
 import FileManager from "./pages/FileManager/FileManager";
@@ -13,7 +13,24 @@ import { AuthProvider } from './contexts/AuthContext';
 import ThemeContext from './contexts/ThemeContext';
 
 function App() {
-  const { theme } = useContext(ThemeContext);
+  const { theme, isLoading } = useContext(ThemeContext);
+
+  // Show loading spinner while theme is being loaded
+  if (isLoading) {
+    return (
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '100vh',
+          backgroundColor: '#121212' // Default dark background while loading
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const appStyles = {
     display: 'flex',

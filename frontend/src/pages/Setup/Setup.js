@@ -10,9 +10,11 @@ import {
   Paper,
   Divider,
   Alert,
-  CircularProgress
+  CircularProgress,
+  IconButton,
+  ListItemSecondaryAction
 } from '@mui/material';
-import { Add as AddIcon, Radio as RadioIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
 import axios from 'axios';
 
 function Setup() {
@@ -21,6 +23,7 @@ function Setup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showSecondary, setShowSecondary] = useState(false);
 
   // Fetch stations on component mount
   useEffect(() => {
@@ -116,10 +119,54 @@ function Setup() {
 
   const handleCallLettersChange = (e) => {
     // Convert to uppercase and limit to typical call letter format
-    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
     if (value.length <= 8) { // Typical max length for call letters
       setCallLetters(value);
     }
+  };
+
+  const handleDeleteStation = async (stationId) => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+
+      console.log('Deleting station:', stationId);
+      
+      await axios.delete(`/api/stations/${stationId}`);
+      
+      console.log('Station deleted successfully');
+      setSuccess('Station deleted successfully!');
+      
+      // Refresh the stations list
+      await fetchStations();
+      
+    } catch (err) {
+      console.error('Error deleting station:', err);
+      console.error('Error response:', err.response);
+      
+      let errorMessage = 'Failed to delete station';
+      
+      if (err.response?.status === 401) {
+        errorMessage = 'Authentication required. Please log in again.';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'Station not found';
+      } else if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = `Network error: ${err.message}`;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSecondaryVisibility = () => {
+    setShowSecondary(!showSecondary);
   };
 
   return (
@@ -159,7 +206,7 @@ function Setup() {
             size="medium"
             sx={{ flexGrow: 1 }}
             disabled={loading}
-            helperText="Enter station call letters (letters and numbers only)"
+            helperText="Enter station call letters"
           />
           <Button
             type="submit"
@@ -177,14 +224,14 @@ function Setup() {
       <Paper elevation={2} sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           Current Stations
-          <Button 
-            onClick={fetchStations} 
+          <IconButton 
+            onClick={toggleSecondaryVisibility} 
             size="small" 
             sx={{ ml: 2 }}
-            disabled={loading}
+            title={showSecondary ? "Hide details" : "Show details"}
           >
-            Refresh
-          </Button>
+            {showSecondary ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          </IconButton>
         </Typography>
         
         {loading && stations.length === 0 ? (
@@ -200,11 +247,23 @@ function Setup() {
             {stations.map((station, index) => (
               <React.Fragment key={station.id || index}>
                 <ListItem>
-                  <RadioIcon sx={{ mr: 2, color: 'primary.main' }} />
                   <ListItemText
                     primary={station.callLetters}
-                    secondary={`Added: ${new Date(station.createdAt || Date.now()).toLocaleDateString()}`}
+                    secondary={showSecondary ? `Added: ${new Date(station.createdAt || Date.now()).toLocaleDateString()}` : null}
                   />
+                  {showSecondary && (
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => handleDeleteStation(station.id)}
+                        disabled={loading}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  )}
                 </ListItem>
                 {index < stations.length - 1 && <Divider />}
               </React.Fragment>
