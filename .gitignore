@@ -126,3 +126,5 @@ Thumbs.db
 # Configuration files that might contain secrets
 config.ini
 secrets.json
+
+/backend/uploads/*

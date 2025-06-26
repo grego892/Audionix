@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pymongo import MongoClient
 from passlib.context import CryptContext
@@ -9,6 +10,9 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 import os
 import logging
+import shutil
+import uuid
+from pathlib import Path
 
 # Add these imports at the top with your other imports
 from bson import ObjectId
@@ -31,6 +35,11 @@ client = MongoClient(MONGODB_URL)
 db = client["Audionix_db"]
 users_collection = db["users"]
 stations_collection = db["stations"]
+audio_files_collection = db["audio_files"]
+
+# Create uploads directory if it doesn't exist
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 # Security - use environment variable
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
@@ -52,8 +61,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Rest of your code remains the same...
-# (Keep all your existing Pydantic models, helper functions, and endpoints as they are)
+# Existing Pydantic models...
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -75,7 +83,6 @@ class StationResponse(BaseModel):
     createdAt: datetime
     createdBy: str
 
-# Add this Pydantic model after your existing models
 class UserPreferences(BaseModel):
     theme: Optional[str] = "light"
     selectedStationId: Optional[str] = None
@@ -84,7 +91,19 @@ class UserPreferencesResponse(BaseModel):
     theme: str
     selectedStationId: Optional[str] = None
 
-# Helper functions
+# Add new models for audio files
+class AudioFileResponse(BaseModel):
+    id: str
+    filename: str
+    originalName: str
+    fileSize: int
+    uploadedAt: datetime
+    uploadedBy: str
+    stationId: Optional[str] = None
+    mimeType: str
+    duration: Optional[float] = None
+
+# Helper functions (keep all existing ones)
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -136,18 +155,16 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail="Internal server error"
         )
 
-# Auth endpoints
+# All existing endpoints remain the same...
 @app.post("/api/register", response_model=Token)
 def register(user: UserRegister):
     logger.info(f"Registration attempt for username: {user.username}")
-    # Check if user exists
     if users_collection.find_one({"username": user.username}):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
         )
 
-    # Create user
     hashed_password = get_password_hash(user.password)
     user_doc = {
         "username": user.username,
@@ -156,7 +173,6 @@ def register(user: UserRegister):
     }
     users_collection.insert_one(user_doc)
 
-    # Create token
     access_token = create_access_token(data={"sub": user.username})
     logger.info(f"User registered successfully: {user.username}")
     return {"access_token": access_token, "token_type": "bearer"}
@@ -189,13 +205,12 @@ def read_users_me(current_user: dict = Depends(get_current_user)):
             detail="Internal server error"
         )
 
-# Station endpoints
+# Station endpoints (keep all existing ones)
 @app.post("/api/stations")
 def create_station(station: StationCreate, current_user: dict = Depends(get_current_user)):
     logger.info(f"Station creation attempt by {current_user['username']}: {station.callLetters}")
 
     try:
-        # Validate call letters format
         call_letters = station.callLetters.strip().upper()
         logger.info(f"Processed call letters: {call_letters}")
 
@@ -213,7 +228,6 @@ def create_station(station: StationCreate, current_user: dict = Depends(get_curr
                 detail="Call letters must be 8 characters or less"
             )
 
-        # Check if station already exists
         existing_station = stations_collection.find_one({"callLetters": call_letters})
         if existing_station:
             logger.warning(f"Station already exists: {call_letters}")
@@ -222,7 +236,6 @@ def create_station(station: StationCreate, current_user: dict = Depends(get_curr
                 detail="Station with these call letters already exists"
             )
 
-        # Create station document
         station_doc = {
             "callLetters": call_letters,
             "createdAt": datetime.utcnow(),
@@ -231,7 +244,6 @@ def create_station(station: StationCreate, current_user: dict = Depends(get_curr
 
         logger.info(f"Creating station document: {station_doc}")
 
-        # Insert into database
         result = stations_collection.insert_one(station_doc)
         logger.info(f"Station created with ID: {result.inserted_id}")
 
@@ -259,11 +271,9 @@ def get_stations(current_user: dict = Depends(get_current_user)):
     logger.info(f"Stations list requested by: {current_user['username']}")
 
     try:
-        # Get all stations
         stations = list(stations_collection.find({}))
         logger.info(f"Found {len(stations)} stations in database")
 
-        # Convert ObjectId to string and format response
         formatted_stations = []
         for station in stations:
             formatted_station = {
@@ -288,11 +298,7 @@ def get_stations(current_user: dict = Depends(get_current_user)):
 def delete_station(station_id: str, current_user: dict = Depends(get_current_user)):
     logger.info(f"Station deletion requested by {current_user['username']}: {station_id}")
 
-    from bson import ObjectId
-    from bson.errors import InvalidId
-
     try:
-        # Convert string ID to ObjectId
         object_id = ObjectId(station_id)
     except InvalidId:
         logger.warning(f"Invalid station ID format: {station_id}")
@@ -301,7 +307,6 @@ def delete_station(station_id: str, current_user: dict = Depends(get_current_use
             detail="Invalid station ID format"
         )
 
-    # Find and delete the station
     result = stations_collection.delete_one({"_id": object_id})
 
     if result.deleted_count == 0:
@@ -314,14 +319,12 @@ def delete_station(station_id: str, current_user: dict = Depends(get_current_use
     logger.info(f"Station deleted successfully: {station_id}")
     return {"message": "Station deleted successfully"}
 
-# Add these endpoints before the health check endpoint
-
+# Preferences endpoints (keep existing ones)
 @app.get("/api/preferences", response_model=UserPreferencesResponse)
 def get_user_preferences(current_user: dict = Depends(get_current_user)):
     logger.info(f"Getting preferences for user: {current_user['username']}")
     
     try:
-        # Get user preferences from database
         user = users_collection.find_one({"username": current_user["username"]})
         if not user:
             raise HTTPException(
@@ -403,6 +406,267 @@ def update_user_preferences(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error updating user preferences"
+        )
+
+# Add new audio file endpoints below
+
+@app.post("/api/audio/upload")
+async def upload_audio_file(
+    station_id: str,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    logger.info(f"File upload attempt by {current_user['username']} for station {station_id}: {file.filename}")
+
+    try:
+        # Validate station ID
+        try:
+            station_object_id = ObjectId(station_id)
+            station = stations_collection.find_one({"_id": station_object_id})
+            if not station:
+                logger.warning(f"Station not found: {station_id}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Station not found"
+                )
+        except InvalidId:
+            logger.warning(f"Invalid station ID format: {station_id}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid station ID format"
+            )
+
+        # Validate file size and type
+        if file.size > 100 * 1024 * 1024:  # 100MB limit
+            logger.warning(f"File size too large: {file.filename}")
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="File size too large (max 100MB)"
+            )
+
+        allowed_mime_types = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp3"]  # Add other audio MIME types
+        if file.content_type not in allowed_mime_types:
+            logger.warning(f"Invalid file type: {file.content_type}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid file type. Only audio files are allowed."
+            )
+
+        # Generate a unique filename
+        file_extension = file.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        file_path = UPLOAD_DIR / unique_filename
+
+        # Save the file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # Store metadata in database
+        file_size = os.path.getsize(file_path)
+        file_doc = {
+            "filename": unique_filename,
+            "originalName": file.filename,
+            "fileSize": file_size,
+            "uploadedAt": datetime.utcnow(),
+            "uploadedBy": current_user["username"],
+            "stationId": station_id,
+            "mimeType": file.content_type
+        }
+        result = audio_files_collection.insert_one(file_doc)
+        file_id = str(result.inserted_id)
+        logger.info(f"File saved to database with ID: {file_id}")
+
+        response_data = {
+            "id": file_id,
+            "filename": unique_filename,
+            "originalName": file.filename,
+            "fileSize": file_size,
+            "uploadedAt": file_doc["uploadedAt"],
+            "uploadedBy": file_doc["uploadedBy"],
+            "stationId": file_doc["stationId"],
+            "mimeType": file.content_type,
+            "duration": None  # You can calculate the duration later if needed
+        }
+        return response_data
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload file"
+        )
+
+@app.get("/api/audio/{file_id}")
+async def get_audio_file(file_id: str, current_user: dict = Depends(get_current_user)):
+    logger.info(f"Request to get audio file: {file_id}")
+    try:
+        # Validate file ID
+        try:
+            file_object_id = ObjectId(file_id)
+            file_data = audio_files_collection.find_one({"_id": file_object_id})
+        except InvalidId:
+            logger.warning(f"Invalid audio file ID format: {file_id}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid audio file ID format"
+            )
+
+        if not file_data:
+            logger.warning(f"Audio file not found: {file_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Audio file not found"
+            )
+
+        file_path = UPLOAD_DIR / file_data["filename"]
+
+        if not file_path.is_file():
+            logger.error(f"File not found on server: {file_path}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Audio file not found on server"
+            )
+
+        logger.info(f"Serving audio file: {file_data['filename']}")
+        return FileResponse(file_path, media_type=file_data["mimeType"], filename=file_data["originalName"])
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting audio file: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving audio file"
+        )
+
+# List audio files (optionally filter by station)
+@app.get("/api/audio-files")
+def list_audio_files(station_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    query = {}
+    if station_id:
+        query["stationId"] = station_id
+    files = list(audio_files_collection.find(query))
+    result = []
+    for f in files:
+        result.append({
+            "id": str(f["_id"]),
+            "filename": f["filename"],
+            "originalName": f["originalName"],
+            "fileSize": f["fileSize"],
+            "uploadedAt": f["uploadedAt"],
+            "uploadedBy": f["uploadedBy"],
+            "stationId": f.get("stationId"),
+            "mimeType": f.get("mimeType"),
+            "duration": f.get("duration"),
+        })
+    return result
+
+# Delete audio file
+@app.delete("/api/audio-files/{file_id}")
+def delete_audio_file(file_id: str, current_user: dict = Depends(get_current_user)):
+    try:
+        file_object_id = ObjectId(file_id)
+        file_data = audio_files_collection.find_one({"_id": file_object_id})
+        if not file_data:
+            raise HTTPException(status_code=404, detail="File not found")
+        file_path = UPLOAD_DIR / file_data["filename"]
+        if file_path.exists():
+            file_path.unlink()
+        audio_files_collection.delete_one({"_id": file_object_id})
+        return {"message": "File deleted successfully"}
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid file ID format")
+
+# Upload audio file (to match frontend)
+@app.post("/api/upload-audio")
+async def upload_audio_file(
+    station_id: Optional[str] = None,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    logger.info(f"File upload attempt by {current_user['username']} for station {station_id}: {file.filename}")
+
+    try:
+        # Validate station ID if provided
+        if station_id:
+            try:
+                station_object_id = ObjectId(station_id)
+                station = stations_collection.find_one({"_id": station_object_id})
+                if not station:
+                    logger.warning(f"Station not found: {station_id}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Station not found"
+                    )
+            except InvalidId:
+                logger.warning(f"Invalid station ID format: {station_id}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid station ID format"
+                )
+
+        # Validate file size and type
+        if file.size > 100 * 1024 * 1024:  # 100MB limit
+            logger.warning(f"File size too large: {file.filename}")
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="File size too large (max 100MB)"
+            )
+
+        allowed_mime_types = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp3"]
+        if file.content_type not in allowed_mime_types:
+            logger.warning(f"Invalid file type: {file.content_type}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid file type. Only audio files are allowed."
+            )
+
+        # Generate a unique filename
+        file_extension = file.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        file_path = UPLOAD_DIR / unique_filename
+
+        # Save the file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # Store metadata in database
+        file_size = os.path.getsize(file_path)
+        file_doc = {
+            "filename": unique_filename,
+            "originalName": file.filename,
+            "fileSize": file_size,
+            "uploadedAt": datetime.utcnow(),
+            "uploadedBy": current_user["username"],
+            "stationId": station_id,
+            "mimeType": file.content_type
+        }
+        result = audio_files_collection.insert_one(file_doc)
+        file_id = str(result.inserted_id)
+        logger.info(f"File saved to database with ID: {file_id}")
+
+        response_data = {
+            "id": file_id,
+            "filename": unique_filename,
+            "originalName": file.filename,
+            "fileSize": file_size,
+            "uploadedAt": file_doc["uploadedAt"],
+            "uploadedBy": file_doc["uploadedBy"],
+            "stationId": file_doc["stationId"],
+            "mimeType": file.content_type,
+            "duration": None
+        }
+        return response_data
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload file"
         )
 
 # Add a simple health check endpoint
