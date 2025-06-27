@@ -1,4 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
+import { createAppTheme } from '../styles/muiTheme';
 import axios from 'axios';
 
 const ThemeContext = createContext();
@@ -6,6 +9,9 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState('light');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Create MUI theme based on current theme mode
+  const muiTheme = createAppTheme(theme);
 
   // Load theme from server when user is authenticated
   useEffect(() => {
@@ -104,7 +110,10 @@ export const ThemeProvider = ({ children }) => {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, isLoading, reloadThemePreferences }}>
-      {children}
+      <MuiThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 };

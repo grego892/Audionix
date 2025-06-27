@@ -1,6 +1,6 @@
 // pages/Login/Login.js
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   TextField, 
@@ -90,12 +90,11 @@ const Login = () => {
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
-            <Box textAlign="center">
-              <Link to="/register" style={{ textDecoration: 'none' }}>
-                <Typography variant="body2" color="primary">
-                  Don't have an account? Sign up
-                </Typography>
-              </Link>
+            
+            <Box textAlign="center" sx={{ mt: 2 }}>
+              <Typography variant="body2" color="textSecondary">
+                Need an account? Contact your administrator.
+              </Typography>
             </Box>
           </Box>
         </Paper>

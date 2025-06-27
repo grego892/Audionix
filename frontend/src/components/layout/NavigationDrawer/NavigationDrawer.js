@@ -24,6 +24,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RadioIcon from '@mui/icons-material/Radio';
 import ThemeContext from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -300,7 +301,7 @@ function NavigationDrawer() {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  Logged in
+                  {user.isAdmin ? 'Administrator' : 'User'}
                 </Typography>
               </Box>
             </Box>
@@ -355,10 +356,19 @@ function NavigationDrawer() {
           <ListItemIcon><AudioFileIcon /></ListItemIcon>
           <ListItemText primary="File Manager" />
         </ListItem>
-        <ListItem button key="Setup" sx={listItemStyles} onClick={() => navigate('/setup')}>
-          <ListItemIcon><SettingsIcon /></ListItemIcon>
-          <ListItemText primary="Setup" />
-        </ListItem>
+        {/* Only show Setup for administrators */}
+        {user && user.isAdmin && (
+          <ListItem button key="Setup" sx={listItemStyles} onClick={() => navigate('/setup')}>
+            <ListItemIcon><SettingsIcon /></ListItemIcon>
+            <ListItemText primary="Setup" />
+          </ListItem>
+        )}
+        {user && user.isAdmin && (
+          <ListItem button key="Users" sx={listItemStyles} onClick={() => navigate('/users')}>
+            <ListItemIcon><ManageAccountsIcon /></ListItemIcon>
+            <ListItemText primary="Users" />
+          </ListItem>
+        )}
       </List>
       <List sx={{ marginTop: 'auto' }}>
         <ListItem key="ThemeToggle">

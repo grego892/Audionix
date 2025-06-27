@@ -12,8 +12,11 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import ThemeContext from './contexts/ThemeContext';
 
+// Example of how to add admin route to your App.js
+import UserManagement from './pages/Admin/UserManagement';
+
 function App() {
-  const { theme, isLoading } = useContext(ThemeContext);
+  const { isLoading } = useContext(ThemeContext);
 
   // Show loading spinner while theme is being loaded
   if (isLoading) {
@@ -24,28 +27,13 @@ function App() {
           justifyContent: 'center', 
           alignItems: 'center', 
           minHeight: '100vh',
-          backgroundColor: '#121212' // Default dark background while loading
+          bgcolor: 'background.default' // Use theme colors
         }}
       >
         <CircularProgress />
       </Box>
     );
   }
-
-  const appStyles = {
-    display: 'flex',
-    backgroundColor: theme === 'dark' ? '#121212' : '#ffffff',
-    minHeight: '100vh',
-    color: theme === 'dark' ? '#ffffff' : '#000000'
-  };
-
-  const mainStyles = {
-    flexGrow: 1,
-    p: 3,
-    backgroundColor: theme === 'dark' ? '#121212' : '#ffffff',
-    color: theme === 'dark' ? '#ffffff' : '#000000'
-  };
-
   return (
     <AuthProvider>
       <Router>
@@ -57,14 +45,33 @@ function App() {
           {/* Protected routes */}
           <Route path="/*" element={
             <ProtectedRoute>
-              <Box sx={appStyles}>
+              <Box sx={{ 
+                display: 'flex',
+                bgcolor: 'background.default',
+                minHeight: '100vh',
+                color: 'text.primary'
+              }}>
                 <NavigationDrawer />
-                <Box component="main" sx={mainStyles}>
+                <Box component="main" sx={{ 
+                  flexGrow: 1,
+                  p: 3,
+                  bgcolor: 'background.default',
+                  color: 'text.primary'
+                }}>
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/studio" element={<Studio />} />
                     <Route path="/filemanager" element={<FileManager />} />
                     <Route path="/setup" element={<Setup />} />
+                    {/* In your routes, add this route (only accessible to admins): */}
+                    <Route 
+                      path="/users"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <UserManagement />
+                        </ProtectedRoute>
+                      } 
+                    />
                   </Routes>
                 </Box>
               </Box>

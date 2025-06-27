@@ -61,14 +61,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Existing Pydantic models...
+# Pydantic models
 class UserLogin(BaseModel):
     username: str
     password: str
 
-class UserRegister(BaseModel):
+class UserCreate(BaseModel):
     username: str
     password: str
+    isAdmin: Optional[bool] = False
+
+class UserResponse(BaseModel):
+    id: str
+    username: str
+    isAdmin: bool
+    createdAt: datetime
+
+class PasswordChange(BaseModel):
+    newPassword: str
 
 class Token(BaseModel):
     access_token: str
@@ -103,7 +113,7 @@ class AudioFileResponse(BaseModel):
     mimeType: str
     duration: Optional[float] = None
 
-# Helper functions (keep all existing ones)
+# Helper functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -155,28 +165,31 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail="Internal server error"
         )
 
-# All existing endpoints remain the same...
-@app.post("/api/register", response_model=Token)
-def register(user: UserRegister):
-    logger.info(f"Registration attempt for username: {user.username}")
-    if users_collection.find_one({"username": user.username}):
+def get_admin_user(current_user: dict = Depends(get_current_user)):
+    if not current_user.get("isAdmin", False):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
         )
+    return current_user
 
-    hashed_password = get_password_hash(user.password)
-    user_doc = {
-        "username": user.username,
-        "hashed_password": hashed_password,
-        "created_at": datetime.utcnow()
-    }
-    users_collection.insert_one(user_doc)
+# Initialize default admin user if none exists
+def init_admin_user():
+    admin_user = users_collection.find_one({"isAdmin": True})
+    if not admin_user:
+        default_admin = {
+            "username": "admin",
+            "hashed_password": get_password_hash("admin123"),
+            "isAdmin": True,
+            "created_at": datetime.utcnow()
+        }
+        users_collection.insert_one(default_admin)
+        logger.info("Default admin user created: admin/admin123")
 
-    access_token = create_access_token(data={"sub": user.username})
-    logger.info(f"User registered successfully: {user.username}")
-    return {"access_token": access_token, "token_type": "bearer"}
+# Call this on startup
+init_admin_user()
 
+# Authentication endpoints
 @app.post("/api/login", response_model=Token)
 def login(user: UserLogin):
     logger.info(f"Login attempt for username: {user.username}")
@@ -197,13 +210,142 @@ def login(user: UserLogin):
 def read_users_me(current_user: dict = Depends(get_current_user)):
     try:
         logger.info(f"User info requested: {current_user.get('username', 'Unknown')}")
-        return {"username": current_user.get("username", "Unknown")}
+        return {
+            "username": current_user.get("username", "Unknown"),
+            "isAdmin": current_user.get("isAdmin", False)
+        }
     except Exception as e:
         logger.error(f"Error in /api/me endpoint: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+
+# Admin-only user management endpoints
+@app.get("/api/admin/users", response_model=List[UserResponse])
+def get_all_users(admin_user: dict = Depends(get_admin_user)):
+    logger.info(f"Admin {admin_user['username']} requested user list")
+    try:
+        users = list(users_collection.find({}))
+        result = []
+        for user in users:
+            result.append({
+                "id": str(user["_id"]),
+                "username": user["username"],
+                "isAdmin": user.get("isAdmin", False),
+                "createdAt": user.get("created_at", datetime.utcnow())
+            })
+        return result
+    except Exception as e:
+        logger.error(f"Error fetching users: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error fetching users"
+        )
+
+@app.post("/api/admin/users", response_model=UserResponse)
+def create_user(user_data: UserCreate, admin_user: dict = Depends(get_admin_user)):
+    logger.info(f"Admin {admin_user['username']} creating user: {user_data.username}")
+    
+    if users_collection.find_one({"username": user_data.username}):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists"
+        )
+
+    hashed_password = get_password_hash(user_data.password)
+    user_doc = {
+        "username": user_data.username,
+        "hashed_password": hashed_password,
+        "isAdmin": user_data.isAdmin,
+        "created_at": datetime.utcnow()
+    }
+    
+    result = users_collection.insert_one(user_doc)
+    logger.info(f"User created successfully: {user_data.username}")
+    
+    return {
+        "id": str(result.inserted_id),
+        "username": user_data.username,
+        "isAdmin": user_data.isAdmin,
+        "createdAt": user_doc["created_at"]
+    }
+
+@app.put("/api/admin/users/{user_id}/password")
+def change_user_password(user_id: str, password_data: PasswordChange, admin_user: dict = Depends(get_admin_user)):
+    logger.info(f"Admin {admin_user['username']} changing password for user: {user_id}")
+    
+    try:
+        object_id = ObjectId(user_id)
+    except InvalidId:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid user ID format"
+        )
+    
+    # Validate password
+    if len(password_data.newPassword) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 6 characters long"
+        )
+    
+    # Check if user exists
+    user_to_update = users_collection.find_one({"_id": object_id})
+    if not user_to_update:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Hash the new password
+    hashed_password = get_password_hash(password_data.newPassword)
+    
+    # Update the user's password
+    result = users_collection.update_one(
+        {"_id": object_id},
+        {"$set": {"hashed_password": hashed_password}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update password"
+        )
+    
+    logger.info(f"Password changed successfully for user: {user_id}")
+    return {"message": "Password changed successfully"}
+
+@app.delete("/api/admin/users/{user_id}")
+def delete_user(user_id: str, admin_user: dict = Depends(get_admin_user)):
+    logger.info(f"Admin {admin_user['username']} deleting user: {user_id}")
+    
+    try:
+        object_id = ObjectId(user_id)
+    except InvalidId:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid user ID format"
+        )
+    
+    # Prevent admin from deleting themselves
+    user_to_delete = users_collection.find_one({"_id": object_id})
+    if user_to_delete and user_to_delete["username"] == admin_user["username"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account"
+        )
+    
+    result = users_collection.delete_one({"_id": object_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    logger.info(f"User deleted successfully: {user_id}")
+    return {"message": "User deleted successfully"}
 
 # Station endpoints (keep all existing ones)
 @app.post("/api/stations")
@@ -408,8 +550,7 @@ def update_user_preferences(
             detail="Error updating user preferences"
         )
 
-# Add new audio file endpoints below
-
+# Audio file endpoints (keep all existing ones)
 @app.post("/api/audio/upload")
 async def upload_audio_file(
     station_id: str,
@@ -581,7 +722,7 @@ def delete_audio_file(file_id: str, current_user: dict = Depends(get_current_use
 
 # Upload audio file (to match frontend)
 @app.post("/api/upload-audio")
-async def upload_audio_file(
+async def upload_audio_file_alt(
     station_id: Optional[str] = None,
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
