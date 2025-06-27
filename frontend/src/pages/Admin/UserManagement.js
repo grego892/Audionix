@@ -40,6 +40,7 @@ const UserManagement = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [passwordDialogUser, setPasswordDialogUser] = useState(null); // Separate state for password dialog
   const [anchorEl, setAnchorEl] = useState(null);
   const [newUser, setNewUser] = useState({
     username: '',
@@ -136,20 +137,53 @@ const UserManagement = () => {
       return;
     }
 
+    // Use passwordDialogUser instead of selectedUser
+    if (!passwordDialogUser) {
+      setFormError('No user selected');
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`/api/admin/users/${selectedUser.id}/password`, {
+      
+      // Add debug logging
+      console.log('Changing password for user:', passwordDialogUser.id);
+      console.log('API URL:', `/api/admin/users/${passwordDialogUser.id}/password`);
+      
+      const response = await axios.put(`/api/admin/users/${passwordDialogUser.id}/password`, {
         newPassword: passwordData.newPassword
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
-      setSuccess(`Password changed successfully for ${selectedUser.username}`);
+      console.log('Password change response:', response.data);
+      
+      setSuccess(`Password changed successfully for ${passwordDialogUser.username}`);
       setOpenPasswordDialog(false);
       setPasswordData({ newPassword: '', confirmPassword: '' });
-      setSelectedUser(null);
+      setPasswordDialogUser(null);
     } catch (err) {
-      setFormError(err.response?.data?.detail || 'Failed to change password');
+      console.error('Password change error:', err);
+      console.error('Error response:', err.response?.data);
+      
+      // More detailed error handling
+      let errorMessage = 'Failed to change password';
+      if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Unauthorized - please log in again';
+      } else if (err.response?.status === 403) {
+        errorMessage = 'Access denied - admin privileges required';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'User not found';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setFormError(errorMessage);
     }
   };
 
@@ -160,14 +194,30 @@ const UserManagement = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedUser(null);
+    // Don't set selectedUser to null here immediately
+    // Wait for the dialog actions to complete
+    setTimeout(() => {
+      if (!openPasswordDialog) {
+        setSelectedUser(null);
+      }
+    }, 100);
   };
 
   const handlePasswordDialogOpen = () => {
+    // Store the selected user in a separate state for the password dialog
+    setPasswordDialogUser(selectedUser);
     setOpenPasswordDialog(true);
     handleMenuClose();
     setFormError('');
     setPasswordData({ newPassword: '', confirmPassword: '' });
+  };
+
+  const handlePasswordDialogClose = () => {
+    setOpenPasswordDialog(false);
+    setPasswordData({ newPassword: '', confirmPassword: '' });
+    setFormError('');
+    setPasswordDialogUser(null);
+    setSelectedUser(null);
   };
 
   const formatDate = (dateString) => {
@@ -346,17 +396,12 @@ const UserManagement = () => {
         {/* Change Password Dialog */}
         <Dialog
           open={openPasswordDialog}
-          onClose={() => {
-            setOpenPasswordDialog(false);
-            setPasswordData({ newPassword: '', confirmPassword: '' });
-            setFormError('');
-            setSelectedUser(null);
-          }}
+          onClose={handlePasswordDialogClose}
           maxWidth="sm"
           fullWidth
         >
           <DialogTitle>
-            Change Password for {selectedUser?.username}
+            Change Password for {passwordDialogUser?.username}
           </DialogTitle>
           <DialogContent>
             {formError && (
@@ -390,14 +435,7 @@ const UserManagement = () => {
             />
           </DialogContent>
           <DialogActions>
-            <Button
-              onClick={() => {
-                setOpenPasswordDialog(false);
-                setPasswordData({ newPassword: '', confirmPassword: '' });
-                setFormError('');
-                setSelectedUser(null);
-              }}
-            >
+            <Button onClick={handlePasswordDialogClose}>
               Cancel
             </Button>
             <Button onClick={handleChangePassword} variant="contained">

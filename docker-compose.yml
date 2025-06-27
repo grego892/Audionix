@@ -17,11 +17,15 @@ services:
 
   backend:
     build: ./backend
+    container_name: audionix_backend
+    restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
       MONGODB_URL: mongodb://admin:password123@mongodb:27017/Audionix_db?authSource=admin
       SECRET_KEY: your-production-secret-key-here
+    volumes:
+      - ./backend/uploads:/app/uploads
     depends_on:
       - mongodb
     networks:
@@ -29,8 +33,12 @@ services:
 
   frontend:
     build: ./frontend
+    container_name: audionix_frontend
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8080:80"  # ← Changed from 80:80 to 8080:80
+    depends_on:
+      - backend
     networks:
       - audionix_network
 
