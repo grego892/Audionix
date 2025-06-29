@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/me');
+      const response = await axios.get('http://localhost:8001/api/me');
       setUser(response.data);
       
       // Trigger preference loading for other contexts
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/login', {
+      const response = await axios.post('http://localhost:8001/api/login', {
         username,
         password
       });
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/register', {
+      const response = await axios.post('http://localhost:8001/api/register', {
         username,
         password
       });
