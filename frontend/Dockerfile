@@ -21,10 +21,10 @@ FROM nginx:alpine
 # Copy built app to nginx
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx server configuration (server block only)
+COPY default.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 81
+# Expose port 8080 (not 81)
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
