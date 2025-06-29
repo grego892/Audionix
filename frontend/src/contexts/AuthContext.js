@@ -1,6 +1,7 @@
 // contexts/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import BASE_URL from '../config/apiConfig'; // Import base URL
 
 const AuthContext = createContext();
 
@@ -20,7 +21,6 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Verify token is still valid
       fetchUser();
     } else {
       setLoading(false);
@@ -29,10 +29,10 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:8001/api/me');
+      const response = await axios.get(`${BASE_URL}/api/me`); // Fix URL interpolation
       setUser(response.data);
-      
-      // Trigger preference loading for other contexts
+
+      // Notify other contexts
       window.dispatchEvent(new CustomEvent('userLoggedIn'));
     } catch (error) {
       localStorage.removeItem('token');
@@ -43,19 +43,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-
   const login = async (username, password) => {
     try {
       const response = await axios.post(`${BASE_URL}/api/login`, {
         username,
-        password
+        password,
       });
-      
+
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      
+
       await fetchUser();
       return true;
     } catch (error) {
@@ -65,15 +63,15 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:8001/api/register', {
+      const response = await axios.post(`${BASE_URL}/api/register`, {
         username,
-        password
+        password,
       });
-      
+
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      
+
       await fetchUser();
       return true;
     } catch (error) {
@@ -85,8 +83,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    
-    // Trigger preference clearing for other contexts
+
     window.dispatchEvent(new CustomEvent('userLoggedOut'));
   };
 
@@ -95,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
   if (loading) {
