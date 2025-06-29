@@ -43,9 +43,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
   const login = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:8001/api/login', {
+      const response = await axios.post(`${BASE_URL}/api/login`, {
         username,
         password
       });
