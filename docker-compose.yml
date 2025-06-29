@@ -23,7 +23,7 @@ services:
     environment:
       MONGODB_URL: mongodb://admin:password123@mongodb:27017/Audionix_db?authSource=admin
       SECRET_KEY: your-production-secret-key-here
-      CORS_ORIGINS: https://djgrego.com
+      CORS_ORIGINS: https://audionix.djgrego.com,http://localhost,http://127.0.0.1
     volumes:
       - ./backend/uploads:/app/uploads
     depends_on:
