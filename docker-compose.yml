@@ -3,6 +3,8 @@ services:
     image: mongo:7
     container_name: audionix_mongodb
     restart: unless-stopped
+    env_file:
+      - .env.production
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-change-this-password}
@@ -16,6 +18,8 @@ services:
     build: ./backend
     container_name: audionix_backend
     restart: unless-stopped
+    env_file:
+      - .env.production
     environment:
       MONGODB_URL: mongodb://admin:${MONGO_PASSWORD:-change-this-password}@mongodb:27017/Audionix_db?authSource=admin
       SECRET_KEY: ${SECRET_KEY:-generate-a-strong-secret-key}
@@ -27,6 +31,7 @@ services:
     networks:
       - audionix_network
 
+  # ... rest of your services
   frontend:
     build: 
       context: ./frontend
@@ -40,22 +45,20 @@ services:
       - audionix_network
 
   nginx:
-    build: 
-      context: .
-      dockerfile: Dockerfile.nginx
+    image: nginx:alpine
     container_name: audionix_nginx
     restart: unless-stopped
     ports:
       - "8081:80"
     volumes:
       - frontend_build:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - backend
       - frontend
     networks:
       - audionix_network
 
-# Add this volume to the volumes section
 volumes:
   mongodb_data:
   frontend_build:
