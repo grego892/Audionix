@@ -45,12 +45,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-       console.log(`Requesting URL: ${BASE_URL}/api/login`);
+      console.log('Login attempt with:', { username });
+      console.log(`Requesting URL: ${BASE_URL}/api/login`);
       const response = await axios.post(`${BASE_URL}/api/login`, {
         username,
         password,
       });
-
+      console.log('Login response:', response);
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
@@ -58,6 +59,11 @@ export const AuthProvider = ({ children }) => {
       await fetchUser();
       return true;
     } catch (error) {
+      console.error('Login error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       throw new Error(error.response?.data?.detail || 'Login failed');
     }
   };

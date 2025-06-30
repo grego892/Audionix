@@ -18,13 +18,13 @@ RUN npm run build
 # Production stage with nginx
 FROM nginx:alpine
 
-# Copy built app to nginx
-COPY --from=build /app/build /usr/share/nginx/html
+# Copy built app to nginx (adjust path based on your build output)
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy nginx server configuration (server block only)
-COPY default.conf /etc/nginx/conf.d/default.conf
+# Copy nginx server configuration
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 80 (to match docker-compose port mapping)
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

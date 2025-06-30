@@ -3,11 +3,9 @@ services:
     image: mongo:7
     container_name: audionix_mongodb
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-change-this-password}
       MONGO_INITDB_DATABASE: Audionix_db
     volumes:
       - mongodb_data:/data/db
@@ -18,12 +16,10 @@ services:
     build: ./backend
     container_name: audionix_backend
     restart: unless-stopped
-    ports:
-      - "8001:8001"
     environment:
-      MONGODB_URL: mongodb://admin:password123@mongodb:27017/Audionix_db?authSource=admin
-      SECRET_KEY: your-production-secret-key-here
-      CORS_ORIGINS: https://audionix.djgrego.com,http://localhost,http://127.0.0.1,http://localhost:8081
+      MONGODB_URL: mongodb://admin:${MONGO_PASSWORD:-change-this-password}@mongodb:27017/Audionix_db?authSource=admin
+      SECRET_KEY: ${SECRET_KEY:-generate-a-strong-secret-key}
+      CORS_ORIGINS: https://audionix.djgrego.com
     volumes:
       - ./backend/uploads:/app/uploads
     depends_on:
@@ -32,13 +28,26 @@ services:
       - audionix_network
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: audionix_frontend
-    restart: unless-stopped
-    ports:
-      - "8081:8080"
     depends_on:
       - backend
+    networks:
+      - audionix_network
+
+  nginx:
+    build: 
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: audionix_nginx
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+      - frontend
     networks:
       - audionix_network
 
