@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
+       console.log(`Requesting URL: ${BASE_URL}/api/login`);
       const response = await axios.post(`${BASE_URL}/api/login`, {
         username,
         password,
