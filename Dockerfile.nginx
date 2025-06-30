@@ -1,14 +1,12 @@
 FROM nginx:alpine
 
-# Copy nginx configuration
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+   # Copy nginx configuration from project root/nginx directory
+   COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+   COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# If you're using default.conf too, include this line:
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+   # We'll get static files from the frontend container
+   # This requires a volume mount in docker-compose.yml
 
-# Copy static files from your frontend build
-COPY ./dist /usr/share/nginx/html
+   EXPOSE 80
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+   CMD ["nginx", "-g", "daemon off;"]

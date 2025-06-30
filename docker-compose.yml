@@ -32,6 +32,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: audionix_frontend
+    volumes:
+      - frontend_build:/app/dist
     depends_on:
       - backend
     networks:
@@ -45,14 +47,18 @@ services:
     restart: unless-stopped
     ports:
       - "8081:80"
+    volumes:
+      - frontend_build:/usr/share/nginx/html
     depends_on:
       - backend
       - frontend
     networks:
       - audionix_network
 
+# Add this volume to the volumes section
 volumes:
   mongodb_data:
+  frontend_build:
 
 networks:
   audionix_network:
