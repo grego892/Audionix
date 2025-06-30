@@ -1,10 +1,12 @@
 FROM nginx:alpine
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
+# If you're using default.conf too, include this line:
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Copy static files from your frontend build
-# If you're building your frontend separately, adjust this path
 COPY ./dist /usr/share/nginx/html
 
 EXPOSE 80
