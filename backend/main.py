@@ -19,7 +19,8 @@ from bson import ObjectId
 from bson.errors import InvalidId
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+import logging
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Configure FastAPI with OpenAPI security scheme
