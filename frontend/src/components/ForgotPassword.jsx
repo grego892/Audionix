@@ -19,13 +19,7 @@ function ForgotPassword() {
       setSubmitted(true);
     } catch (error) {
       console.error('Password reset request error:', error);
-      let message = 'Failed to process your request';
-      
-      if (error.response && error.response.data && error.response.data.detail) {
-        message = error.response.data.detail;
-      }
-      
-      setError(message);
+      setError('Failed to process your request. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }

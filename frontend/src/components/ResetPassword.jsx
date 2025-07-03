@@ -1,5 +1,5 @@
 // src/components/ResetPassword.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -13,23 +13,11 @@ function ResetPassword() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!token) {
-      setError('Missing reset token. Please request a new password reset link.');
-    }
-  }, [token]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate passwords
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-    
-    if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters long');
       return;
     }
     
@@ -43,24 +31,24 @@ function ResetPassword() {
       });
       
       setSuccess(true);
-      
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      setTimeout(() => navigate('/login'), 3000);
     } catch (error) {
       console.error('Password reset error:', error);
-      let message = 'Failed to reset password';
-      
-      if (error.response && error.response.data && error.response.data.detail) {
-        message = error.response.data.detail;
-      }
-      
-      setError(message);
+      setError('Failed to reset password. The link may have expired.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (!token) {
+    return (
+      <div className="reset-password-container">
+        <h2>Invalid Reset Link</h2>
+        <p>The password reset link is invalid or has expired.</p>
+        <p><Link to="/forgot-password">Request a new reset link</Link></p>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -68,9 +56,7 @@ function ResetPassword() {
         <h2>Password Reset Successful</h2>
         <p>Your password has been reset successfully.</p>
         <p>You will be redirected to the login page shortly.</p>
-        <p>
-          <Link to="/login">Click here if you are not redirected</Link>
-        </p>
+        <p><Link to="/login">Login now</Link></p>
       </div>
     );
   }
@@ -88,8 +74,7 @@ function ResetPassword() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
-            disabled={isSubmitting || !token}
-            minLength={8}
+            disabled={isSubmitting}
           />
         </div>
         <div className="form-group">
@@ -100,17 +85,13 @@ function ResetPassword() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            disabled={isSubmitting || !token}
-            minLength={8}
+            disabled={isSubmitting}
           />
         </div>
-        <button type="submit" disabled={isSubmitting || !token}>
+        <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Resetting...' : 'Reset Password'}
         </button>
       </form>
-      <p>
-        <Link to="/login">Return to login</Link>
-      </p>
     </div>
   );
 }

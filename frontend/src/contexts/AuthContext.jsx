@@ -2,7 +2,7 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';  // Updated import syntax
 
 export const AuthContext = createContext();
 

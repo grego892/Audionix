@@ -1,6 +1,6 @@
 // src/services/api.js
 import axios from 'axios';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const api = axios.create({
   baseURL: process.env.NODE_ENV === 'production' 
@@ -8,6 +8,10 @@ const api = axios.create({
     : 'http://localhost:8001', // Development URL
   withCredentials: true // Important for CSRF protection when using cookies
 });
+
+// Prevent refresh token loops
+let isRefreshing = false;
+let refreshPromise = null;
 
 // Check if token is close to expiring (within 5 minutes)
 const isTokenNearExpiration = (token) => {
@@ -22,23 +26,34 @@ const isTokenNearExpiration = (token) => {
 
 // Add request interceptor to include auth token
 api.interceptors.request.use(async (config) => {
+  // Skip token refresh for refresh and logout endpoints to prevent loops
+  const skipRefresh = config.url === '/api/auth/refresh' || 
+                     config.url === '/api/auth/logout';
+  
   const token = localStorage.getItem('token');
   
-  if (token) {
+  if (token && !skipRefresh) {
     // Check if token is close to expiration
-    if (isTokenNearExpiration(token)) {
+    if (isTokenNearExpiration(token) && !isRefreshing) {
+      isRefreshing = true;
+      
       try {
-        // Try to refresh the token
-        const response = await axios.post('/api/auth/refresh', {}, {
+        // Create a new axios instance to avoid interceptor loops
+        const refreshResponse = await axios({
+          method: 'post',
+          url: '/api/auth/refresh',
           baseURL: config.baseURL,
+          headers: { 'Authorization': `Bearer ${token}` },
           withCredentials: true
         });
         
         // Update token in localStorage
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('token', refreshResponse.data.token);
       } catch (error) {
         console.error('Failed to refresh token:', error);
         // If refresh fails, proceed with the original token
+      } finally {
+        isRefreshing = false;
       }
     }
     
