@@ -6,20 +6,40 @@ import './NavigationDrawer.css';
 
 function NavigationDrawer() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, logout } = useContext(AuthContext);
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
 
+  const closeDrawer = () => {
+    setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    setIsLoggingOut(false);
+    closeDrawer();
+  };
+
   return (
     <>
-      <button className="drawer-toggle" onClick={toggleDrawer}>
+      <button 
+        className="drawer-toggle" 
+        onClick={toggleDrawer}
+        aria-label="Open navigation menu"
+      >
         ☰
       </button>
       <div className={`navigation-drawer ${isOpen ? 'open' : ''}`}>
         <div className="drawer-header">
-          <button className="close-drawer" onClick={toggleDrawer}>
+          <button 
+            className="close-drawer" 
+            onClick={closeDrawer}
+            aria-label="Close navigation menu"
+          >
             ×
           </button>
           {user && (
@@ -32,37 +52,41 @@ function NavigationDrawer() {
         <nav className="drawer-nav">
           <ul>
             <li>
-              <Link to="/" onClick={toggleDrawer}>
+              <Link to="/" onClick={closeDrawer}>
                 Home
               </Link>
             </li>
             {user ? (
               <>
                 <li>
-                  <Link to="/dashboard" onClick={toggleDrawer}>
+                  <Link to="/dashboard" onClick={closeDrawer}>
                     Dashboard
                   </Link>
                 </li>
                 <li>
-                  <Link to="/profile" onClick={toggleDrawer}>
+                  <Link to="/profile" onClick={closeDrawer}>
                     Profile
                   </Link>
                 </li>
                 <li>
-                  <button className="logout-button" onClick={logout}>
-                    Logout
+                  <button 
+                    className="logout-button" 
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
                   </button>
                 </li>
               </>
             ) : (
               <>
                 <li>
-                  <Link to="/login" onClick={toggleDrawer}>
+                  <Link to="/login" onClick={closeDrawer}>
                     Login
                   </Link>
                 </li>
                 <li>
-                  <Link to="/register" onClick={toggleDrawer}>
+                  <Link to="/register" onClick={closeDrawer}>
                     Register
                   </Link>
                 </li>
@@ -71,7 +95,7 @@ function NavigationDrawer() {
           </ul>
         </nav>
       </div>
-      {isOpen && <div className="drawer-backdrop" onClick={toggleDrawer}></div>}
+      {isOpen && <div className="drawer-backdrop" onClick={closeDrawer}></div>}
     </>
   );
 }

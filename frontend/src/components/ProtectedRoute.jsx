@@ -1,17 +1,24 @@
 // src/components/ProtectedRoute.jsx
 import { useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading authentication...</p>
+      </div>
+    );
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    // Save the location they were trying to go to
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;
