@@ -6,9 +6,10 @@ RUN npm install --production
 COPY . .
 RUN npm run build
 
-# Instead of copying to nginx, serve directly with a Node.js server
-# You can use a simple static file server like 'serve'
+# Install serve for static file serving
 RUN npm install -g serve
 
 EXPOSE 8080
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# The -l 8080 flag specifies the port, and the -s flag serves as single-page application
+# Adding the 0.0.0.0 host to ensure it binds to all network interfaces
+CMD ["serve", "-s", "dist", "-l", "tcp://0.0.0.0:8080"]
