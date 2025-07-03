@@ -39,6 +39,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
           </main>
         </div>
