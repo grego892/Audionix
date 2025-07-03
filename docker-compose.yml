@@ -1,19 +1,31 @@
 services:
   backend:
     build: ./backend
-    volumes:
-      - ./backend:/app
     ports:
-      - "8001:8000"  # map container 8000 to host 8001
+      - "8001:8000"
     environment:
       - MONGO_URL=mongodb://mongo:27017
+      - SECRET_KEY=your-secure-production-key
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
     depends_on:
       - mongo
 
   frontend:
     build: ./frontend
     ports:
-      - "8080:8080"  # map container 8080 to host 8080
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
     depends_on:
       - backend
 
@@ -24,6 +36,14 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secure-password
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   mongo-data:

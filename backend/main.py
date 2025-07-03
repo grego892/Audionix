@@ -9,7 +9,8 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-app.config['SECRET_KEY'] = 'your-secret-key'  # Change this to a secure key
+# Change this hardcoded secret key
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key')
 
 # Connect to MongoDB using environment variable
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
@@ -114,5 +115,12 @@ def validate_token(current_user):
 def health_check():
     return jsonify({'status': 'healthy'})
 
+# Add request logging
+@app.before_request
+def log_request_info():
+    app.logger.info('Request: %s %s', request.method, request.path)
+
+# Limit debug mode to development
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=8000, debug=debug_mode)
