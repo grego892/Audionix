@@ -1,4 +1,4 @@
-FROM node:18  # Using a specific version is recommended
+FROM node:18
 
 WORKDIR /app
 COPY package*.json ./
