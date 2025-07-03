@@ -1,15 +1,21 @@
-FROM node:latest
+FROM node:18  # Using a specific version is recommended
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --production
+
+# Remove the --production flag to install ALL dependencies including dev dependencies
+RUN npm install
+
 COPY . .
+# Build the project
 RUN npm run build
+
+# After building, we can prune the dev dependencies to make the image smaller
+RUN npm prune --production
 
 # Install serve for static file serving
 RUN npm install -g serve
 
 EXPOSE 8080
-# The -l 8080 flag specifies the port, and the -s flag serves as single-page application
-# Adding the 0.0.0.0 host to ensure it binds to all network interfaces
+# Make sure to bind to all interfaces
 CMD ["serve", "-s", "dist", "-l", "tcp://0.0.0.0:8080"]
