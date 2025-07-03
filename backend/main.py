@@ -1,126 +1,168 @@
-from flask import Flask, request, jsonify, make_response
+from fastapi import FastAPI, Depends, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 import jwt
 import datetime
-from functools import wraps
-from werkzeug.security import generate_password_hash, check_password_hash
-from pymongo import MongoClient
+from passlib.context import CryptContext
+from motor.motor_asyncio import AsyncIOMotorClient
 import os
-from flask_cors import CORS
+from pymongo.errors import DuplicateKeyError
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-# Change this hardcoded secret key
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key')
+# Models
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
 
-# Connect to MongoDB using environment variable
-mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-client = MongoClient(mongo_url)
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    name: str
+    email: EmailStr
+
+class TokenResponse(BaseModel):
+    token: str
+    user: UserResponse
+
+# Setup
+app = FastAPI(title="Authentication API")
+security = HTTPBearer()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Customize this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Config
+SECRET_KEY = os.environ.get('SECRET_KEY', 'default-dev-key')
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+client = AsyncIOMotorClient(MONGO_URL)
 db = client.user_database
 users_collection = db.users
 
-# Token required decorator
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            token = auth_header.split(" ")[1]
-            
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
-            
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-            current_user = users_collection.find_one({'email': data['email']})
-            
-            if not current_user:
-                return jsonify({'message': 'User not found!'}), 401
-                
-        except:
-            return jsonify({'message': 'Token is invalid!'}), 401
-            
-        return f(current_user, *args, **kwargs)
-    
-    return decorated
+# Ensure email index
+@app.on_event("startup")
+async def startup_db_client():
+    await users_collection.create_index("email", unique=True)
 
-@app.route('/api/auth/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    
-    # Check if email already exists
-    if users_collection.find_one({'email': data['email']}):
-        return jsonify({'message': 'Email already exists!'}), 400
-        
-    # Create new user
-    hashed_password = generate_password_hash(data['password'])
-    
-    new_user = {
-        'name': data['name'],
-        'email': data['email'],
-        'password': hashed_password
+# Helper functions
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_token(email: str):
+    payload = {
+        'email': email,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
     }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        email = payload.get("email")
+        if email is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail="Invalid authentication credentials"
+            )
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Invalid authentication credentials"
+        )
+        
+    user = await users_collection.find_one({"email": email})
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="User not found"
+        )
     
-    user_id = users_collection.insert_one(new_user).inserted_id
-    
-    # Generate token
-    token = jwt.encode({
-        'email': new_user['email'],
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
-    }, app.config['SECRET_KEY'], algorithm="HS256")
-    
-    return jsonify({
-        'token': token,
-        'user': {
-            'name': new_user['name'],
-            'email': new_user['email']
+    return user
+
+# Middleware for logging
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"Request: {request.method} {request.url.path}")
+    response = await call_next(request)
+    return response
+
+# Routes
+@app.post("/api/auth/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+async def register(user_data: UserCreate):
+    try:
+        hashed_password = get_password_hash(user_data.password)
+        
+        new_user = {
+            "name": user_data.name,
+            "email": user_data.email,
+            "password": hashed_password
         }
-    }), 201
-
-@app.route('/api/auth/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    
-    user = users_collection.find_one({'email': data['email']})
-    
-    if not user or not check_password_hash(user['password'], data['password']):
-        return jsonify({'message': 'Invalid credentials!'}), 401
-    
-    # Generate token
-    token = jwt.encode({
-        'email': user['email'],
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
-    }, app.config['SECRET_KEY'], algorithm="HS256")
-    
-    return jsonify({
-        'token': token,
-        'user': {
-            'name': user['name'],
-            'email': user['email']
+        
+        await users_collection.insert_one(new_user)
+        
+        token = create_token(new_user["email"])
+        
+        return {
+            "token": token,
+            "user": {
+                "name": new_user["name"],
+                "email": new_user["email"]
+            }
         }
-    })
+    except DuplicateKeyError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists!"
+        )
 
-@app.route('/api/auth/validate', methods=['GET'])
-@token_required
-def validate_token(current_user):
-    return jsonify({
-        'user': {
-            'name': current_user['name'],
-            'email': current_user['email']
+@app.post("/api/auth/login", response_model=TokenResponse)
+async def login(user_data: UserLogin):
+    user = await users_collection.find_one({"email": user_data.email})
+    
+    if not user or not verify_password(user_data.password, user["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials!"
+        )
+    
+    token = create_token(user["email"])
+    
+    return {
+        "token": token,
+        "user": {
+            "name": user["name"],
+            "email": user["email"]
         }
-    })
+    }
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({'status': 'healthy'})
+@app.get("/api/auth/validate", response_model=UserResponse)
+async def validate_token(current_user: dict = Depends(get_current_user)):
+    return {
+        "name": current_user["name"],
+        "email": current_user["email"]
+    }
 
-# Add request logging
-@app.before_request
-def log_request_info():
-    app.logger.info('Request: %s %s', request.method, request.path)
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy"}
 
-# Limit debug mode to development
-if __name__ == '__main__':
-    debug_mode = os.environ.get('FLASK_ENV') == 'development'
-    app.run(host='0.0.0.0', port=8000, debug=debug_mode)
+# Run the application with uvicorn
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=os.environ.get('FASTAPI_ENV') == 'development')
