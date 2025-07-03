@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     // Check if user is already logged in
     const token = localStorage.getItem('token');
     if (token) {
-      // Validate token with your backend
+      // Token will be automatically added by the interceptor in api.js
       api.get('/api/auth/validate')
         .then(response => {
           setUser(response.data.user);

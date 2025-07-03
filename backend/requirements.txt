@@ -6,3 +6,4 @@ pyjwt
 pyyaml
 six
 werkzeug
+flask-cors

@@ -1,15 +1,19 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import jwt
 import datetime
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
+import os
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 app.config['SECRET_KEY'] = 'your-secret-key'  # Change this to a secure key
 
-# Connect to MongoDB
-client = MongoClient('mongodb://mongo:27017/')
+# Connect to MongoDB using environment variable
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+client = MongoClient(mongo_url)
 db = client.user_database
 users_collection = db.users
 
@@ -106,5 +110,9 @@ def validate_token(current_user):
         }
     })
 
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy'})
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
