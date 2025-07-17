@@ -1,20 +1,19 @@
 import React from 'react';
-import { Typography, Container, Paper, Box } from '@mui/material';
+import { Container, Paper, Typography } from '@mui/material';
 
-const Dashboard = () => {
+const Settings = () => {
   return (
     <Container maxWidth="lg">
       <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Dashboard
+          Settings
         </Typography>
         <Typography variant="body1">
-          Welcome to your dashboard! This is where your main content will go.
+          Application settings and preferences will go here.
         </Typography>
-        {/* Add your dashboard content here */}
       </Paper>
     </Container>
   );
 };
 
-export default Dashboard;
+export default Settings;

@@ -1,135 +1,104 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import {
-  Avatar,
-  Button,
-  CssBaseline,
-  TextField,
-  Link,
-  Box,
-  Typography,
-  Container,
-  Alert,
-  CircularProgress
+import { 
+  Container, 
+  Paper, 
+  TextField, 
+  Button, 
+  Typography, 
+  Box, 
+  Alert 
 } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useAuth } from '../contexts/AuthContext';
 
-const defaultTheme = createTheme();
-
-const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+const Login = ({ onSwitchToRegister }) => {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    const result = await login(username, password);
     
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
+    const result = await login(formData.username, formData.password);
+    
+    if (!result.success) {
       setError(result.error);
     }
+    // If successful, the app will automatically show the dashboard
     
     setLoading(false);
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f5f5f5',
-        }}
-      >
-        <Container component="main" maxWidth="xs">
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              backgroundColor: 'white',
-              padding: 4,
-              borderRadius: 2,
-              boxShadow: 3,
-            }}
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h4" gutterBottom align="center">
+          Sign In
+        </Typography>
+        
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          
+          <TextField
+            name="username"
+            label="Username"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            required
+            value={formData.username}
+            onChange={handleChange}
+          />
+          
+          <TextField
+            name="password"
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            required
+            value={formData.password}
+            onChange={handleChange}
+          />
+          
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={loading}
+            sx={{ mt: 3, mb: 2 }}
           >
-            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
-              )}
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="username"
-                label="Username"
-                name="username"
-                autoComplete="username"
-                autoFocus
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Sign In'}
-              </Button>
-              <Box sx={{ textAlign: 'center' }}>
-                <Link
-                  component="button"
-                  variant="body2"
-                  onClick={() => navigate('/register')}
-                  sx={{ cursor: 'pointer' }}
-                >
-                  Don't have an account? Sign Up
-                </Link>
-              </Box>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-    </ThemeProvider>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
+          
+          <Button
+            variant="text"
+            fullWidth
+            onClick={onSwitchToRegister}
+          >
+            Don't have an account? Sign up
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
