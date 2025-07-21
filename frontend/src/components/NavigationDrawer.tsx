@@ -23,7 +23,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const NavigationDrawer = ({ children, currentView, onViewChange }) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const { logout } = useAuth();
 
   const toggleDrawer = () => {
@@ -37,7 +37,6 @@ const NavigationDrawer = ({ children, currentView, onViewChange }) => {
 
   const handleViewChange = (view) => {
     onViewChange(view);
-    setDrawerOpen(false);
   };
 
   const menuItems = [
@@ -50,7 +49,16 @@ const NavigationDrawer = ({ children, currentView, onViewChange }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar 
+        position="fixed" 
+        sx={{ 
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          width: '100%',
+          left: 0,
+          right: 0,
+          // Remove the margin and width constraints that were tied to the drawer
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
@@ -67,9 +75,9 @@ const NavigationDrawer = ({ children, currentView, onViewChange }) => {
       </AppBar>
 
       <Drawer
-        variant="temporary"
+        variant="persistent"
+        anchor="left"
         open={drawerOpen}
-        onClose={toggleDrawer}
         sx={{
           width: drawerWidth,
           flexShrink: 0,
@@ -115,7 +123,12 @@ const NavigationDrawer = ({ children, currentView, onViewChange }) => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: drawerOpen ? `calc(100% - ${drawerWidth}px)` : '100%',
+          ml: drawerOpen ? `${drawerWidth}px` : 0,
+          transition: (theme) => theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
         }}
       >
         <Toolbar />
