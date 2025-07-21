@@ -20,7 +20,7 @@ import {
   Logout as LogoutIcon,
   Dashboard as DashboardIcon
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const NavigationDrawer = ({ children, currentView, onViewChange }) => {
   const [drawerOpen, setDrawerOpen] = useState(true);

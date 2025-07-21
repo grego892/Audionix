@@ -8,7 +8,7 @@ import {
   Box, 
   Alert 
 } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 
 const Register = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({

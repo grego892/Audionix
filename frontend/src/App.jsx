@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { AuthProvider } from './contexts/AuthContext';
-import Login from './components/Login.jsx';
-import Register from './components/Register';
-import Dashboard from './components/Dashboard.jsx';
-import Profile from './components/Profile';
-import Settings from './components/Settings';
-import NavigationDrawer from './components/NavigationDrawer.tsx';
+import Login from './components/auth/Login.jsx';
+import Register from './components/auth/Register';
+import Dashboard from './components/dashboard/Dashboard.jsx';
+import Profile from './components/profile/Profile';
+import Settings from './components/settings/Settings';
+import NavigationDrawer from './components/ui/NavigationDrawer.tsx';
 import { useAuth } from './contexts/AuthContext';
 
 const theme = createTheme();
